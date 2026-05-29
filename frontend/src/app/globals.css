@@ -1,0 +1,265 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TAILWIND V4 THEME CONFIGURATION
+   ============================================================ */
+@theme {
+  /* Brand Colors */
+  --color-brand-forest: #2D5016;
+  --color-brand-olive: #6B7C3A;
+  --color-brand-sage: #A8B89A;
+  --color-brand-beige: #F5F0E8;
+  --color-brand-gold: #C9A84C;
+  --color-brand-brown: #8B6B47;
+
+  /* Semantic Colors */
+  --color-background: hsl(40 33% 94%);
+  --color-foreground: hsl(90 20% 15%);
+  --color-card: hsl(0 0% 100%);
+  --color-card-foreground: hsl(90 20% 15%);
+  --color-popover: hsl(0 0% 100%);
+  --color-popover-foreground: hsl(90 20% 15%);
+  --color-primary: hsl(94 57% 20%);
+  --color-primary-foreground: hsl(60 9% 98%);
+  --color-secondary: hsl(76 36% 36%);
+  --color-secondary-foreground: hsl(60 9% 98%);
+  --color-muted: hsl(86 16% 85%);
+  --color-muted-foreground: hsl(90 10% 40%);
+  --color-accent: hsl(44 54% 54%);
+  --color-accent-foreground: hsl(0 0% 100%);
+  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive-foreground: hsl(0 0% 98%);
+  --color-border: hsl(86 16% 85%);
+  --color-input: hsl(86 16% 85%);
+  --color-ring: hsl(94 57% 20%);
+
+  /* Border Radius */
+  --radius: 0.75rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-slow: float 10s ease-in-out infinite;
+  --animate-pulse-soft: pulse-soft 3s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.4s ease-out forwards;
+  --animate-fade-in: fade-in 0.4s ease-out forwards;
+  --animate-shimmer: shimmer 2s linear infinite;
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+@layer base {
+  *, *::before, *::after {
+    border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.6;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-gold);
+    color: white;
+  }
+
+  /* Form elements: always visible text */
+  input,
+  textarea,
+  select {
+    color: hsl(90 20% 12%);
+    background-color: rgb(255 255 255 / 0.8);
+    transition: all 0.2s ease;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: hsl(90 10% 58%);
+  }
+
+  input:focus,
+  textarea:focus,
+  select:focus {
+    color: hsl(90 20% 10%);
+    background-color: rgb(255 255 255 / 0.95);
+    outline: none;
+  }
+
+  option {
+    color: hsl(90 20% 12%);
+    background-color: white;
+  }
+
+  /* Heading defaults */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  a {
+    transition: color 0.15s ease, opacity 0.15s ease;
+  }
+}
+
+/* ============================================================
+   GLASSMORPHISM UTILITIES
+   ============================================================ */
+@layer utilities {
+  .glass-panel {
+    background-color: rgb(255 255 255 / 0.6);
+    backdrop-filter: blur(16px) saturate(1.5);
+    -webkit-backdrop-filter: blur(16px) saturate(1.5);
+    border: 1px solid rgb(255 255 255 / 0.45);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+  }
+
+  .glass-card {
+    background-color: rgb(255 255 255 / 0.82);
+    backdrop-filter: blur(8px) saturate(1.3);
+    -webkit-backdrop-filter: blur(8px) saturate(1.3);
+    border: 1px solid rgb(255 255 255 / 0.65);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.06), 0 2px 4px -2px rgb(0 0 0 / 0.06);
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
+  }
+
+  .glass-card:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.08);
+    transform: translateY(-1px);
+  }
+
+  /* Shimmer loading skeleton */
+  .skeleton {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+    border-radius: 0.5rem;
+  }
+
+  /* Premium button base */
+  .btn-primary {
+    background-color: var(--color-brand-forest);
+    color: white;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgb(45 80 22 / 0.25);
+  }
+
+  .btn-primary:hover {
+    background-color: hsl(94 57% 17%);
+    box-shadow: 0 6px 20px 0 rgb(45 80 22 / 0.35);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px 0 rgb(45 80 22 / 0.2);
+  }
+
+  /* Gold button */
+  .btn-gold {
+    background-color: var(--color-brand-gold);
+    color: hsl(90 20% 12%);
+    font-weight: 700;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 14px 0 rgb(201 168 76 / 0.3);
+  }
+
+  .btn-gold:hover {
+    background-color: hsl(44 54% 48%);
+    box-shadow: 0 6px 20px 0 rgb(201 168 76 / 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Focus ring */
+  .focus-ring:focus-visible {
+    outline: 2px solid var(--color-brand-forest);
+    outline-offset: 2px;
+  }
+
+  /* Status badges */
+  .badge-approved { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+  .badge-pending  { background: #fef9c3; color: #a16207; border: 1px solid #fde047; }
+  .badge-rejected { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+  .badge-suspended { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+
+  /* Page transition */
+  .page-enter {
+    animation: slide-up 0.35s ease-out both;
+  }
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background-color: color-mix(in srgb, var(--color-brand-sage) 60%, transparent);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-brand-olive);
+}
+
+/* ============================================================
+   ADMIN DARK THEME — override form inputs in dark context
+   ============================================================ */
+.dark-form input,
+.dark-form textarea,
+.dark-form select {
+  background-color: hsl(220 20% 14%);
+  color: #f3f4f6;
+  border-color: hsl(220 15% 25%);
+}
+
+.dark-form input::placeholder,
+.dark-form textarea::placeholder {
+  color: hsl(220 10% 50%);
+}

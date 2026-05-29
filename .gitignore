@@ -1,0 +1,36 @@
+# ─────────────────────────────────────────────────
+# Root
+# ─────────────────────────────────────────────────
+node_modules/
+.env
+*.log
+.DS_Store
+Thumbs.db
+
+# ─────────────────────────────────────────────────
+# Backend
+# ─────────────────────────────────────────────────
+backend/node_modules/
+backend/dist/
+backend/.env
+backend/uploads/
+backend/*.log
+
+# ─────────────────────────────────────────────────
+# Frontend
+# ─────────────────────────────────────────────────
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
+frontend/out/
+frontend/*.log
+
+# ─────────────────────────────────────────────────
+# Misc
+# ─────────────────────────────────────────────────
+*.bat
+*.sh
+SETUP_AND_RUN.bat
+run.bat
+START.bat
+GO.bat

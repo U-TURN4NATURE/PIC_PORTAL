@@ -1,0 +1,279 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────
+
+enum PICStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  PAID
+  CANCELLED
+  REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum NotificationType {
+  PIC_APPROVED
+  PIC_REJECTED
+  PIC_SUSPENDED
+  NEW_ORDER
+  NEW_COMMISSION
+  PAYOUT_COMPLETED
+  PAYOUT_FAILED
+  SYSTEM
+}
+
+enum ActorRole {
+  ADMIN
+  PIC
+  SYSTEM
+}
+
+// ─────────────────────────────────────────────────
+// ADMIN MODEL
+// ─────────────────────────────────────────────────
+
+model Admin {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  phone        String?
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  notifications Notification[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+  @@map("admins")
+}
+
+// ─────────────────────────────────────────────────
+// PIC PARTNER MODEL
+// ─────────────────────────────────────────────────
+
+model PICPartner {
+  id                String     @id @default(cuid())
+  
+  // Personal Info
+  fullName          String
+  email             String     @unique
+  phone             String
+  password          String
+  profileImage      String?
+  
+  // Address
+  address           String
+  state             String
+  city              String
+  pincode           String
+  
+  // KYC / Identity
+  panCard           String
+  aadhaarNumber     String
+  
+  // Payment Details
+  upiId             String?
+  bankAccountNumber String?
+  ifscCode          String?
+  
+  // Social / Application
+  instagramProfile  String?
+  experience        String
+  whyJoin           String     @db.Text
+  
+  // System Fields
+  referralCode      String?    @unique
+  status            PICStatus  @default(PENDING)
+  isEmailVerified   Boolean    @default(false)
+  otpCode           String?
+  otpExpiresAt      DateTime?
+  resetToken        String?
+  resetTokenExpiry  DateTime?
+  
+  createdAt         DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  // Relations
+  wallet            Wallet?
+  orders            Order[]
+  payouts           Payout[]
+  notifications     Notification[]
+
+  @@index([email])
+  @@index([referralCode])
+  @@index([status])
+  @@map("pic_partners")
+}
+
+// ─────────────────────────────────────────────────
+// WALLET MODEL
+// ─────────────────────────────────────────────────
+
+model Wallet {
+  id               String     @id @default(cuid())
+  picId            String     @unique
+  totalEarnings    Float      @default(0)
+  pendingEarnings  Float      @default(0)
+  paidEarnings     Float      @default(0)
+  availableBalance Float      @default(0)
+  updatedAt        DateTime   @updatedAt
+
+  pic              PICPartner @relation(fields: [picId], references: [id], onDelete: Cascade)
+
+  @@index([picId])
+  @@map("wallets")
+}
+
+// ─────────────────────────────────────────────────
+// ORDER MODEL (Synced from Shopify)
+// ─────────────────────────────────────────────────
+
+model Order {
+  id              String      @id @default(cuid())
+  shopifyOrderId  String      @unique
+  shopifyOrderNum String?
+
+  // PIC Association (nullable — not all orders are referred)
+  picId           String?
+  referralCode    String?
+
+  // Customer
+  customerName    String?
+  customerEmail   String?
+
+  // Financials
+  orderAmount     Float
+  commissionRate  Float       @default(5.0)
+  commissionAmount Float      @default(0)
+
+  // Status
+  status          OrderStatus @default(PENDING)
+
+  // Raw Shopify payload
+  shopifyData     Json?
+
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  pic             PICPartner? @relation(fields: [picId], references: [id])
+
+  @@index([picId])
+  @@index([referralCode])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// ─────────────────────────────────────────────────
+// PAYOUT MODEL
+// ─────────────────────────────────────────────────
+
+model Payout {
+  id              String       @id @default(cuid())
+  picId           String
+  amount          Float
+  status          PayoutStatus @default(PENDING)
+  paymentMethod   String       @default("UPI") // UPI | BANK_TRANSFER
+  transactionRef  String?
+  notes           String?
+  requestedAt     DateTime     @default(now())
+  processedAt     DateTime?
+
+  pic             PICPartner   @relation(fields: [picId], references: [id])
+
+  @@index([picId])
+  @@index([status])
+  @@map("payouts")
+}
+
+// ─────────────────────────────────────────────────
+// NOTIFICATION MODEL
+// ─────────────────────────────────────────────────
+
+model Notification {
+  id        String           @id @default(cuid())
+  picId     String?
+  adminId   String?
+  type      NotificationType
+  title     String
+  message   String           @db.Text
+  isRead    Boolean          @default(false)
+  metadata  Json?
+  createdAt DateTime         @default(now())
+
+  pic       PICPartner?      @relation(fields: [picId], references: [id], onDelete: Cascade)
+  admin     Admin?           @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([picId])
+  @@index([adminId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────
+// SHOPIFY SETTINGS MODEL
+// ─────────────────────────────────────────────────
+
+model ShopifySettings {
+  id             String   @id @default(cuid())
+  storeName      String
+  storeUrl       String
+  apiKey         String   // AES-encrypted
+  apiSecret      String   // AES-encrypted
+  accessToken    String   // AES-encrypted
+  webhookSecret  String   // AES-encrypted
+  isActive       Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("shopify_settings")
+}
+
+// ─────────────────────────────────────────────────
+// AUDIT LOG MODEL
+// ─────────────────────────────────────────────────
+
+model AuditLog {
+  id          String    @id @default(cuid())
+  actorId     String
+  actorRole   ActorRole
+  action      String    // e.g. "APPROVE_PIC", "REJECT_PIC", "MARK_PAYOUT_PAID"
+  targetId    String?
+  targetType  String?   // e.g. "PICPartner", "Payout"
+  metadata    Json?
+  ipAddress   String?
+  createdAt   DateTime  @default(now())
+
+  admin       Admin?    @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
