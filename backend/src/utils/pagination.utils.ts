@@ -55,12 +55,12 @@ export const buildPaginationMeta = (
 export const successResponse = <T>(
   data: T,
   message = 'Success',
-  meta?: Record<string, unknown>
+  meta?: unknown
 ) => ({
   success: true,
   message,
   data,
-  ...(meta && { meta }),
+  ...(meta ? { meta } : {}),
 });
 
 /**
@@ -69,5 +69,5 @@ export const successResponse = <T>(
 export const errorResponse = (message: string, errors?: unknown) => ({
   success: false,
   message,
-  ...(errors && { errors }),
+  ...(errors ? { errors } : {}),
 });
