@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
-import { User, Phone, Mail, MapPin, CreditCard, Building2, Instagram, Loader2, Save, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, MapPin, CreditCard, Building2, Link, Loader2, Save, CheckCircle2 } from 'lucide-react';
 
 export default function ProfilePage() {
   const { user } = useAuthStore();
@@ -122,7 +122,7 @@ export default function ProfilePage() {
           <InfoRow icon={MapPin} label="City" value={profile?.city} />
           <InfoRow icon={MapPin} label="State" value={profile?.state} />
           <InfoRow icon={MapPin} label="Pincode" value={profile?.pincode} />
-          <InfoRow icon={Instagram} label="Instagram" value={profile?.instagramProfile} />
+          <InfoRow icon={Link} label="Instagram" value={profile?.instagramProfile} />
         </div>
       </div>
 
