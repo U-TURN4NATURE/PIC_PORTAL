@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
                 <YAxis stroke="#9CA3AF" axisLine={false} tickLine={false} tickFormatter={v => `₹${v}`} tick={{ fontSize: 11 }} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb' }}
-                  formatter={(v: number, name: string) => [formatCurrency(v), name === 'order' ? 'Order Value' : 'Your Commission']}
+                  formatter={(v: any, name: any) => [formatCurrency(Number(v) || 0), name === 'order' ? 'Order Value' : 'Your Commission']}
                 />
                 <Bar dataKey="order" fill="#E5E7EB" radius={[4, 4, 0, 0]} name="order" />
                 <Bar dataKey="commission" fill="#2D5016" radius={[4, 4, 0, 0]} name="commission" />
