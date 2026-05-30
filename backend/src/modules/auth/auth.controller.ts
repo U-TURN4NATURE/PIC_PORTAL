@@ -101,20 +101,18 @@ export const completeProfileKYC = async (req: Request, res: Response, next: Next
     const picId = req.user!.id;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    const fileMap = {
-      aadhaarDocument: files?.aadhaarDocument?.[0]?.path,
-      panDocument: files?.panDocument?.[0]?.path,
-    };
-
-    // Convert absolute paths to relative URL paths
-    const toRelativePath = (absPath?: string) => {
-      if (!absPath) return undefined;
-      return '/uploads/docs/' + path.basename(absPath);
+    // In production (Cloudinary): file.path is already a full URL
+    // In development (local disk): file.path is an absolute path, convert to relative
+    const getFileUrl = (file?: Express.Multer.File): string | undefined => {
+      if (!file) return undefined;
+      // Cloudinary returns a full URL starting with https://
+      if (file.path.startsWith('http')) return file.path;
+      return '/uploads/docs/' + path.basename(file.path);
     };
 
     const result = await authService.completeProfileKYC(picId, req.body, {
-      aadhaarDocument: toRelativePath(fileMap.aadhaarDocument),
-      panDocument: toRelativePath(fileMap.panDocument),
+      aadhaarDocument: getFileUrl(files?.aadhaarDocument?.[0]),
+      panDocument: getFileUrl(files?.panDocument?.[0]),
     });
 
     res.status(200).json(successResponse(null, result.message));
@@ -132,12 +130,13 @@ export const completeProfileExperience = async (req: Request, res: Response, nex
     const picId = req.user!.id;
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    const toRelativePath = (absPath?: string) => {
-      if (!absPath) return undefined;
-      return '/uploads/docs/' + path.basename(absPath);
+    const getFileUrl = (file?: Express.Multer.File): string | undefined => {
+      if (!file) return undefined;
+      if (file.path.startsWith('http')) return file.path;
+      return '/uploads/docs/' + path.basename(file.path);
     };
 
-    const resumePath = toRelativePath(files?.resumeDocument?.[0]?.path);
+    const resumePath = getFileUrl(files?.resumeDocument?.[0]);
 
     const result = await authService.completeProfileExperience(picId, req.body, resumePath);
     res.status(200).json(successResponse(null, result.message));
