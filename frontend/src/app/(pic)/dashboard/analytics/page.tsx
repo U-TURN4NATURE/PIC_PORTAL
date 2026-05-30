@@ -89,7 +89,7 @@ export default function AnalyticsPage() {
                 <YAxis stroke="#9CA3AF" axisLine={false} tickLine={false} tickFormatter={v => `₹${v}`} tick={{ fontSize: 11 }} />
                 <Tooltip
                   contentStyle={{ borderRadius: '12px', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                  formatter={(v: number) => [formatCurrency(v), 'Commission']}
+                  formatter={(v: any) => [formatCurrency(Number(v) || 0), 'Commission']}
                 />
                 <Area type="monotone" dataKey="commission" stroke="#2D5016" strokeWidth={2.5} fill="url(#commGrad)" dot={{ fill: '#2D5016', r: 4 }} />
               </AreaChart>
