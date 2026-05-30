@@ -5,13 +5,19 @@ import nodemailer from 'nodemailer';
 // Supports Gmail, SendGrid, Mailgun, and generic SMTP
 // ─────────────────────────────────────────────────
 
+// Support both EMAIL_* and SMTP_* variable naming conventions
+const smtpHost = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
+const smtpPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || '587');
+const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
+const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
+  host: smtpHost,
+  port: smtpPort,
   secure: process.env.SMTP_SECURE === 'true',
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: smtpUser,
+    pass: smtpPass,
   },
 });
 
