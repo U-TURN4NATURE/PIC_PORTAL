@@ -3,79 +3,59 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Loader2, ArrowRight, CheckCircle2, Leaf, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
 import Link from 'next/link';
 
-// Zod Schema matches backend exactly
 const registerSchema = z.object({
-  fullName: z.string().min(2, 'Required'),
-  email: z.string().email('Invalid email'),
-  phone: z.string().regex(/^[6-9]\d{9}$/, '10-digit Indian phone number'),
-  password: z.string().min(8, 'Min 8 chars').regex(/[A-Z]/, '1 uppercase').regex(/[0-9]/, '1 number'),
-  address: z.string().min(5, 'Required'),
-  state: z.string().min(2, 'Required'),
-  city: z.string().min(2, 'Required'),
-  pincode: z.string().regex(/^\d{6}$/, '6-digit pincode'),
-  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN'),
-  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar'),
-  upiId: z.string().optional(),
-  bankAccountNumber: z.string().optional(),
-  ifscCode: z.string().optional(),
-  instagramProfile: z.string().optional().or(z.literal('')),
-  experience: z.string().min(1, 'Required'),
-  whyJoin: z.string().min(20, 'At least 20 chars'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian phone number'),
+  password: z
+    .string()
+    .min(8, 'At least 8 characters')
+    .regex(/[A-Z]/, 'Must contain one uppercase letter')
+    .regex(/[0-9]/, 'Must contain one number'),
+  address: z.string().min(5, 'Full address is required'),
+  city: z.string().min(2, 'City is required'),
+  state: z.string().min(2, 'State is required'),
+  pincode: z.string().regex(/^\d{6}$/, 'Enter a valid 6-digit pincode'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const STEPS = [
-  { id: 1, name: 'Personal Details' },
-  { id: 2, name: 'Identity & Bank' },
-  { id: 3, name: 'Experience' }
+const INDIAN_STATES = [
+  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
+  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
+  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
+  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
+  'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh',
 ];
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const { register, handleSubmit, trigger, formState: { errors } } = useForm<RegisterFormValues>({
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
-    mode: 'onTouched'
+    mode: 'onTouched',
   });
-
-  const nextStep = async () => {
-    let fieldsToValidate: any[] = [];
-    if (currentStep === 1) fieldsToValidate = ['fullName', 'email', 'phone', 'password', 'address', 'state', 'city', 'pincode'];
-    if (currentStep === 2) fieldsToValidate = ['panCard', 'aadhaarNumber', 'upiId', 'bankAccountNumber', 'ifscCode'];
-    
-    const isStepValid = await trigger(fieldsToValidate as any);
-    if (isStepValid) setCurrentStep((prev) => Math.min(prev + 1, 3));
-  };
-
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       setIsLoading(true);
-      const res = await api.post('/auth/register', data);
-      if (res.data.success) {
-        // Save email so verify-email page knows where to send the OTP
-        sessionStorage.setItem('pendingVerificationEmail', data.email);
-        toast.success(res.data.message || 'Application submitted! Please verify your email.');
-        setIsSuccess(true);
-      }
+      await api.post('/auth/register', data);
+      setIsSuccess(true);
     } catch (error: any) {
       const apiError = error.response?.data;
-      if (apiError?.errors && Array.isArray(apiError.errors) && apiError.errors.length > 0) {
-        apiError.errors.forEach((e: { field: string; message: string }) => {
-          toast.error(`${e.field}: ${e.message}`);
-        });
+      if (apiError?.errors?.length) {
+        apiError.errors.forEach((e: { field: string; message: string }) =>
+          toast.error(`${e.field}: ${e.message}`)
+        );
       } else {
         toast.error(apiError?.message || 'Registration failed. Please try again.');
       }
@@ -86,18 +66,32 @@ export default function RegisterPage() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-brand-beige relative">
-        <div className="max-w-md p-8 glass-card rounded-2xl text-center">
-          <CheckCircle2 className="w-16 h-16 text-brand-forest mx-auto mb-4" />
-          <h2 className="text-2xl font-dm-serif text-brand-forest mb-2">Application Submitted!</h2>
-          <p className="text-gray-600 mb-6">
-            We've sent an OTP to your email. Please verify your email address to complete the application process.
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white px-4">
+        <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center">
+          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-green-600" />
+          </div>
+          <h2 className="text-2xl font-dm-serif text-brand-forest mb-3">Application Submitted!</h2>
+          <p className="text-gray-600 mb-2 leading-relaxed">
+            Your application has been submitted successfully.
           </p>
-          <button 
-            onClick={() => router.push('/verify-email')}
-            className="w-full bg-brand-forest text-white py-3 rounded-xl font-medium"
+          <p className="text-gray-500 text-sm mb-8 leading-relaxed">
+            Please wait for admin approval. You will be able to complete your profile and start earning after approval.
+          </p>
+          <div className="bg-brand-sage/20 rounded-xl p-4 mb-6 text-left">
+            <p className="text-sm font-medium text-brand-forest mb-1">What happens next?</p>
+            <ul className="text-xs text-gray-600 space-y-1">
+              <li>✅ Our team reviews your application</li>
+              <li>✅ You receive an approval notification</li>
+              <li>✅ Login to complete your KYC & profile</li>
+              <li>✅ Start earning with your unique referral code!</li>
+            </ul>
+          </div>
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full bg-brand-forest text-white py-3 rounded-xl font-medium hover:bg-brand-forest/90 transition-colors flex items-center justify-center gap-2"
           >
-            Verify Email
+            Go to Login <ArrowRight className="w-4 h-4" />
           </button>
         </div>
       </div>
@@ -106,122 +100,83 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white relative overflow-hidden">
-      
-      {/* Background blobs */}
-      <div className="fixed top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand-olive/10 rounded-full blur-3xl animate-float"></div>
-      
-      <div className="w-full max-w-2xl glass-card rounded-2xl p-6 md:p-8 relative z-10 mx-auto border border-white/50 shadow-xl">
-        
+      <div className="fixed top-[-10%] right-[-5%] w-[40%] h-[40%] bg-brand-olive/10 rounded-full blur-3xl animate-float" />
+      <div className="fixed bottom-[-10%] left-[-5%] w-[35%] h-[35%] bg-brand-gold/10 rounded-full blur-3xl" />
+
+      <div className="w-full max-w-2xl glass-card rounded-2xl p-6 md:p-8 relative z-10 border border-white/50 shadow-xl">
+        {/* Header */}
         <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
+              <Leaf className="w-7 h-7" />
+            </div>
+          </div>
           <h1 className="font-dm-serif text-3xl text-brand-forest">Join U-Turn4Nature</h1>
-          <p className="text-brand-olive text-sm mt-2">Become a Partner In Charge (PIC)</p>
+          <p className="text-brand-olive text-sm mt-2">Become a Partner In Charge (PIC) and start earning</p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="flex justify-between items-center mb-8 relative">
-          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-1 bg-gray-200 -z-10 rounded-full"></div>
-          <div 
-            className="absolute left-0 top-1/2 transform -translate-y-1/2 h-1 bg-brand-forest -z-10 rounded-full transition-all duration-300"
-            style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
-          ></div>
-          
-          {STEPS.map((step) => (
-            <div key={step.id} className="flex flex-col items-center">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${currentStep >= step.id ? 'bg-brand-forest text-white' : 'bg-gray-200 text-gray-500'}`}>
-                {step.id}
-              </div>
-              <span className="text-xs mt-2 font-medium text-gray-600 hidden md:block">{step.name}</span>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+          {/* Personal Details */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <User className="w-4 h-4 text-brand-forest" />
+              <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Personal Details</h2>
             </div>
-          ))}
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          
-          {/* STEP 1: Personal Details */}
-          <div className={currentStep === 1 ? 'block' : 'hidden'}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <InputField label="Full Name" name="fullName" register={register} error={errors.fullName} />
-              <InputField label="Email" name="email" type="email" register={register} error={errors.email} />
-              <InputField label="Phone Number" name="phone" register={register} error={errors.phone} />
-              <InputField label="Password" name="password" type="password" register={register} error={errors.password} />
-              <div className="md:col-span-2">
-                <InputField label="Full Address" name="address" register={register} error={errors.address} />
-              </div>
-              <InputField label="City" name="city" register={register} error={errors.city} />
-              <InputField label="State" name="state" register={register} error={errors.state} />
-              <InputField label="Pincode" name="pincode" register={register} error={errors.pincode} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Full Name" error={errors.fullName?.message}>
+                <input {...register('fullName')} placeholder="John Doe" className={inputClass} />
+              </Field>
+              <Field label="Email Address" error={errors.email?.message}>
+                <input {...register('email')} type="email" placeholder="you@example.com" className={inputClass} />
+              </Field>
+              <Field label="Phone Number" error={errors.phone?.message}>
+                <input {...register('phone')} placeholder="9876543210" className={inputClass} />
+              </Field>
+              <Field label="Password" error={errors.password?.message}>
+                <input {...register('password')} type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" className={inputClass} />
+              </Field>
             </div>
           </div>
 
-          {/* STEP 2: Identity & Bank */}
-          <div className={currentStep === 2 ? 'block' : 'hidden'}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <InputField label="PAN Card Number" name="panCard" register={register} error={errors.panCard} />
-              <InputField label="Aadhaar Number" name="aadhaarNumber" register={register} error={errors.aadhaarNumber} />
-              <div className="md:col-span-2">
-                <hr className="my-2 border-brand-sage/30" />
-                <p className="text-sm font-medium text-brand-forest mb-4">Payment Details (Optional now, required for withdrawal)</p>
-              </div>
-              <InputField label="UPI ID" name="upiId" register={register} error={errors.upiId} />
-              <div className="hidden md:block"></div>
-              <InputField label="Bank Account Number" name="bankAccountNumber" register={register} error={errors.bankAccountNumber} />
-              <InputField label="IFSC Code" name="ifscCode" register={register} error={errors.ifscCode} />
+          <hr className="border-brand-sage/30" />
+
+          {/* Address */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="w-4 h-4 text-brand-forest" />
+              <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Address</h2>
             </div>
-          </div>
-
-          {/* STEP 3: Experience */}
-          <div className={currentStep === 3 ? 'block' : 'hidden'}>
-            <div className="grid grid-cols-1 gap-5">
-              <InputField label="Instagram Profile URL (Optional)" name="instagramProfile" type="url" register={register} error={errors.instagramProfile} />
-              
-              <div>
-                <label className="block text-sm font-medium text-brand-forest mb-1">Your Experience in Sales/Marketing</label>
-                <select 
-                  {...register('experience')}
-                  className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all"
-                >
-                  <option value="" className="text-gray-900">Select experience level</option>
-                  <option value="Beginner (0-1 years)" className="text-gray-900">Beginner (0-1 years)</option>
-                  <option value="Intermediate (1-3 years)" className="text-gray-900">Intermediate (1-3 years)</option>
-                  <option value="Advanced (3+ years)" className="text-gray-900">Advanced (3+ years)</option>
-                  <option value="Influencer / Creator" className="text-gray-900">Influencer / Content Creator</option>
-                </select>
-                {errors.experience && <p className="text-red-500 text-xs mt-1">{errors.experience.message}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-brand-forest mb-1">Why do you want to join U-Turn4Nature?</label>
-                <textarea 
-                  {...register('whyJoin')}
-                  rows={4}
-                  className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all resize-none"
-                  placeholder="Tell us about yourself and why you're interested in our sustainable brand..."
-                ></textarea>
-                {errors.whyJoin && <p className="text-red-500 text-xs mt-1">{errors.whyJoin.message}</p>}
+            <div className="grid grid-cols-1 gap-4">
+              <Field label="Full Address" error={errors.address?.message}>
+                <input {...register('address')} placeholder="House No, Street, Area" className={inputClass} />
+              </Field>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Field label="City" error={errors.city?.message}>
+                  <input {...register('city')} placeholder="Mumbai" className={inputClass} />
+                </Field>
+                <Field label="State" error={errors.state?.message}>
+                  <select {...register('state')} className={inputClass}>
+                    <option value="">Select State</option>
+                    {INDIAN_STATES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Pincode" error={errors.pincode?.message}>
+                  <input {...register('pincode')} placeholder="400001" className={inputClass} />
+                </Field>
               </div>
             </div>
           </div>
 
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8 pt-4 border-t border-brand-sage/20">
-            {currentStep > 1 ? (
-              <button type="button" onClick={prevStep} className="px-6 py-2.5 rounded-xl text-brand-forest font-medium border border-brand-forest/30 hover:bg-brand-sage/10 transition-colors flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2" /> Back
-              </button>
-            ) : <div></div>}
-
-            {currentStep < 3 ? (
-              <button type="button" onClick={nextStep} className="px-8 py-2.5 rounded-xl bg-brand-forest text-white font-medium hover:bg-brand-forest/90 transition-colors flex items-center">
-                Next <ArrowRight className="w-4 h-4 ml-2" />
-              </button>
-            ) : (
-              <button type="submit" disabled={isLoading} className="px-8 py-2.5 rounded-xl bg-brand-gold text-white font-medium hover:bg-yellow-600 transition-colors flex items-center disabled:opacity-70">
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <CheckCircle2 className="w-5 h-5 mr-2" />}
-                Submit Application
-              </button>
-            )}
-          </div>
-
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 mt-6 shadow-lg shadow-brand-forest/20"
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+            {isLoading ? 'Submitting Application...' : 'Submit Application'}
+          </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-600">
@@ -230,21 +185,19 @@ export default function RegisterPage() {
             Login here
           </Link>
         </div>
-
       </div>
     </div>
   );
 }
 
-// Reusable Input Field Component
-const InputField = ({ label, name, type = 'text', register, error }: any) => (
-  <div>
-    <label className="block text-sm font-medium text-brand-forest mb-1">{label}</label>
-    <input 
-      type={type}
-      {...register(name)}
-      className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all"
-    />
-    {error && <p className="text-red-500 text-xs mt-1">{error.message}</p>}
-  </div>
-);
+const inputClass = "w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all text-sm";
+
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-brand-forest mb-1">{label}</label>
+      {children}
+      {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+    </div>
+  );
+}

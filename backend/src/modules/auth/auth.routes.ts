@@ -3,6 +3,7 @@ import * as authController from './auth.controller';
 import { validate } from '../../middleware/validate.middleware';
 import { protect } from '../../middleware/auth.middleware';
 import { authLimiter } from '../../middleware/rate-limit.middleware';
+import { kycUpload } from '../../middleware/upload.middleware';
 import {
   registerSchema,
   picLoginSchema,
@@ -18,13 +19,13 @@ const router = Router();
 // Auth Routes
 // ─────────────────────────────────────────────────
 
-// PIC Registration
+// PIC Registration (Step 1 — basic info only)
 router.post('/register', authLimiter, validate(registerSchema), authController.register);
 
-// OTP Verification
+// OTP Verification (legacy — kept for backward compat)
 router.post('/verify-otp', authLimiter, validate(verifyOTPSchema), authController.verifyOTP);
 
-// Resend OTP
+// Resend OTP (legacy)
 router.post('/resend-otp', authLimiter, authController.resendOTP);
 
 // PIC Login
@@ -33,7 +34,7 @@ router.post('/login', authLimiter, validate(picLoginSchema), authController.picL
 // Admin Login
 router.post('/admin/login', authLimiter, validate(adminLoginSchema), authController.adminLogin);
 
-// Logout (protected — must be logged in)
+// Logout
 router.post('/logout', protect, authController.logout);
 
 // Get current user
@@ -44,5 +45,25 @@ router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), aut
 
 // Reset Password
 router.post('/reset-password/:token', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
+
+// ─────────────────────────────────────────────────
+// Profile Completion Routes (protected — after admin approval)
+// ─────────────────────────────────────────────────
+
+// Step 2 — KYC & Bank Details (with file uploads)
+router.post(
+  '/complete-profile/kyc',
+  protect,
+  kycUpload,
+  authController.completeProfileKYC
+);
+
+// Step 3 — Experience & PIC Details (with optional resume upload)
+router.post(
+  '/complete-profile/experience',
+  protect,
+  kycUpload,
+  authController.completeProfileExperience
+);
 
 export default router;

@@ -31,11 +31,21 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       const res = await api.post('/auth/login', data);
-      
+
       if (res.data.success) {
-        setUser(res.data.data.user);
+        const user = res.data.data.user;
+        setUser(user);
         toast.success('Welcome back!');
-        router.push('/dashboard');
+
+        // Smart redirect based on status and profile completion
+        if (user.status === 'ACTIVE') {
+          router.push('/dashboard');
+        } else if ((user.status === 'APPROVED') && !user.profileCompleted) {
+          router.push('/complete-profile');
+        } else {
+          // PENDING or other states — go to dashboard (will show status screen)
+          router.push('/dashboard');
+        }
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');
@@ -46,15 +56,13 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white relative overflow-hidden">
-      
-      {/* Decorative Elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-forest/5 rounded-full blur-3xl animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-brand-gold/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-brand-forest/5 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-brand-gold/10 rounded-full blur-3xl animate-pulse delay-1000" />
 
       <div className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10 mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-brand-forest text-white p-3 rounded-full">
+            <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
               <Leaf className="w-8 h-8" />
             </div>
           </div>
@@ -65,7 +73,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           <div>
             <label className="block text-sm font-medium text-brand-forest mb-1">Email Address</label>
-            <input 
+            <input
               type="email"
               {...register('email')}
               className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
@@ -81,7 +89,7 @@ export default function LoginPage() {
                 Forgot password?
               </Link>
             </div>
-            <input 
+            <input
               type="password"
               {...register('password')}
               className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
@@ -90,10 +98,10 @@ export default function LoginPage() {
             {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
-            className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-medium py-3 rounded-xl flex items-center justify-center transition-all disabled:opacity-70 disabled:cursor-not-allowed group"
+            className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-medium py-3 rounded-xl flex items-center justify-center transition-all disabled:opacity-70 disabled:cursor-not-allowed group shadow-lg shadow-brand-forest/20"
           >
             {isLoading ? (
               <Loader2 className="w-5 h-5 animate-spin" />

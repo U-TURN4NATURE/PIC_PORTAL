@@ -13,7 +13,12 @@
     "seed:admin": "ts-node src/scripts/seed-admin.ts",
     "lint": "eslint src --ext .ts"
   },
-  "keywords": ["uturn4nature", "pic-portal", "affiliate", "shopify"],
+  "keywords": [
+    "uturn4nature",
+    "pic-portal",
+    "affiliate",
+    "shopify"
+  ],
   "author": "U-Turn4Nature",
   "license": "MIT",
   "dependencies": {
@@ -43,7 +48,7 @@
     "@types/csurf": "^1.11.5",
     "@types/express": "^4.17.21",
     "@types/jsonwebtoken": "^9.0.6",
-    "@types/multer": "^1.4.11",
+    "@types/multer": "^1.4.13",
     "@types/node": "^20.11.24",
     "@types/nodemailer": "^6.4.14",
     "@types/uuid": "^9.0.8",

@@ -93,8 +93,9 @@ export default function AdminPICsPage() {
           className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
         >
           <option value="">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
+          <option value="PENDING">Pending Review</option>
+          <option value="APPROVED">Approved (Profile Incomplete)</option>
+          <option value="ACTIVE">Active</option>
           <option value="REJECTED">Rejected</option>
           <option value="SUSPENDED">Suspended</option>
         </select>
@@ -155,12 +156,14 @@ export default function AdminPICsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                        pic.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                        pic.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
+                        pic.status === 'APPROVED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
                         pic.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
                         pic.status === 'REJECTED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                        pic.status === 'SUSPENDED' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
                         'bg-gray-500/10 text-gray-400 border-gray-500/20'
                       }`}>
-                        {pic.status}
+                        {pic.status === 'APPROVED' ? 'Profile Incomplete' : pic.status}
                       </span>
                       {!pic.isEmailVerified && pic.status === 'PENDING' && (
                          <p className="text-[10px] text-red-400 mt-1">Email unverified</p>

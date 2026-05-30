@@ -31,7 +31,7 @@ export const getDashboardStats = async () => {
     monthlyRevenue,
   ] = await Promise.all([
     prisma.pICPartner.count(),
-    prisma.pICPartner.count({ where: { status: PICStatus.APPROVED } }),
+    prisma.pICPartner.count({ where: { status: { in: [PICStatus.APPROVED, PICStatus.ACTIVE] } } }),
     prisma.pICPartner.count({ where: { status: PICStatus.PENDING } }),
     prisma.pICPartner.count({ where: { status: PICStatus.REJECTED } }),
     prisma.order.count(),
@@ -123,7 +123,7 @@ export const getAllPICs = async (
 };
 
 /**
- * Get single PIC with full details
+ * Get single PIC with full details (including KYC docs and timeline)
  */
 export const getPICById = async (picId: string) => {
   const pic = await prisma.pICPartner.findUnique({
@@ -149,7 +149,7 @@ export const getPICById = async (picId: string) => {
   if (!pic) throw createError('PIC not found', 404);
 
   // Remove sensitive fields
-  const { password, otpCode, resetToken, ...safePIC } = pic;
+  const { password, otpCode, resetToken, otpExpiresAt, resetTokenExpiry, ...safePIC } = pic;
   return safePIC;
 };
 
@@ -159,7 +159,9 @@ export const getPICById = async (picId: string) => {
 export const approvePIC = async (picId: string, adminId: string) => {
   const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
   if (!pic) throw createError('PIC not found', 404);
-  if (pic.status === PICStatus.APPROVED) throw createError('PIC is already approved', 400);
+  if (pic.status === PICStatus.APPROVED || pic.status === PICStatus.ACTIVE) {
+    throw createError('PIC is already approved', 400);
+  }
 
   // Generate unique referral code
   let referralCode = generateReferralCode(pic.fullName);
@@ -171,32 +173,28 @@ export const approvePIC = async (picId: string, adminId: string) => {
     attempts++;
   }
 
-  // Approve + create wallet in a transaction
   const updatedPIC = await prisma.$transaction(async (tx) => {
     const updated = await tx.pICPartner.update({
       where: { id: picId },
-      data: { status: PICStatus.APPROVED, referralCode },
+      data: {
+        status: PICStatus.APPROVED,
+        referralCode,
+        approvedAt: new Date(),
+        rejectionReason: null,
+        rejectedAt: null,
+      },
     });
 
-    // Create wallet if not exists
-    await tx.wallet.upsert({
-      where: { picId },
-      create: { picId, totalEarnings: 0, pendingEarnings: 0, paidEarnings: 0, availableBalance: 0 },
-      update: {},
-    });
-
-    // Create notification
     await tx.notification.create({
       data: {
         picId,
         type: 'PIC_APPROVED',
-        title: 'Application Approved!',
-        message: `Congratulations! Your PIC application has been approved. Your referral code is ${referralCode}.`,
+        title: 'Application Approved! 🎉',
+        message: `Congratulations! Your PIC application has been approved. Please login and complete your KYC and profile details to get your referral code and start earning.`,
         metadata: { referralCode },
       },
     });
 
-    // Audit log
     await tx.auditLog.create({
       data: {
         actorId: adminId,
@@ -211,9 +209,7 @@ export const approvePIC = async (picId: string, adminId: string) => {
     return updated;
   });
 
-  // Send approval email
   sendApprovalEmail(pic.email, pic.fullName, referralCode).catch(console.error);
-
   return { id: updatedPIC.id, status: updatedPIC.status, referralCode };
 };
 
@@ -225,13 +221,22 @@ export const rejectPIC = async (picId: string, adminId: string, reason?: string)
   if (!pic) throw createError('PIC not found', 404);
 
   await prisma.$transaction(async (tx) => {
-    await tx.pICPartner.update({ where: { id: picId }, data: { status: PICStatus.REJECTED } });
+    await tx.pICPartner.update({
+      where: { id: picId },
+      data: {
+        status: PICStatus.REJECTED,
+        rejectionReason: reason || null,
+        rejectedAt: new Date(),
+      },
+    });
     await tx.notification.create({
       data: {
         picId,
         type: 'PIC_REJECTED',
         title: 'Application Update',
-        message: reason || 'Your PIC application has been reviewed and was not approved at this time.',
+        message: reason
+          ? `Your PIC application has been reviewed and was not approved. Reason: ${reason}`
+          : 'Your PIC application has been reviewed and was not approved at this time. Please contact support for more information.',
       },
     });
     await tx.auditLog.create({

@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import * as authService from './auth.service';
 import { getCookieOptions } from '../../utils/jwt.utils';
-import { successResponse, errorResponse } from '../../utils/pagination.utils';
+import { successResponse } from '../../utils/pagination.utils';
+import path from 'path';
 
 // ─────────────────────────────────────────────────
 // Auth Controller — HTTP Layer
@@ -10,7 +11,7 @@ import { successResponse, errorResponse } from '../../utils/pagination.utils';
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const pic = await authService.registerPIC(req.body);
-    res.status(201).json(successResponse(pic, 'Application submitted successfully. Please check your email to verify your account.'));
+    res.status(201).json(successResponse(pic, 'Application submitted successfully! Please wait for admin approval.'));
   } catch (error) {
     next(error);
   }
@@ -30,7 +31,6 @@ export const picLogin = async (req: Request, res: Response, next: NextFunction):
     const { email, password } = req.body;
     const { token, user } = await authService.loginPIC(email, password);
 
-    // Set HTTP-only cookie
     res.cookie('token', token, getCookieOptions());
     res.status(200).json(successResponse({ user }, 'Login successful'));
   } catch (error) {
@@ -87,6 +87,60 @@ export const getMe = async (req: Request, res: Response, next: NextFunction): Pr
   try {
     const user = await authService.getMe(req.user!.id, req.user!.role);
     res.status(200).json(successResponse(user));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/complete-profile/kyc
+ * Handles multipart/form-data with file uploads (aadhaarDocument, panDocument)
+ */
+export const completeProfileKYC = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const picId = req.user!.id;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    const fileMap = {
+      aadhaarDocument: files?.aadhaarDocument?.[0]?.path,
+      panDocument: files?.panDocument?.[0]?.path,
+    };
+
+    // Convert absolute paths to relative URL paths
+    const toRelativePath = (absPath?: string) => {
+      if (!absPath) return undefined;
+      return '/uploads/docs/' + path.basename(absPath);
+    };
+
+    const result = await authService.completeProfileKYC(picId, req.body, {
+      aadhaarDocument: toRelativePath(fileMap.aadhaarDocument),
+      panDocument: toRelativePath(fileMap.panDocument),
+    });
+
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/complete-profile/experience
+ * Handles multipart/form-data with optional resume upload
+ */
+export const completeProfileExperience = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const picId = req.user!.id;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+    const toRelativePath = (absPath?: string) => {
+      if (!absPath) return undefined;
+      return '/uploads/docs/' + path.basename(absPath);
+    };
+
+    const resumePath = toRelativePath(files?.resumeDocument?.[0]?.path);
+
+    const result = await authService.completeProfileExperience(picId, req.body, resumePath);
+    res.status(200).json(successResponse(null, result.message));
   } catch (error) {
     next(error);
   }

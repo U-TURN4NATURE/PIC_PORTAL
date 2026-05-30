@@ -9,7 +9,10 @@ interface User {
   name?: string;
   role: 'ADMIN' | 'PIC';
   status?: string;
+  profileCompleted?: boolean;
   profileImage?: string;
+  referralCode?: string;
+  rejectionReason?: string;
 }
 
 interface AuthState {
@@ -24,7 +27,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       isAuthenticated: false,
       isLoading: true,
@@ -37,7 +40,6 @@ export const useAuthStore = create<AuthState>()(
           const userData = res.data.data;
           set({ user: userData, isAuthenticated: true, isLoading: false });
         } catch {
-          // Session invalid or expired
           set({ user: null, isAuthenticated: false, isLoading: false });
         }
       },
@@ -46,7 +48,6 @@ export const useAuthStore = create<AuthState>()(
       name: 'auth-storage',
       partialize: (state) => ({ user: state.user, isAuthenticated: state.isAuthenticated }),
       onRehydrateStorage: () => (state) => {
-        // After rehydration from localStorage, stop loading
         if (state) {
           state.isLoading = false;
         }

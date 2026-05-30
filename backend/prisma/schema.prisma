@@ -17,6 +17,7 @@ datasource db {
 enum PICStatus {
   PENDING
   APPROVED
+  ACTIVE
   REJECTED
   SUSPENDED
 }
@@ -79,43 +80,67 @@ model Admin {
 
 model PICPartner {
   id                String     @id @default(cuid())
-  
-  // Personal Info
+
+  // Personal Info (Step 1 — collected at registration)
   fullName          String
   email             String     @unique
   phone             String
   password          String
   profileImage      String?
-  
-  // Address
+
+  // Address (Step 1)
   address           String
   state             String
   city              String
   pincode           String
-  
-  // KYC / Identity
-  panCard           String
-  aadhaarNumber     String
-  
-  // Payment Details
-  upiId             String?
+
+  // KYC / Identity (Step 2 — collected after approval)
+  aadhaarNumber     String?
+  panCard           String?
+
+  // KYC Documents (Step 2 — uploaded files)
+  aadhaarDocument   String?    // file path
+  panDocument       String?    // file path
+
+  // Payment Details (Step 2)
+  bankAccountName   String?
+  bankName          String?
   bankAccountNumber String?
   ifscCode          String?
-  
-  // Social / Application
+  branchName        String?
+  upiId             String?
+
+  // Professional Info (Step 3 — collected after approval)
+  occupation        String?
+  yearsOfExperience String?
+  skills            String?
+  education         String?
+  experience        String?    // kept for backward-compat
+  whyJoin           String?    @db.Text
+  preferredWorkingArea String?
+  preferredDistrict String?
+  availability      String?
   instagramProfile  String?
-  experience        String
-  whyJoin           String     @db.Text
-  
-  // System Fields
+  resumeDocument    String?    // file path (optional)
+
+  // System / Application Fields
   referralCode      String?    @unique
   status            PICStatus  @default(PENDING)
+  profileCompleted  Boolean    @default(false)
   isEmailVerified   Boolean    @default(false)
+
+  // Timestamps for application timeline
+  approvedAt        DateTime?
+  profileCompletedAt DateTime?
+  rejectionReason   String?
+  rejectedAt        DateTime?
+
+  // OTP / Reset
   otpCode           String?
   otpExpiresAt      DateTime?
   resetToken        String?
   resetTokenExpiry  DateTime?
-  
+
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
 
