@@ -104,7 +104,7 @@ export default function AdminDashboardPage() {
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#1F2937', border: '1px solid #374151', borderRadius: '8px' }}
                     itemStyle={{ color: '#F3F4F6' }}
-                    formatter={(value: number) => [formatCurrency(value), '']}
+                    formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
                   />
                   <Bar dataKey="revenue" name="Revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="commission" name="Commission Paid" fill="#2D5016" radius={[4, 4, 0, 0]} />
