@@ -24,29 +24,16 @@ const app: Express = express();
 // 1. Security Headers
 app.use(helmet());
 
-// 2. CORS (Cross-Origin Resource Sharing)
-const allowedOrigins = [
-  process.env.FRONTEND_URL || 'http://localhost:3000',
-  'http://localhost:3000',
-  /\.vercel\.app$/,  // Allow all Vercel preview & production URLs
-];
-
+// 2. CORS — allow all origins (needed for Vercel + Railway cross-domain)
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, Postman)
-      if (!origin) return callback(null, true);
-      const isAllowed = allowedOrigins.some(o =>
-        typeof o === 'string' ? o === origin : o.test(origin)
-      );
-      if (isAllowed) return callback(null, true);
-      return callback(new Error(`CORS: origin ${origin} not allowed`));
-    },
+    origin: true, // reflect the request origin — allows any domain
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
 
 // 3. Webhooks (Must be parsed before general body parser to keep raw body for HMAC)
 app.use('/api/webhooks/shopify', shopifyRoutes);
