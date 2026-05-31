@@ -5,8 +5,9 @@ const LOCAL_API_URL = 'http://localhost:5000/api';
 
 const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
 
+// Force the correct Railway URL in production, ignoring any potentially incorrect Vercel env vars
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || (isProduction ? PRODUCTION_API_URL : LOCAL_API_URL),
+  baseURL: isProduction ? PRODUCTION_API_URL : LOCAL_API_URL,
   withCredentials: true, // Crucial for sending HTTP-only cookies
   headers: {
     'Content-Type': 'application/json',
