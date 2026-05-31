@@ -1,7 +1,12 @@
 import axios from 'axios';
 
+const PRODUCTION_API_URL = 'https://picportal-production-a624.up.railway.app/api';
+const LOCAL_API_URL = 'http://localhost:5000/api';
+
+const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || 'https://picportal-production-a624.up.railway.app/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || (isProduction ? PRODUCTION_API_URL : LOCAL_API_URL),
   withCredentials: true, // Crucial for sending HTTP-only cookies
   headers: {
     'Content-Type': 'application/json',
