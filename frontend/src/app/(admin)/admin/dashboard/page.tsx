@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
                     formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
                   />
                   <Bar dataKey="revenue" name="Revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
-                  ><Bar dataKey="commission" name="Contribution Paid" fill="#2D5016" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="commission" name="Contribution Paid" fill="#2D5016" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
