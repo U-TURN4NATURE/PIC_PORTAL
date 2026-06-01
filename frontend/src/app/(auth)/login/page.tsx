@@ -67,7 +67,7 @@ export default function LoginPage() {
             </div>
           </div>
           <h1 className="font-dm-serif text-3xl text-brand-forest">U-Turn4Nature</h1>
-          <p className="text-brand-olive text-sm mt-2">Partner In Charge (PIC) Portal</p>
+          <p className="text-brand-olive text-sm mt-2">Partners in Change (PIC) Portal</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

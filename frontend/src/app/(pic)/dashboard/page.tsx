@@ -108,7 +108,7 @@ export default function PICDashboardPage() {
           value={formatCurrency(wallet.totalEarnings || 0)}
           icon={<IndianRupee className="w-5 h-5" />}
           iconBg="bg-brand-gold/20 text-yellow-700"
-          footer={<p className="text-xs text-gray-500">Lifetime commission earned</p>}
+          footer={<p className="text-xs text-gray-500">Lifetime contribution earned</p>}
         />
         <KPICard
           label="Pending Earnings"
@@ -139,7 +139,7 @@ export default function PICDashboardPage() {
                 <th className="px-6 py-4 font-medium">Order ID</th>
                 <th className="px-6 py-4 font-medium">Date</th>
                 <th className="px-6 py-4 font-medium">Order Amount</th>
-                <th className="px-6 py-4 font-medium">Commission</th>
+                <th className="px-6 py-4 font-medium">Contribution</th>
                 <th className="px-6 py-4 font-medium">Status</th>
               </tr>
             </thead>

@@ -57,7 +57,7 @@ export default function ReferralPage() {
     <div className="space-y-8 max-w-3xl">
       <div>
         <h1 className="text-3xl font-dm-serif text-brand-forest mb-1">Your Referral Link</h1>
-        <p className="text-gray-500">Share this link to earn 5% commission on every successful order.</p>
+        <p className="text-gray-500">Share this link to earn 5% contribution on every successful order.</p>
       </div>
 
       {/* Main Link Card */}
@@ -66,7 +66,7 @@ export default function ReferralPage() {
         <div className="relative z-10">
           <div className="flex items-center gap-2 mb-2">
             <TrendingUp className="w-5 h-5 text-brand-gold" />
-            <span className="text-brand-gold font-semibold text-sm">Active • 5% Commission</span>
+            <span className="text-brand-gold font-semibold text-sm">Active • 5% Contribution</span>
           </div>
           <p className="text-white/70 text-sm mb-3">Your unique referral link</p>
           <div className="bg-black/20 rounded-xl px-4 py-3 font-mono text-sm text-white break-all border border-white/10 mb-4">
@@ -108,7 +108,7 @@ export default function ReferralPage() {
         </div>
         <div className="bg-white border border-brand-sage/30 rounded-2xl p-5 shadow-sm text-center">
           <p className="text-3xl font-bold text-brand-gold">{formatCurrency(referral?.stats?.totalCommission ?? 0)}</p>
-          <p className="text-sm text-gray-500 mt-1">Total Commission Earned</p>
+          <p className="text-sm text-gray-500 mt-1">Total Contribution Earned</p>
         </div>
       </div>
 
@@ -119,7 +119,7 @@ export default function ReferralPage() {
           <li className="flex items-start gap-2"><span className="text-brand-gold mt-0.5">•</span> Share on WhatsApp, Instagram, and Facebook with a personal recommendation</li>
           <li className="flex items-start gap-2"><span className="text-brand-gold mt-0.5">•</span> Create content about U-Turn4Nature's sustainable products and include your link</li>
           <li className="flex items-start gap-2"><span className="text-brand-gold mt-0.5">•</span> Add your referral code in your Instagram/YouTube bio</li>
-          <li className="flex items-start gap-2"><span className="text-brand-gold mt-0.5">•</span> Commission is tracked when customers purchase within 30 days of clicking your link</li>
+          <li className="flex items-start gap-2"><span className="text-brand-gold mt-0.5">•</span> Contribution is tracked when customers purchase within 30 days of clicking your link</li>
         </ul>
       </div>
     </div>

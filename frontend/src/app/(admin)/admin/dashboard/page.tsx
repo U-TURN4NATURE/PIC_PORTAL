@@ -51,7 +51,7 @@ export default function AdminDashboardPage() {
 
   const kpis = [
     { title: 'Total Revenue', value: formatCurrency(stats?.stats?.totalRevenue || 0), icon: IndianRupee, color: 'text-brand-gold', bg: 'bg-brand-gold/10' },
-    { title: 'Commissions Paid', value: formatCurrency(stats?.stats?.totalCommissionPaid || 0), icon: TrendingUp, color: 'text-green-400', bg: 'bg-green-400/10' },
+    { title: 'Contributions Paid', value: formatCurrency(stats?.stats?.totalCommissionPaid || 0), icon: TrendingUp, color: 'text-green-400', bg: 'bg-green-400/10' },
     { title: 'Total Orders', value: stats?.stats?.totalOrders || 0, icon: ShoppingCart, color: 'text-blue-400', bg: 'bg-blue-400/10' },
     { title: 'Active PICs', value: stats?.stats?.activePICs || 0, icon: UserCheck, color: 'text-brand-gold', bg: 'bg-brand-gold/10' },
     { title: 'Pending Approvals', value: stats?.stats?.pendingPICs || 0, icon: Clock, color: 'text-yellow-400', bg: 'bg-yellow-400/10' },
@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
         
         {/* Revenue Chart */}
         <div className="lg:col-span-2 bg-gray-800 border border-gray-700 rounded-2xl p-6">
-          <h3 className="text-lg font-bold text-white mb-6">Revenue & Commission Trends</h3>
+          <h3 className="text-lg font-bold text-white mb-6">Revenue & Contribution Trends</h3>
           <div className="h-[300px] w-full">
             {stats?.monthlyRevenue && stats.monthlyRevenue.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -107,7 +107,7 @@ export default function AdminDashboardPage() {
                     formatter={(value: any) => [formatCurrency(Number(value) || 0), '']}
                   />
                   <Bar dataKey="revenue" name="Revenue" fill="#C9A84C" radius={[4, 4, 0, 0]} />
-                  <Bar dataKey="commission" name="Commission Paid" fill="#2D5016" radius={[4, 4, 0, 0]} />
+                  ><Bar dataKey="commission" name="Contribution Paid" fill="#2D5016" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

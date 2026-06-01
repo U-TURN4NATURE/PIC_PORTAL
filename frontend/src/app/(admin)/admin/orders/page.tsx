@@ -33,7 +33,7 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-white mb-1">Orders</h1>
-        <p className="text-gray-400">View all orders and associated referral commissions.</p>
+        <p className="text-gray-400">View all orders and associated referral contributions.</p>
       </div>
 
       <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
@@ -45,7 +45,7 @@ export default function AdminOrdersPage() {
                 <th className="px-6 py-4 font-medium text-white">Customer</th>
                 <th className="px-6 py-4 font-medium text-white">Amount</th>
                 <th className="px-6 py-4 font-medium text-white">PIC / Referral Code</th>
-                <th className="px-6 py-4 font-medium text-white">Commission</th>
+                <th className="px-6 py-4 font-medium text-white">Contribution</th>
                 <th className="px-6 py-4 font-medium text-white">Date</th>
               </tr>
             </thead>

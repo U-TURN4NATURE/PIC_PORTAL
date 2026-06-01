@@ -52,7 +52,7 @@ export default function PICOrdersPage() {
                 <th className="px-6 py-4 font-medium">Order #</th>
                 <th className="px-6 py-4 font-medium">Customer</th>
                 <th className="px-6 py-4 font-medium">Order Amount</th>
-                <th className="px-6 py-4 font-medium">Commission (5%)</th>
+                <th className="px-6 py-4 font-medium">Contribution (5%)</th>
                 <th className="px-6 py-4 font-medium">Date</th>
                 <th className="px-6 py-4 font-medium">Status</th>
               </tr>

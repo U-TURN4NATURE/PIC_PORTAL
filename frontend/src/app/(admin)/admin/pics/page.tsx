@@ -71,7 +71,7 @@ export default function AdminPICsPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-white mb-1">PIC Management</h1>
-          <p className="text-gray-400">View and manage Partner In Charge applications and accounts.</p>
+          <p className="text-gray-400">View and manage Partners in Change applications and accounts.</p>
         </div>
       </div>
 

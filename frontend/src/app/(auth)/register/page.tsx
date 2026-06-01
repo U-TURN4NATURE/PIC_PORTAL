@@ -112,7 +112,7 @@ export default function RegisterPage() {
             </div>
           </div>
           <h1 className="font-dm-serif text-3xl text-brand-forest">Join U-Turn4Nature</h1>
-          <p className="text-brand-olive text-sm mt-2">Become a Partner In Charge (PIC) and start earning</p>
+          <p className="text-brand-olive text-sm mt-2">Become a <strong>Partner in Change (PIC)</strong> — Be part of India&apos;s Homemade Revolution</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">

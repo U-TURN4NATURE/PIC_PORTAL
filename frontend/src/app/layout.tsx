@@ -11,8 +11,8 @@ const dmSerif = DM_Serif_Display({
 });
 
 export const metadata: Metadata = {
-  title: 'U-Turn4Nature | PIC Partner Portal',
-  description: 'Manage your affiliate commissions and referrals with U-Turn4Nature.',
+  title: 'U-Turn4Nature | Partners in Change (PIC) Portal',
+  description: 'Join U-Turn4Nature as a Partner in Change (PIC). Earn 5% contribution on every referral, support rural women entrepreneurs, and be part of India\'s homemade food revolution.',
 };
 
 export default function RootLayout({
