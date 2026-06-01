@@ -31,8 +31,8 @@ export const verifyToken = (token: string): JWTPayload => {
  */
 export const getCookieOptions = () => ({
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'strict' as const,
+  secure: true, // Must be true for SameSite=None
+  sameSite: 'none' as const, // Required for cross-domain cookies (Vercel <-> Railway)
   maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN || '7') * 24 * 60 * 60 * 1000, // days to ms
   path: '/',
 });
