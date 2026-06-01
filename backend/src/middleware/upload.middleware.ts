@@ -23,15 +23,9 @@ if (isProduction) {
   storage = new CloudinaryStorage({
     cloudinary,
     params: async (_req: any, file: Express.Multer.File) => {
-      const isDocument =
-        file.mimetype === 'application/pdf' ||
-        file.mimetype.includes('msword') ||
-        file.mimetype.includes('officedocument');
-
       return {
         folder: 'pic-portal/docs',
-        resource_type: isDocument ? 'raw' : 'image',
-        allowed_formats: ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx'],
+        resource_type: 'auto',
         public_id: `${file.fieldname}-${Date.now()}`,
       };
     },
