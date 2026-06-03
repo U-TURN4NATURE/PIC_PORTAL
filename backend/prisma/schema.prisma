@@ -37,6 +37,23 @@ enum PayoutStatus {
   FAILED
 }
 
+enum ReferralStatus {
+  PENDING
+  CONTACTED
+  INTERESTED
+  BUYING
+  NOT_BUYING
+  ACTIVE_SELLER
+  INACTIVE
+}
+
+enum FollowUpStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  DISMISSED
+}
+
 enum NotificationType {
   PIC_APPROVED
   PIC_REJECTED
@@ -149,6 +166,8 @@ model PICPartner {
   orders            Order[]
   payouts           Payout[]
   notifications     Notification[]
+  referrals         Referral[]
+  followUpRequests  FollowUpRequest[]
 
   @@index([email])
   @@index([referralCode])
@@ -259,6 +278,71 @@ model Notification {
   @@index([adminId])
   @@index([isRead])
   @@map("notifications")
+}
+
+// ─────────────────────────────────────────────────
+// REFERRAL MODEL
+// ─────────────────────────────────────────────────
+
+model Referral {
+  id                String         @id @default(cuid())
+  picId             String
+
+  // Referred Person Details (entered by PIC)
+  personName        String
+  personEmail       String?
+  personPhone       String
+
+  // Status managed by Admin
+  status            ReferralStatus @default(PENDING)
+  adminNotes        String?        @db.Text
+  statusUpdatedAt   DateTime?
+
+  // Sales — manually updated by Admin
+  totalSalesAmount  Float          @default(0)
+  commissionAmount  Float          @default(0)
+  commissionRate    Float          @default(5.0)
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  pic               PICPartner     @relation(fields: [picId], references: [id], onDelete: Cascade)
+  followUpRequests  FollowUpRequest[]
+
+  @@unique([picId, personPhone])
+  @@index([picId])
+  @@index([status])
+  @@map("referrals")
+}
+
+// ─────────────────────────────────────────────────
+// FOLLOW-UP REQUEST MODEL
+// ─────────────────────────────────────────────────
+
+model FollowUpRequest {
+  id          String         @id @default(cuid())
+  picId       String
+  referralId  String
+
+  // PIC fills this
+  reason      String         @db.Text
+  priority    String         @default("NORMAL")
+
+  // Admin manages this
+  status      FollowUpStatus @default(OPEN)
+  adminNotes  String?        @db.Text
+  resolvedAt  DateTime?
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  pic         PICPartner     @relation(fields: [picId], references: [id], onDelete: Cascade)
+  referral    Referral       @relation(fields: [referralId], references: [id], onDelete: Cascade)
+
+  @@index([picId])
+  @@index([referralId])
+  @@index([status])
+  @@map("follow_up_requests")
 }
 
 // ─────────────────────────────────────────────────

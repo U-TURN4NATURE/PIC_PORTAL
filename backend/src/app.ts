@@ -13,7 +13,10 @@ import authRoutes from './modules/auth/auth.routes';
 import adminRoutes from './modules/admin/admin.routes';
 import picRoutes from './modules/pic/pic.routes';
 import walletRoutes from './modules/wallet/wallet.routes';
-import shopifyRoutes from './modules/shopify/shopify.routes';
+import picReferralRoutes from './modules/referral/referral.routes';
+import adminReferralRoutes from './modules/referral/referral.admin.routes';
+import picFollowUpRoutes from './modules/followup/followup.routes';
+import adminFollowUpRoutes from './modules/followup/followup.admin.routes';
 
 // ─────────────────────────────────────────────────
 // Express Application Bootstrap
@@ -35,8 +38,6 @@ app.use(
 );
 
 
-// 3. Webhooks (Must be parsed before general body parser to keep raw body for HMAC)
-app.use('/api/webhooks/shopify', shopifyRoutes);
 
 // 4. Body Parsers & Cookies (For all other routes)
 app.use(express.json({ limit: '10mb' }));
@@ -54,6 +55,21 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/pic', picRoutes);
 app.use('/api/pic/wallet', walletRoutes);
+app.use('/api/pic/referrals', picReferralRoutes);
+app.use('/api/pic/referrals', picFollowUpRoutes);
+app.use('/api/pic/followups', picFollowUpRoutes);
+app.use('/api/admin/referrals', adminReferralRoutes);
+app.use('/api/admin/followups', adminFollowUpRoutes);
+
+// Root Endpoint
+app.get('/', (_req, res) => {
+  res.status(200).json({ 
+    success: true, 
+    message: 'PIC Portal API is running!', 
+    docs: 'API routes are available under /api',
+    timestamp: new Date()
+  });
+});
 
 // Health Check Endpoint
 app.get('/health', (_req, res) => {

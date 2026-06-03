@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
@@ -10,25 +10,38 @@ import {
   ArrowLeft, User, Mail, Phone, MapPin, Calendar, Tag,
   CheckCircle, XCircle, Ban, Trash2, Wallet, ShoppingCart,
   TrendingUp, Clock, Copy, ExternalLink, FileText, Download,
-  CreditCard, Building, Briefcase, Eye,
+  CreditCard, Building, Briefcase, Eye, Users, Flag, IndianRupee,
+  RefreshCw, X,
 } from 'lucide-react';
 
+// ─────────────────────────────────────────────────
+// Status Configs
+// ─────────────────────────────────────────────────
+
 const statusConfig: Record<string, { label: string; classes: string }> = {
-  ACTIVE:    { label: 'Active',           classes: 'bg-green-500/10 text-green-400 border-green-500/30' },
-  APPROVED:  { label: 'Approved',         classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
-  PENDING:   { label: 'Pending Review',   classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
-  REJECTED:  { label: 'Rejected',         classes: 'bg-red-500/10 text-red-400 border-red-500/30' },
-  SUSPENDED: { label: 'Suspended',        classes: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
+  ACTIVE:    { label: 'Active',         classes: 'bg-green-500/10 text-green-400 border-green-500/30' },
+  APPROVED:  { label: 'Approved',       classes: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
+  PENDING:   { label: 'Pending Review', classes: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30' },
+  REJECTED:  { label: 'Rejected',       classes: 'bg-red-500/10 text-red-400 border-red-500/30' },
+  SUSPENDED: { label: 'Suspended',      classes: 'bg-orange-500/10 text-orange-400 border-orange-500/30' },
 };
 
-const orderStatusClasses: Record<string, string> = {
-  PAID:       'bg-green-500/10 text-green-400 border-green-500/20',
-  PROCESSING: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  PENDING:    'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  CANCELLED:  'bg-red-500/10 text-red-400 border-red-500/20',
+const REFERRAL_STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+  PENDING:       { label: 'Pending',       color: 'bg-gray-500/10 text-gray-400 border-gray-500/20' },
+  CONTACTED:     { label: 'Contacted',     color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  INTERESTED:    { label: 'Interested',    color: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' },
+  BUYING:        { label: 'Buying',        color: 'bg-green-500/10 text-green-400 border-green-500/20' },
+  NOT_BUYING:    { label: 'Not Buying',    color: 'bg-red-500/10 text-red-400 border-red-500/20' },
+  ACTIVE_SELLER: { label: 'Active Seller', color: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+  INACTIVE:      { label: 'Inactive',      color: 'bg-slate-500/10 text-slate-400 border-slate-500/20' },
 };
 
-// ─── Document Preview Modal ───────────────────────
+const ALL_REFERRAL_STATUSES = ['PENDING','CONTACTED','INTERESTED','BUYING','NOT_BUYING','ACTIVE_SELLER','INACTIVE'];
+
+// ─────────────────────────────────────────────────
+// Document Preview Modal
+// ─────────────────────────────────────────────────
+
 function DocModal({ url, label, onClose }: { url: string; label: string; onClose: () => void }) {
   const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
   return (
@@ -57,6 +70,10 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
   );
 }
 
+// ─────────────────────────────────────────────────
+// Main Component
+// ─────────────────────────────────────────────────
+
 export default function PICDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
@@ -64,8 +81,17 @@ export default function PICDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [docModal, setDocModal] = useState<{ url: string; label: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'referrals'>('overview');
 
-  const fetchPIC = async () => {
+  // Referrals state
+  const [referrals, setReferrals] = useState<any[]>([]);
+  const [referralsLoading, setReferralsLoading] = useState(false);
+  const [saleModal, setSaleModal] = useState<any | null>(null);
+  const [saleForm, setSaleForm] = useState({ salesAmount: '', commissionRate: '5' });
+  const [saleSubmitting, setSaleSubmitting] = useState(false);
+  const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+
+  const fetchPIC = useCallback(async () => {
     try {
       setIsLoading(true);
       const res = await api.get(`/admin/pics/${id}`);
@@ -76,9 +102,48 @@ export default function PICDetailPage() {
     } finally {
       setIsLoading(false);
     }
+  }, [id, router]);
+
+  const fetchReferrals = useCallback(async () => {
+    if (!id) return;
+    setReferralsLoading(true);
+    try {
+      const res = await api.get(`/admin/referrals/pic/${id}`);
+      setReferrals(res.data.referrals);
+    } catch { toast.error('Failed to load referrals'); }
+    finally { setReferralsLoading(false); }
+  }, [id]);
+
+  useEffect(() => { if (id) { fetchPIC(); fetchReferrals(); } }, [id, fetchPIC, fetchReferrals]);
+
+  const handleUpdateStatus = async (referralId: string, status: string) => {
+    setStatusUpdating(referralId);
+    try {
+      await api.patch(`/admin/referrals/${referralId}/status`, { status });
+      toast.success('Status updated!');
+      fetchReferrals();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to update status');
+    } finally { setStatusUpdating(null); }
   };
 
-  useEffect(() => { if (id) fetchPIC(); }, [id]);
+  const handleAddSale = async () => {
+    if (!saleModal || !saleForm.salesAmount) { toast.error('Enter a sale amount'); return; }
+    setSaleSubmitting(true);
+    try {
+      const res = await api.patch(`/admin/referrals/${saleModal.id}/sales`, {
+        salesAmount: parseFloat(saleForm.salesAmount),
+        commissionRate: parseFloat(saleForm.commissionRate),
+      });
+      toast.success(`₹${res.data.data.commissionEarned.toFixed(2)} commission credited to PIC wallet!`);
+      setSaleModal(null);
+      setSaleForm({ salesAmount: '', commissionRate: '5' });
+      fetchReferrals();
+      fetchPIC();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to add sale');
+    } finally { setSaleSubmitting(false); }
+  };
 
   const handleAction = async (action: 'approve' | 'reject' | 'suspend') => {
     const reason = action !== 'approve' ? window.prompt(`Enter reason for ${action}:`) : '';
@@ -120,7 +185,54 @@ export default function PICDetailPage() {
 
   return (
     <div className="space-y-6">
+      {/* Modals */}
       {docModal && <DocModal url={docModal.url} label={docModal.label} onClose={() => setDocModal(null)} />}
+
+      {saleModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-white font-semibold">Add Sale Entry</h3>
+              <button onClick={() => setSaleModal(null)} className="p-1 hover:bg-gray-700 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <p className="text-sm text-gray-400 mb-4">For: <span className="text-white font-medium">{saleModal.personName}</span></p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Sale Amount (₹) *</label>
+                <input
+                  type="number" min="1"
+                  value={saleForm.salesAmount}
+                  onChange={e => setSaleForm(f => ({ ...f, salesAmount: e.target.value }))}
+                  placeholder="e.g. 1500"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">Commission Rate (%)</label>
+                <input
+                  type="number" min="0" max="100"
+                  value={saleForm.commissionRate}
+                  onChange={e => setSaleForm(f => ({ ...f, commissionRate: e.target.value }))}
+                  className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+                />
+              </div>
+              {saleForm.salesAmount && (
+                <div className="bg-brand-gold/10 border border-brand-gold/20 rounded-xl p-3 text-sm">
+                  <span className="text-gray-400">Commission to credit: </span>
+                  <span className="text-brand-gold font-bold">₹{((parseFloat(saleForm.salesAmount || '0') * parseFloat(saleForm.commissionRate || '5')) / 100).toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <button onClick={() => setSaleModal(null)} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
+                <button onClick={handleAddSale} disabled={saleSubmitting} className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 flex items-center justify-center gap-2">
+                  {saleSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <IndianRupee className="w-4 h-4" />}
+                  Credit Commission
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -147,205 +259,263 @@ export default function PICDetailPage() {
         </div>
       </div>
 
-      {/* Profile + Stats */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
-          <div className="flex items-start justify-between">
-            <div className="w-16 h-16 rounded-2xl bg-gray-700 flex items-center justify-center text-2xl font-bold text-brand-gold border border-gray-600">
-              {pic.fullName.charAt(0)}
-            </div>
-            <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${status.classes}`}>{status.label}</span>
-          </div>
-          <div className="space-y-3">
-            <InfoRow icon={<User className="w-4 h-4" />} label="Full Name" value={pic.fullName} />
-            <InfoRow icon={<Mail className="w-4 h-4" />} label="Email" value={pic.email} badge={pic.isEmailVerified ? '✓ Verified' : '✗ Unverified'} badgeClass={pic.isEmailVerified ? 'text-green-400' : 'text-red-400'} onCopy={() => copy(pic.email, 'Email')} />
-            <InfoRow icon={<Phone className="w-4 h-4" />} label="Phone" value={pic.phone} onCopy={() => copy(pic.phone, 'Phone')} />
-            <InfoRow icon={<MapPin className="w-4 h-4" />} label="Location" value={`${pic.city}, ${pic.state} ${pic.pincode}`} />
-            {pic.address && <InfoRow icon={<MapPin className="w-4 h-4" />} label="Address" value={pic.address} />}
-            {pic.referralCode && <InfoRow icon={<Tag className="w-4 h-4" />} label="Referral Code" value={pic.referralCode} valueClass="text-brand-gold font-mono font-bold" onCopy={() => copy(pic.referralCode, 'Referral code')} />}
-            {pic.upiId && <InfoRow icon={<Wallet className="w-4 h-4" />} label="UPI ID" value={pic.upiId} onCopy={() => copy(pic.upiId, 'UPI ID')} />}
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="lg:col-span-2 grid grid-cols-2 gap-4 content-start">
-          <StatCard icon={<TrendingUp className="w-6 h-6 text-green-400" />} label="Total Earnings" value={formatCurrency(pic.wallet?.totalEarnings || 0)} bg="bg-green-500/5 border-green-500/20" />
-          <StatCard icon={<Wallet className="w-6 h-6 text-brand-gold" />} label="Available Balance" value={formatCurrency(pic.wallet?.availableBalance || 0)} bg="bg-yellow-500/5 border-yellow-500/20" />
-          <StatCard icon={<ShoppingCart className="w-6 h-6 text-blue-400" />} label="Total Orders" value={String(pic._count?.orders || 0)} bg="bg-blue-500/5 border-blue-500/20" />
-          <StatCard icon={<Clock className="w-6 h-6 text-purple-400" />} label="Pending Earnings" value={formatCurrency(pic.wallet?.pendingEarnings || 0)} bg="bg-purple-500/5 border-purple-500/20" />
-        </div>
+      {/* Tabs */}
+      <div className="flex gap-1 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
+        {[
+          { key: 'overview', label: 'Overview', icon: <User className="w-4 h-4" /> },
+          { key: 'referrals', label: `Referrals (${referrals.length})`, icon: <Users className="w-4 h-4" /> },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveTab(tab.key as typeof activeTab)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.key ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            {tab.icon}{tab.label}
+          </button>
+        ))}
       </div>
 
-      {/* Application Timeline */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-        <h2 className="text-lg font-semibold text-white mb-5">Application Timeline</h2>
-        <div className="flex flex-wrap gap-6">
-          <TimelineItem icon={<Calendar className="w-4 h-4" />} label="Registered" value={pic.createdAt} />
-          <TimelineItem icon={<CheckCircle className="w-4 h-4 text-green-400" />} label="Approved" value={pic.approvedAt} empty="Not yet approved" />
-          <TimelineItem icon={<User className="w-4 h-4 text-blue-400" />} label="Profile Completed" value={pic.profileCompletedAt} empty="Not completed" />
-          <div className="flex flex-col gap-1">
-            <p className="text-xs text-gray-500 uppercase tracking-wide">Current Status</p>
-            <span className={`text-sm font-semibold px-3 py-1 rounded-full border w-fit ${status.classes}`}>{status.label}</span>
-          </div>
-        </div>
-        {pic.rejectionReason && (
-          <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
-            <p className="text-xs text-red-400 font-semibold mb-1">Rejection Reason</p>
-            <p className="text-sm text-red-300">{pic.rejectionReason}</p>
-          </div>
-        )}
-      </div>
-
-      {/* KYC Details */}
-      {(pic.aadhaarNumber || pic.panCard || pic.bankName) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Identity */}
-          {(pic.aadhaarNumber || pic.panCard) && (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <CreditCard className="w-5 h-5 text-brand-gold" />
-                <h2 className="text-base font-semibold text-white">Identity (KYC)</h2>
+      {/* ── OVERVIEW TAB ── */}
+      {activeTab === 'overview' && (
+        <div className="space-y-6">
+          {/* Profile + Stats */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
+              <div className="flex items-start justify-between">
+                <div className="w-16 h-16 rounded-2xl bg-gray-700 flex items-center justify-center text-2xl font-bold text-brand-gold border border-gray-600">
+                  {pic.fullName.charAt(0)}
+                </div>
+                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${status.classes}`}>{status.label}</span>
               </div>
               <div className="space-y-3">
-                {pic.aadhaarNumber && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="Aadhaar" value={`XXXX XXXX ${pic.aadhaarNumber.slice(-4)}`} onCopy={() => copy(pic.aadhaarNumber, 'Aadhaar')} />}
-                {pic.panCard && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="PAN" value={pic.panCard} onCopy={() => copy(pic.panCard, 'PAN')} />}
+                <InfoRow icon={<User className="w-4 h-4" />} label="Full Name" value={pic.fullName} />
+                <InfoRow icon={<Mail className="w-4 h-4" />} label="Email" value={pic.email} badge={pic.isEmailVerified ? '✓ Verified' : '✗ Unverified'} badgeClass={pic.isEmailVerified ? 'text-green-400' : 'text-red-400'} onCopy={() => copy(pic.email, 'Email')} />
+                <InfoRow icon={<Phone className="w-4 h-4" />} label="Phone" value={pic.phone} onCopy={() => copy(pic.phone, 'Phone')} />
+                <InfoRow icon={<MapPin className="w-4 h-4" />} label="Location" value={`${pic.city}, ${pic.state} ${pic.pincode}`} />
+                {pic.address && <InfoRow icon={<MapPin className="w-4 h-4" />} label="Address" value={pic.address} />}
+                {pic.referralCode && <InfoRow icon={<Tag className="w-4 h-4" />} label="Referral Code" value={pic.referralCode} valueClass="text-brand-gold font-mono font-bold" onCopy={() => copy(pic.referralCode, 'Referral code')} />}
+                {pic.upiId && <InfoRow icon={<Wallet className="w-4 h-4" />} label="UPI ID" value={pic.upiId} onCopy={() => copy(pic.upiId, 'UPI ID')} />}
+              </div>
+            </div>
+            <div className="lg:col-span-2 grid grid-cols-2 gap-4 content-start">
+              <StatCard icon={<TrendingUp className="w-6 h-6 text-green-400" />} label="Total Earnings" value={formatCurrency(pic.wallet?.totalEarnings || 0)} bg="bg-green-500/5 border-green-500/20" />
+              <StatCard icon={<Wallet className="w-6 h-6 text-brand-gold" />} label="Available Balance" value={formatCurrency(pic.wallet?.availableBalance || 0)} bg="bg-yellow-500/5 border-yellow-500/20" />
+              <StatCard icon={<ShoppingCart className="w-6 h-6 text-blue-400" />} label="Total Orders" value={String(pic._count?.orders || 0)} bg="bg-blue-500/5 border-blue-500/20" />
+              <StatCard icon={<Clock className="w-6 h-6 text-purple-400" />} label="Pending Earnings" value={formatCurrency(pic.wallet?.pendingEarnings || 0)} bg="bg-purple-500/5 border-purple-500/20" />
+            </div>
+          </div>
+
+          {/* Application Timeline */}
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-white mb-5">Application Timeline</h2>
+            <div className="flex flex-wrap gap-6">
+              <TimelineItem icon={<Calendar className="w-4 h-4" />} label="Registered" value={pic.createdAt} />
+              <TimelineItem icon={<CheckCircle className="w-4 h-4 text-green-400" />} label="Approved" value={pic.approvedAt} empty="Not yet approved" />
+              <TimelineItem icon={<User className="w-4 h-4 text-blue-400" />} label="Profile Completed" value={pic.profileCompletedAt} empty="Not completed" />
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-gray-500 uppercase tracking-wide">Current Status</p>
+                <span className={`text-sm font-semibold px-3 py-1 rounded-full border w-fit ${status.classes}`}>{status.label}</span>
+              </div>
+            </div>
+            {pic.rejectionReason && (
+              <div className="mt-4 bg-red-500/10 border border-red-500/20 rounded-xl p-4">
+                <p className="text-xs text-red-400 font-semibold mb-1">Rejection Reason</p>
+                <p className="text-sm text-red-300">{pic.rejectionReason}</p>
+              </div>
+            )}
+          </div>
+
+          {/* KYC Details */}
+          {(pic.aadhaarNumber || pic.panCard || pic.bankName) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {(pic.aadhaarNumber || pic.panCard) && (
+                <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <CreditCard className="w-5 h-5 text-brand-gold" />
+                    <h2 className="text-base font-semibold text-white">Identity (KYC)</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {pic.aadhaarNumber && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="Aadhaar" value={`XXXX XXXX ${pic.aadhaarNumber.slice(-4)}`} onCopy={() => copy(pic.aadhaarNumber, 'Aadhaar')} />}
+                    {pic.panCard && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="PAN" value={pic.panCard} onCopy={() => copy(pic.panCard, 'PAN')} />}
+                  </div>
+                </div>
+              )}
+              {pic.bankName && (
+                <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Building className="w-5 h-5 text-brand-gold" />
+                    <h2 className="text-base font-semibold text-white">Bank Details</h2>
+                  </div>
+                  <div className="space-y-3">
+                    {pic.bankAccountName && <InfoRow icon={<User className="w-4 h-4" />} label="Account Holder" value={pic.bankAccountName} />}
+                    {pic.bankName && <InfoRow icon={<Building className="w-4 h-4" />} label="Bank" value={`${pic.bankName}${pic.branchName ? ' — ' + pic.branchName : ''}`} />}
+                    {pic.bankAccountNumber && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="Account No." value={`XXXX${pic.bankAccountNumber.slice(-4)}`} />}
+                    {pic.ifscCode && <InfoRow icon={<Tag className="w-4 h-4" />} label="IFSC" value={pic.ifscCode} onCopy={() => copy(pic.ifscCode, 'IFSC')} />}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Documents */}
+          {(pic.aadhaarDocument || pic.panDocument || pic.resumeDocument) && (
+            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <FileText className="w-5 h-5 text-brand-gold" />
+                <h2 className="text-base font-semibold text-white">Uploaded Documents</h2>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {pic.aadhaarDocument && <DocCard label="Aadhaar Document" url={pic.aadhaarDocument} onPreview={() => setDocModal({ url: pic.aadhaarDocument, label: 'Aadhaar Document' })} />}
+                {pic.panDocument && <DocCard label="PAN Document" url={pic.panDocument} onPreview={() => setDocModal({ url: pic.panDocument, label: 'PAN Document' })} />}
+                {pic.resumeDocument && <DocCard label="Resume" url={pic.resumeDocument} onPreview={() => setDocModal({ url: pic.resumeDocument, label: 'Resume' })} />}
               </div>
             </div>
           )}
 
-          {/* Bank */}
-          {pic.bankName && (
+          {/* Professional Info */}
+          {(pic.occupation || pic.whyJoin) && (
             <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Building className="w-5 h-5 text-brand-gold" />
-                <h2 className="text-base font-semibold text-white">Bank Details</h2>
+                <Briefcase className="w-5 h-5 text-brand-gold" />
+                <h2 className="text-base font-semibold text-white">Professional & PIC Details</h2>
               </div>
-              <div className="space-y-3">
-                {pic.bankAccountName && <InfoRow icon={<User className="w-4 h-4" />} label="Account Holder" value={pic.bankAccountName} />}
-                {pic.bankName && <InfoRow icon={<Building className="w-4 h-4" />} label="Bank" value={`${pic.bankName}${pic.branchName ? ' — ' + pic.branchName : ''}`} />}
-                {pic.bankAccountNumber && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="Account No." value={`XXXX${pic.bankAccountNumber.slice(-4)}`} />}
-                {pic.ifscCode && <InfoRow icon={<Tag className="w-4 h-4" />} label="IFSC" value={pic.ifscCode} onCopy={() => copy(pic.ifscCode, 'IFSC')} />}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pic.occupation && <InfoRow icon={<Briefcase className="w-4 h-4" />} label="Occupation" value={pic.occupation} />}
+                {pic.yearsOfExperience && <InfoRow icon={<Clock className="w-4 h-4" />} label="Experience" value={pic.yearsOfExperience} />}
+                {pic.education && <InfoRow icon={<User className="w-4 h-4" />} label="Education" value={pic.education} />}
+                {pic.skills && <InfoRow icon={<Tag className="w-4 h-4" />} label="Skills" value={pic.skills} />}
+                {pic.availability && <InfoRow icon={<Calendar className="w-4 h-4" />} label="Availability" value={pic.availability} />}
+                {pic.preferredWorkingArea && <InfoRow icon={<MapPin className="w-4 h-4" />} label="Working Area" value={`${pic.preferredWorkingArea}, ${pic.preferredDistrict || ''}`} />}
+                {pic.instagramProfile && <InfoRow icon={<ExternalLink className="w-4 h-4" />} label="Instagram" value={pic.instagramProfile} />}
+                {pic.whyJoin && (
+                  <div className="md:col-span-2">
+                    <InfoRow icon={<User className="w-4 h-4" />} label="Why they want to be a PIC" value={pic.whyJoin} />
+                  </div>
+                )}
               </div>
+            </div>
+          )}
+
+          {/* Recent Payouts */}
+          <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-white">Recent Payouts</h2>
+              <span className="text-xs text-gray-500">Last 5</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+                  <tr>
+                    <th className="px-6 py-3">Amount</th>
+                    <th className="px-6 py-3">Method</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3">Requested</th>
+                    <th className="px-6 py-3">Processed</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {!pic.payouts?.length ? (
+                    <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No payouts yet</td></tr>
+                  ) : pic.payouts.map((p: any) => (
+                    <tr key={p.id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
+                      <td className="px-6 py-4 text-white font-medium">{formatCurrency(p.amount)}</td>
+                      <td className="px-6 py-4 text-gray-300">{p.paymentMethod || 'UPI'}</td>
+                      <td className="px-6 py-4">
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${p.status === 'PAID' ? 'bg-green-500/10 text-green-400 border-green-500/20' : p.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.status}</span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-400">{new Date(p.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td className="px-6 py-4 text-gray-400">{p.processedAt ? new Date(p.processedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── REFERRALS TAB ── */}
+      {activeTab === 'referrals' && (
+        <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-700">
+            <h2 className="text-lg font-semibold text-white">People Referred by {pic.fullName}</h2>
+            <p className="text-xs text-gray-400 mt-0.5">Update status and manually enter sale amounts to credit commission to this PIC's wallet.</p>
+          </div>
+          {referralsLoading ? (
+            <div className="p-8 text-center text-gray-400">Loading...</div>
+          ) : referrals.length === 0 ? (
+            <div className="p-12 text-center">
+              <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500">No referrals added by this PIC yet.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+                  <tr>
+                    <th className="px-6 py-3">Person</th>
+                    <th className="px-6 py-3">Contact</th>
+                    <th className="px-6 py-3">Status</th>
+                    <th className="px-6 py-3 text-right">Sales</th>
+                    <th className="px-6 py-3 text-right">Commission</th>
+                    <th className="px-6 py-3">Follow-ups</th>
+                    <th className="px-6 py-3 text-center">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-700/50">
+                  {referrals.map((ref: any) => {
+                    const sc = REFERRAL_STATUS_CONFIG[ref.status] || REFERRAL_STATUS_CONFIG.PENDING;
+                    return (
+                      <tr key={ref.id} className="hover:bg-gray-700/20 transition-colors">
+                        <td className="px-6 py-4">
+                          <p className="font-medium text-white">{ref.personName}</p>
+                          <p className="text-gray-500 text-xs mt-0.5">{new Date(ref.createdAt).toLocaleDateString()}</p>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-1 text-gray-300 text-xs"><Phone className="w-3 h-3" />{ref.personPhone}</div>
+                          {ref.personEmail && <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5"><Mail className="w-3 h-3" />{ref.personEmail}</div>}
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={ref.status}
+                            disabled={statusUpdating === ref.id}
+                            onChange={e => handleUpdateStatus(ref.id, e.target.value)}
+                            className={`text-xs font-medium px-2.5 py-1.5 rounded-full border bg-transparent cursor-pointer focus:outline-none ${sc.color}`}
+                          >
+                            {ALL_REFERRAL_STATUSES.map(s => (
+                              <option key={s} value={s} className="bg-gray-800 text-white">{REFERRAL_STATUS_CONFIG[s]?.label || s}</option>
+                            ))}
+                          </select>
+                          {ref.adminNotes && <p className="text-xs text-gray-500 mt-1 italic truncate max-w-[160px]">{ref.adminNotes}</p>}
+                        </td>
+                        <td className="px-6 py-4 text-right text-gray-300 font-medium">₹{ref.totalSalesAmount.toFixed(0)}</td>
+                        <td className="px-6 py-4 text-right text-brand-gold font-semibold">₹{ref.commissionAmount.toFixed(2)}</td>
+                        <td className="px-6 py-4">
+                          {ref.followUpRequests?.length > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full">
+                              <Flag className="w-3 h-3" /> {ref.followUpRequests.length} request{ref.followUpRequests.length > 1 ? 's' : ''}
+                            </span>
+                          ) : <span className="text-gray-600 text-xs">None</span>}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={() => { setSaleModal(ref); setSaleForm({ salesAmount: '', commissionRate: String(ref.commissionRate) }); }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold border border-brand-gold/20 rounded-lg text-xs font-medium transition-colors"
+                          >
+                            <IndianRupee className="w-3 h-3" /> Add Sale
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
       )}
-
-      {/* Documents */}
-      {(pic.aadhaarDocument || pic.panDocument || pic.resumeDocument) && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <FileText className="w-5 h-5 text-brand-gold" />
-            <h2 className="text-base font-semibold text-white">Uploaded Documents</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {pic.aadhaarDocument && (
-              <DocCard label="Aadhaar Document" url={pic.aadhaarDocument} onPreview={() => setDocModal({ url: pic.aadhaarDocument, label: 'Aadhaar Document' })} />
-            )}
-            {pic.panDocument && (
-              <DocCard label="PAN Document" url={pic.panDocument} onPreview={() => setDocModal({ url: pic.panDocument, label: 'PAN Document' })} />
-            )}
-            {pic.resumeDocument && (
-              <DocCard label="Resume" url={pic.resumeDocument} onPreview={() => setDocModal({ url: pic.resumeDocument, label: 'Resume' })} />
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Professional Info */}
-      {(pic.occupation || pic.whyJoin) && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Briefcase className="w-5 h-5 text-brand-gold" />
-            <h2 className="text-base font-semibold text-white">Professional & PIC Details</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {pic.occupation && <InfoRow icon={<Briefcase className="w-4 h-4" />} label="Occupation" value={pic.occupation} />}
-            {pic.yearsOfExperience && <InfoRow icon={<Clock className="w-4 h-4" />} label="Experience" value={pic.yearsOfExperience} />}
-            {pic.education && <InfoRow icon={<User className="w-4 h-4" />} label="Education" value={pic.education} />}
-            {pic.skills && <InfoRow icon={<Tag className="w-4 h-4" />} label="Skills" value={pic.skills} />}
-            {pic.availability && <InfoRow icon={<Calendar className="w-4 h-4" />} label="Availability" value={pic.availability} />}
-            {pic.preferredWorkingArea && <InfoRow icon={<MapPin className="w-4 h-4" />} label="Working Area" value={`${pic.preferredWorkingArea}, ${pic.preferredDistrict || ''}`} />}
-            {pic.instagramProfile && <InfoRow icon={<ExternalLink className="w-4 h-4" />} label="Instagram" value={pic.instagramProfile} />}
-            {pic.whyJoin && (
-              <div className="md:col-span-2">
-                <InfoRow icon={<User className="w-4 h-4" />} label="Why they want to be a PIC" value={pic.whyJoin} />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Recent Orders */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Orders</h2>
-          <span className="text-xs text-gray-500">Last 10</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
-              <tr>
-                <th className="px-6 py-3">Order ID</th>
-                <th className="px-6 py-3">Amount</th>
-                <th className="px-6 py-3">Commission</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!pic.orders?.length ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No orders yet</td></tr>
-              ) : pic.orders.map((o: any) => (
-                <tr key={o.id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                  <td className="px-6 py-4 font-mono text-xs text-gray-300">#{o.shopifyOrderId}</td>
-                  <td className="px-6 py-4 text-white font-medium">{formatCurrency(o.orderAmount)}</td>
-                  <td className="px-6 py-4 text-brand-gold font-medium">{formatCurrency(o.commissionAmount)}</td>
-                  <td className="px-6 py-4"><span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${orderStatusClasses[o.status] || 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>{o.status}</span></td>
-                  <td className="px-6 py-4 text-gray-400">{new Date(o.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Recent Payouts */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-white">Recent Payouts</h2>
-          <span className="text-xs text-gray-500">Last 5</span>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
-              <tr>
-                <th className="px-6 py-3">Amount</th>
-                <th className="px-6 py-3">Method</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Requested</th>
-                <th className="px-6 py-3">Processed</th>
-              </tr>
-            </thead>
-            <tbody>
-              {!pic.payouts?.length ? (
-                <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No payouts yet</td></tr>
-              ) : pic.payouts.map((p: any) => (
-                <tr key={p.id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                  <td className="px-6 py-4 text-white font-medium">{formatCurrency(p.amount)}</td>
-                  <td className="px-6 py-4 text-gray-300">{p.paymentMethod || 'UPI'}</td>
-                  <td className="px-6 py-4">
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${p.status === 'PAID' ? 'bg-green-500/10 text-green-400 border-green-500/20' : p.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.status}</span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-400">{new Date(p.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                  <td className="px-6 py-4 text-gray-400">{p.processedAt ? new Date(p.processedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
   );
 }

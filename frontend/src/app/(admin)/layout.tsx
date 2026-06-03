@@ -14,7 +14,8 @@ import {
   Bell,
   Menu,
   X,
-  Leaf
+  Leaf,
+  Flag
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -57,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
     { name: 'PIC Management', href: '/admin/pics', icon: Users },
+    { name: 'Follow-up Requests', href: '/admin/followups', icon: Flag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
