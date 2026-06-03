@@ -199,7 +199,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   // ─── Full Dashboard (ACTIVE users only) ─────────
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Referral Link', href: '/dashboard/referral', icon: LinkIcon },
+    { name: 'Referrals', href: '/dashboard/referral', icon: User },
     { name: 'My Orders', href: '/dashboard/orders', icon: ShoppingCart },
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
     { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },

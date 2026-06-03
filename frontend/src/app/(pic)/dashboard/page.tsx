@@ -18,20 +18,14 @@ import { useAuthStore } from '@/store/authStore';
 
 export default function PICDashboardPage() {
   const [stats, setStats] = useState<any>(null);
-  const [referralLink, setReferralLink] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [copied, setCopied] = useState(false);
   const { user } = useAuthStore();
 
   useEffect(() => {
     const fetchDashboard = async () => {
       try {
-        const [statsRes, refRes] = await Promise.all([
-          api.get('/pic/dashboard'),
-          api.get('/pic/referral'),
-        ]);
+        const statsRes = await api.get('/pic/dashboard');
         setStats(statsRes.data.data);
-        setReferralLink(refRes.data.data.referralLink);
       } catch {
         toast.error('Failed to load dashboard data');
       } finally {
@@ -40,13 +34,6 @@ export default function PICDashboardPage() {
     };
     fetchDashboard();
   }, []);
-
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(referralLink);
-    setCopied(true);
-    toast.success('Referral link copied!');
-    setTimeout(() => setCopied(false), 3000);
-  };
 
   if (isLoading) {
     return (
@@ -73,24 +60,13 @@ export default function PICDashboardPage() {
             Welcome back, {user?.fullName?.split(' ')[0]}! 🌱
           </h1>
           <p className="text-brand-beige/90 max-w-xl">
-            Track your earnings, share your unique referral link, and manage your partner account here.
+            Track your earnings, manage your referrals, and view your partner account here.
           </p>
-
-          {referralLink && (
-            <div className="mt-8 flex flex-col sm:flex-row items-center gap-4 bg-white/10 p-2 pl-4 rounded-xl border border-white/20 backdrop-blur-sm w-full max-w-2xl">
-              <span className="text-white/80 text-sm font-medium whitespace-nowrap">Your Referral Link:</span>
-              <div className="flex-1 bg-black/20 rounded-lg px-3 py-2 text-white font-mono text-sm truncate w-full">
-                {referralLink}
-              </div>
-              <button
-                onClick={copyToClipboard}
-                className="bg-brand-gold hover:bg-yellow-500 text-gray-900 font-bold px-6 py-2 rounded-lg transition-colors flex items-center shrink-0 w-full sm:w-auto justify-center"
-              >
-                {copied ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                {copied ? 'Copied!' : 'Copy Link'}
-              </button>
-            </div>
-          )}
+          <div className="mt-8">
+            <Link href="/dashboard/referral" className="bg-brand-gold hover:bg-yellow-500 text-gray-900 font-bold px-6 py-2.5 rounded-lg transition-colors inline-block">
+              Add New Referral
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -149,7 +125,7 @@ export default function PICDashboardPage() {
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <ShoppingCart className="w-10 h-10 text-gray-200 mx-auto mb-3" />
                     <p className="text-gray-500">No orders referred yet.</p>
-                    <p className="text-sm text-gray-400 mt-1">Share your referral link to start earning!</p>
+                    <p className="text-sm text-gray-400 mt-1">Add a new referral to start earning!</p>
                   </td>
                 </tr>
               ) : (
