@@ -51,7 +51,13 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
   // Detect type by file extension (most reliable)
   const isPdf = /\.pdf(\?|$)/i.test(url);
   const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
-  // For PDFs: use Google Docs Viewer to embed them (works with Cloudinary URLs)
+  
+  // Workaround: Cloudinary blocks raw PDF delivery by default on new accounts.
+  // Rendering the PDF as a JPG (first page) works natively without relying on viewers.
+  const isCloudinaryPdf = fullUrl.includes('cloudinary') && isPdf;
+  const previewUrl = isCloudinaryPdf ? fullUrl.replace(/\.pdf(\?|$)/i, '.jpg$1') : fullUrl;
+  
+  // For external PDFs: use Google Docs Viewer to embed them
   const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullUrl)}&embedded=true`;
 
   return (
@@ -61,7 +67,7 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
           <p className="font-semibold text-gray-900">{label}</p>
           <div className="flex items-center gap-2">
             <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-              <ExternalLink className="w-3 h-3" /> Open
+              <ExternalLink className="w-3 h-3" /> View Original
             </a>
             <a href={fullUrl} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
               <Download className="w-3 h-3" /> Download
@@ -71,16 +77,10 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
             </button>
           </div>
         </div>
-        <div className="overflow-auto max-h-[calc(90vh-72px)]">
-          {isImage ? (
-            <div className="p-4">
-              <img src={fullUrl} alt={label} className="max-w-full rounded-lg mx-auto" />
-            </div>
+        <div className="flex-1 min-h-[500px] bg-gray-100 flex items-center justify-center p-4">
+          {isCloudinaryPdf ? (
+            <img src={previewUrl} alt={label} className="max-w-full max-h-full object-contain rounded-lg shadow-sm" />
           ) : isPdf ? (
-            <iframe
-              src={googleViewerUrl}
-              className="w-full h-[75vh] border-0"
-              title={label}
             />
           ) : (
             <div className="p-4">
@@ -638,7 +638,7 @@ export default function PICDetailPage() {
                             onClick={() => setSaleModal(ref)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest border border-brand-forest/20 rounded-lg text-xs font-medium transition-colors shadow-sm"
                           >
-                            <IndianRupee className="w-3 h-3" /> Add Sale
+                            <IndianRupee className="w-3 h-3" /> Manage Sales
                           </button>
                         </td>
                       </tr>

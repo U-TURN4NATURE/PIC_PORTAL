@@ -385,7 +385,7 @@ export default function CustomersPage() {
                           onClick={() => setSaleModal(ref)}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest border border-brand-forest/20 rounded-lg text-xs font-medium transition-colors shadow-sm"
                         >
-                          <IndianRupee className="w-3 h-3" /> Add Sale
+                          <IndianRupee className="w-3 h-3" /> Manage Sales
                         </button>
                       </td>
                     </tr>
