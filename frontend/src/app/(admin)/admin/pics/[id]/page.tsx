@@ -81,11 +81,11 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
           {isCloudinaryPdf ? (
             <img src={previewUrl} alt={label} className="max-w-full max-h-full object-contain rounded-lg shadow-sm" />
           ) : isPdf ? (
-            />
+            <iframe src={googleViewerUrl} className="w-full h-[75vh] border-0 rounded-lg shadow-sm" title={label} />
+          ) : isImage ? (
+            <img src={fullUrl} alt={label} className="max-w-full max-h-full object-contain rounded-lg shadow-sm" />
           ) : (
-            <div className="p-4">
-              <iframe src={fullUrl} className="w-full h-[60vh] rounded-lg" title={label} />
-            </div>
+            <iframe src={fullUrl} className="w-full h-[60vh] rounded-lg border-0 shadow-sm" title={label} />
           )}
         </div>
       </div>
