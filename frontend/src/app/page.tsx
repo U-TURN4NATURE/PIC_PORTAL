@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { Leaf, ArrowRight, Users, Heart, TrendingUp, ShieldCheck, Star, MapPin } from 'lucide-react';
 
@@ -14,11 +15,7 @@ export default function Home() {
       {/* Navigation */}
       <nav className="relative z-10 px-6 py-6 md:px-12 flex justify-between items-center bg-white/50 backdrop-blur-md border-b border-white/40 shadow-sm">
         <div className="flex items-center space-x-2 text-brand-forest">
-          <Leaf className="w-6 h-6" />
-          <div>
-            <span className="font-dm-serif text-xl font-bold tracking-wide">U-Turn4Nature</span>
-            <p className="text-xs text-brand-olive font-medium">Partners in Change (PIC)</p>
-          </div>
+          <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={180} height={60} className="object-contain mix-blend-multiply" />
         </div>
         <div className="flex space-x-4">
           <Link href="/login" className="px-5 py-2 text-brand-forest font-medium hover:bg-white/50 rounded-lg transition-colors">

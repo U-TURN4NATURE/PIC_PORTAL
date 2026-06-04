@@ -8,7 +8,8 @@ import * as z from 'zod';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
-import { Loader2, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 
 const adminLoginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -49,11 +50,10 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md p-8 bg-gray-800 border border-gray-700 rounded-2xl relative z-10 mx-4 shadow-2xl">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-gray-700 text-brand-gold p-3 rounded-xl border border-gray-600">
-              <ShieldCheck className="w-8 h-8" />
+            <div className="bg-white p-2 rounded-xl flex items-center justify-center">
+              <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={220} height={80} className="object-contain" />
             </div>
           </div>
-          <h1 className="font-dm-serif text-3xl text-white">Admin Portal</h1>
           <p className="text-gray-400 text-sm mt-2">Secure Access Only</p>
         </div>
 

@@ -7,7 +7,8 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, CheckCircle2, Leaf, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
+import { Loader2, ArrowRight, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const registerSchema = z.object({
@@ -107,11 +108,9 @@ export default function RegisterPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
-              <Leaf className="w-7 h-7" />
-            </div>
+            <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={200} height={70} className="object-contain mix-blend-multiply" />
           </div>
-          <h1 className="font-dm-serif text-3xl text-brand-forest">Join U-Turn4Nature</h1>
+          <h1 className="font-dm-serif text-2xl text-brand-forest mt-2">Join Us</h1>
           <p className="text-brand-olive text-sm mt-2">Become a <strong>Partner in Change (PIC)</strong> — Be part of India&apos;s Homemade Revolution</p>
         </div>
 

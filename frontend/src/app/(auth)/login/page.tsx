@@ -8,7 +8,8 @@ import * as z from 'zod';
 import api from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
-import { Loader2, Leaf, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const loginSchema = z.object({
@@ -62,11 +63,8 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10 mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
-              <Leaf className="w-8 h-8" />
-            </div>
+            <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={220} height={80} className="object-contain mix-blend-multiply" />
           </div>
-          <h1 className="font-dm-serif text-3xl text-brand-forest">U-Turn4Nature</h1>
           <p className="text-brand-olive text-sm mt-2">Partners in Change (PIC) Portal</p>
         </div>
 

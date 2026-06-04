@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   LayoutDashboard,
   Link as LinkIcon,
@@ -224,11 +225,11 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-brand-sage/30 shadow-[4px_0_24px_rgba(45,80,22,0.02)] z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-20 flex items-center justify-between px-6 border-b border-brand-sage/20 bg-gradient-to-r from-brand-forest/5 to-transparent">
-          <div className="flex items-center space-x-3 text-brand-forest font-dm-serif text-xl">
-            <div className="bg-brand-forest text-white p-2 rounded-lg shadow-sm">
-              <Leaf className="w-5 h-5" />
+          <div className="flex items-center space-x-2 text-white font-dm-serif text-xl">
+            <div className="bg-white px-2 py-1 rounded-md flex items-center shadow-sm">
+              <Image src="/logo_2.jpg" alt="U-Turn4Nature" width={100} height={30} className="object-contain mix-blend-multiply" />
             </div>
-            <span>PIC Portal</span>
+            <span className="text-sm font-medium opacity-80 border-l border-brand-sage/30 pl-2 text-brand-forest">PIC Portal</span>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-brand-forest/50">
             <X className="w-5 h-5" />
