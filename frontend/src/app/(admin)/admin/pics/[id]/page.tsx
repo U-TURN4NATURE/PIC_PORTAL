@@ -42,6 +42,8 @@ const ALL_REFERRAL_STATUSES = ['PENDING','CONTACTED','INTERESTED','BUYING','NOT_
 // Document Preview Modal
 // ─────────────────────────────────────────────────
 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+
 function DocModal({ url, label, onClose }: { url: string; label: string; onClose: () => void }) {
   const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
   return (
@@ -50,7 +52,7 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <p className="font-semibold text-white">{label}</p>
           <div className="flex items-center gap-2">
-            <a href={`http://localhost:5000${url}`} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
+            <a href={`${BASE_URL}${url}`} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
               <Download className="w-3 h-3" /> Download
             </a>
             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-700 text-gray-400">
@@ -60,9 +62,9 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
         </div>
         <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
           {isImage ? (
-            <img src={`http://localhost:5000${url}`} alt={label} className="max-w-full rounded-lg" />
+            <img src={`${BASE_URL}${url}`} alt={label} className="max-w-full rounded-lg" />
           ) : (
-            <iframe src={`http://localhost:5000${url}`} className="w-full h-[60vh] rounded-lg" title={label} />
+            <iframe src={`${BASE_URL}${url}`} className="w-full h-[60vh] rounded-lg" title={label} />
           )}
         </div>
       </div>
@@ -539,7 +541,7 @@ function DocCard({ label, url, onPreview }: { label: string; url: string; onPrev
         <button onClick={onPreview} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors">
           <Eye className="w-3 h-3" /> Preview
         </button>
-        <a href={`http://localhost:5000${url}`} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold rounded-lg transition-colors">
+        <a href={`${BASE_URL}${url}`} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold rounded-lg transition-colors">
           <Download className="w-3 h-3" /> Download
         </a>
       </div>
