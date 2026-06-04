@@ -7,8 +7,10 @@ import {
   getAllReferrals,
   updateReferralStatus,
   updateReferralSales,
+  addSaleEntry,
   getSaleHistory,
   updateSaleEntry,
+  deleteSaleEntry,
 } from './referral.service';
 import { ReferralStatus } from '@prisma/client';
 
@@ -81,12 +83,23 @@ export const handleGetSaleHistory = async (req: Request, res: Response): Promise
   res.json({ success: true, data });
 };
 
-export const handleUpdateSaleEntry = async (req: Request, res: Response): Promise<void> => {
-  const { saleId } = req.params;
-  const { saleAmount, commissionRate } = req.body;
-  const data = await updateSaleEntry(saleId, {
-    saleAmount: saleAmount ? Number(saleAmount) : undefined,
-    commissionRate: commissionRate ? Number(commissionRate) : undefined
-  });
-  res.json({ success: true, data });
+export const handleUpdateSaleEntry = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { saleId } = req.params;
+    const { saleAmount, commissionRate } = req.body;
+    const result = await updateSaleEntry(saleId, { saleAmount, commissionRate });
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const handleDeleteSaleEntry = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { saleId } = req.params;
+    const result = await deleteSaleEntry(saleId);
+    res.status(200).json({ status: 'success', data: result });
+  } catch (error) {
+    next(error);
+  }
 };

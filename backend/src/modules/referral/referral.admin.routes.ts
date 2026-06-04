@@ -7,6 +7,7 @@ import {
   handleUpdateReferralSales,
   handleGetSaleHistory,
   handleUpdateSaleEntry,
+  handleDeleteSaleEntry,
 } from './referral.controller';
 
 const router = Router();
@@ -27,5 +28,6 @@ router.patch('/:id/status', handleUpdateReferralStatus);
 router.patch('/:id/sales', handleUpdateReferralSales);
 router.get('/:id/sales/history', handleGetSaleHistory);
 router.patch('/sales/:saleId', handleUpdateSaleEntry);
+router.delete('/sales/:saleId', handleDeleteSaleEntry);
 
 export default router;

@@ -272,6 +272,41 @@ export const updateSaleEntry = async (saleId: string, updates: { saleAmount?: nu
 };
 
 /**
+ * Delete a past sale entry safely, subtracting the commission from wallet and totals.
+ */
+export const deleteSaleEntry = async (saleId: string) => {
+  const sale = await prisma.saleEntry.findUnique({ where: { id: saleId }, include: { referral: true } });
+  if (!sale) throw createError('Sale entry not found', 404);
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Delete the sale entry
+    await tx.saleEntry.delete({
+      where: { id: saleId },
+    });
+
+    // 2. Subtract from referral totals
+    await tx.referral.update({
+      where: { id: sale.referralId },
+      data: {
+        totalSalesAmount: { decrement: sale.saleAmount },
+        commissionAmount: { decrement: sale.commissionEarned },
+      }
+    });
+
+    // 3. Subtract from PIC wallet balance
+    await tx.wallet.update({
+      where: { picId: sale.picId },
+      data: {
+        totalEarnings: { decrement: sale.commissionEarned },
+        availableBalance: { decrement: sale.commissionEarned },
+      }
+    });
+  });
+
+  return { message: 'Sale entry deleted successfully' };
+};
+
+/**
  * PIC dashboard referral stats
  */
 export const getPICReferralStats = async (picId: string) => {

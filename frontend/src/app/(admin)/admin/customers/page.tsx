@@ -71,6 +71,21 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
     } finally { setLoading(false); }
   };
 
+  const handleDeleteClick = async (saleId: string) => {
+    if (!window.confirm('Are you sure you want to delete this sale entry? The commission will be deducted from the PIC wallet.')) return;
+    setLoading(true);
+    try {
+      await api.delete(`/admin/referrals/sales/${saleId}`);
+      toast.success('Sale entry deleted and wallet adjusted.');
+      onSuccess();
+      const res = await api.get(`/admin/referrals/${referral.id}/sales/history`);
+      setHistory(res.data.data || []);
+      if (editingSale?.id === saleId) cancelEdit();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to delete sale');
+    } finally { setLoading(false); }
+  };
+
   const handleEditClick = (sale: any) => {
     setEditingSale(sale);
     setSalesAmount(String(sale.saleAmount));
@@ -111,9 +126,10 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
                     <p className="text-white font-medium text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-400 font-normal">({sale.commissionRate}% comm.)</span></p>
                     <p className="text-xs text-gray-500 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
                     <p className="text-brand-gold font-semibold text-sm">+₹{sale.commissionEarned.toFixed(2)}</p>
-                    <button onClick={() => handleEditClick(sale)} className="text-xs text-blue-400 hover:text-blue-300 underline">Edit</button>
+                    <button onClick={() => handleEditClick(sale)} className="text-xs text-blue-400 hover:text-blue-300 px-1">Edit</button>
+                    <button onClick={() => handleDeleteClick(sale.id)} disabled={loading} className="text-xs text-red-400 hover:text-red-300 px-1">Delete</button>
                   </div>
                 </div>
               ))}
