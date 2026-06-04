@@ -93,6 +93,147 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
 }
 
 // ─────────────────────────────────────────────────
+// Manage Sales Modal
+// ─────────────────────────────────────────────────
+function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: () => void; onSuccess: () => void }) {
+  const [history, setHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [salesAmount, setSalesAmount] = useState('');
+  const [commissionRate, setCommissionRate] = useState(String(referral.commissionRate || 5));
+  const [loading, setLoading] = useState(false);
+  const [editingSale, setEditingSale] = useState<any | null>(null);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const res = await api.get(`/admin/referrals/${referral.id}/sales/history`);
+        setHistory(res.data.data || []);
+      } catch (err) {
+        toast.error('Failed to load sale history');
+      } finally { setLoadingHistory(false); }
+    };
+    fetchHistory();
+  }, [referral.id]);
+
+  const handleSubmit = async () => {
+    if (!salesAmount) { toast.error('Enter a sale amount'); return; }
+    setLoading(true);
+    try {
+      if (editingSale) {
+        await api.patch(`/admin/referrals/sales/${editingSale.id}`, {
+          saleAmount: parseFloat(salesAmount),
+          commissionRate: parseFloat(commissionRate),
+        });
+        toast.success('Sale entry updated successfully!');
+      } else {
+        await api.patch(`/admin/referrals/${referral.id}/sales`, {
+          salesAmount: parseFloat(salesAmount),
+          commissionRate: parseFloat(commissionRate),
+        });
+        toast.success(`Commission credited to ${referral.pic?.fullName || 'PIC'}'s wallet!`);
+      }
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to save sale');
+    } finally { setLoading(false); }
+  };
+
+  const handleEditClick = (sale: any) => {
+    setEditingSale(sale);
+    setSalesAmount(String(sale.saleAmount));
+    setCommissionRate(String(sale.commissionRate));
+  };
+
+  const cancelEdit = () => {
+    setEditingSale(null);
+    setSalesAmount('');
+    setCommissionRate(String(referral.commissionRate || 5));
+  };
+
+  const commission = salesAmount ? ((parseFloat(salesAmount) * parseFloat(commissionRate)) / 100).toFixed(2) : '0.00';
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+      <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5 sticky top-0 bg-gray-800 pb-2 border-b border-gray-700 z-10">
+          <div>
+            <h3 className="text-white font-semibold">Manage Sales</h3>
+            <p className="text-xs text-gray-400 mt-0.5">For: <span className="text-white">{referral.personName}</span></p>
+          </div>
+          <button onClick={onClose} className="p-1 hover:bg-gray-700 rounded-lg"><XCircle className="w-5 h-5 text-gray-400" /></button>
+        </div>
+
+        {/* History Section */}
+        <div className="mb-6">
+          <h4 className="text-sm font-medium text-gray-300 mb-3">Sale History</h4>
+          {loadingHistory ? (
+            <div className="text-center py-4 text-gray-500 text-sm">Loading history...</div>
+          ) : history.length === 0 ? (
+            <div className="text-center py-4 text-gray-500 text-sm border border-gray-700 border-dashed rounded-xl">No past sales found.</div>
+          ) : (
+            <div className="space-y-2">
+              {history.map(sale => (
+                <div key={sale.id} className="flex items-center justify-between bg-gray-700/30 border border-gray-700 p-3 rounded-xl">
+                  <div>
+                    <p className="text-white font-medium text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-400 font-normal">({sale.commissionRate}% comm.)</span></p>
+                    <p className="text-xs text-gray-500 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-brand-gold font-semibold text-sm">+₹{sale.commissionEarned.toFixed(2)}</p>
+                    <button onClick={() => handleEditClick(sale)} className="text-xs text-blue-400 hover:text-blue-300 underline">Edit</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Form Section */}
+        <div className="space-y-4 bg-gray-900/50 p-4 rounded-xl border border-gray-700">
+          <h4 className="text-sm font-medium text-gray-300 flex items-center justify-between">
+            {editingSale ? 'Edit Sale Entry' : 'Add New Sale Entry'}
+            {editingSale && <button onClick={cancelEdit} className="text-xs text-gray-400 hover:text-white underline">Cancel Edit</button>}
+          </h4>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Sale Amount (₹) *</label>
+            <input
+              type="number" min="1"
+              value={salesAmount}
+              onChange={e => setSalesAmount(e.target.value)}
+              placeholder="e.g. 1500"
+              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-gray-400 mb-1">Commission Rate (%)</label>
+            <input
+              type="number" min="0" max="100"
+              value={commissionRate}
+              onChange={e => setCommissionRate(e.target.value)}
+              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+            />
+          </div>
+          {salesAmount && (
+            <div className="bg-brand-gold/10 border border-brand-gold/20 rounded-xl p-3 text-sm">
+              <span className="text-gray-400">{editingSale ? 'New Commission:' : 'Commission to credit:'} </span>
+              <span className="text-brand-gold font-bold">₹{commission}</span>
+            </div>
+          )}
+          <div className="flex gap-3 pt-2">
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
+            <button onClick={handleSubmit} disabled={loading} className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 flex items-center justify-center gap-2">
+              {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <IndianRupee className="w-4 h-4" />}
+              {editingSale ? 'Update Sale' : 'Credit Commission'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────
 // Main Component
 // ─────────────────────────────────────────────────
 
@@ -109,8 +250,6 @@ export default function PICDetailPage() {
   const [referrals, setReferrals] = useState<any[]>([]);
   const [referralsLoading, setReferralsLoading] = useState(false);
   const [saleModal, setSaleModal] = useState<any | null>(null);
-  const [saleForm, setSaleForm] = useState({ salesAmount: '', commissionRate: '5' });
-  const [saleSubmitting, setSaleSubmitting] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
 
   const fetchPIC = useCallback(async () => {
@@ -147,24 +286,6 @@ export default function PICDetailPage() {
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to update status');
     } finally { setStatusUpdating(null); }
-  };
-
-  const handleAddSale = async () => {
-    if (!saleModal || !saleForm.salesAmount) { toast.error('Enter a sale amount'); return; }
-    setSaleSubmitting(true);
-    try {
-      const res = await api.patch(`/admin/referrals/${saleModal.id}/sales`, {
-        salesAmount: parseFloat(saleForm.salesAmount),
-        commissionRate: parseFloat(saleForm.commissionRate),
-      });
-      toast.success(`₹${res.data.data.commissionEarned.toFixed(2)} commission credited to PIC wallet!`);
-      setSaleModal(null);
-      setSaleForm({ salesAmount: '', commissionRate: '5' });
-      fetchReferrals();
-      fetchPIC();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Failed to add sale');
-    } finally { setSaleSubmitting(false); }
   };
 
   const handleAction = async (action: 'approve' | 'reject' | 'suspend') => {
@@ -211,49 +332,11 @@ export default function PICDetailPage() {
       {docModal && <DocModal url={docModal.url} label={docModal.label} onClose={() => setDocModal(null)} />}
 
       {saleModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-sm p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-white font-semibold">Add Sale Entry</h3>
-              <button onClick={() => setSaleModal(null)} className="p-1 hover:bg-gray-700 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
-            </div>
-            <p className="text-sm text-gray-400 mb-4">For: <span className="text-white font-medium">{saleModal.personName}</span></p>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Sale Amount (₹) *</label>
-                <input
-                  type="number" min="1"
-                  value={saleForm.salesAmount}
-                  onChange={e => setSaleForm(f => ({ ...f, salesAmount: e.target.value }))}
-                  placeholder="e.g. 1500"
-                  className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-gray-400 mb-1">Commission Rate (%)</label>
-                <input
-                  type="number" min="0" max="100"
-                  value={saleForm.commissionRate}
-                  onChange={e => setSaleForm(f => ({ ...f, commissionRate: e.target.value }))}
-                  className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
-                />
-              </div>
-              {saleForm.salesAmount && (
-                <div className="bg-brand-gold/10 border border-brand-gold/20 rounded-xl p-3 text-sm">
-                  <span className="text-gray-400">Commission to credit: </span>
-                  <span className="text-brand-gold font-bold">₹{((parseFloat(saleForm.salesAmount || '0') * parseFloat(saleForm.commissionRate || '5')) / 100).toFixed(2)}</span>
-                </div>
-              )}
-              <div className="flex gap-3">
-                <button onClick={() => setSaleModal(null)} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
-                <button onClick={handleAddSale} disabled={saleSubmitting} className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 flex items-center justify-center gap-2">
-                  {saleSubmitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <IndianRupee className="w-4 h-4" />}
-                  Credit Commission
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <SaleModal
+          referral={saleModal}
+          onClose={() => setSaleModal(null)}
+          onSuccess={() => { fetchReferrals(); fetchPIC(); }}
+        />
       )}
 
       {/* Header */}
@@ -523,7 +606,7 @@ export default function PICDetailPage() {
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button
-                            onClick={() => { setSaleModal(ref); setSaleForm({ salesAmount: '', commissionRate: String(ref.commissionRate) }); }}
+                            onClick={() => setSaleModal(ref)}
                             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold border border-brand-gold/20 rounded-lg text-xs font-medium transition-colors"
                           >
                             <IndianRupee className="w-3 h-3" /> Add Sale

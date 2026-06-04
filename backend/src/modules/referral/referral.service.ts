@@ -172,6 +172,17 @@ export const updateReferralSales = async (
       },
     });
 
+    // Create the SaleEntry
+    await tx.saleEntry.create({
+      data: {
+        referralId: referralId,
+        picId: referral.picId,
+        saleAmount: salesAmount,
+        commissionRate: rate,
+        commissionEarned: newCommission,
+      }
+    });
+
     // Credit commission directly to PIC wallet
     await tx.wallet.update({
       where: { picId: referral.picId },
@@ -201,6 +212,63 @@ export const updateReferralSales = async (
     newTotalSales,
     newTotalCommission,
   };
+};
+
+/**
+ * Get the history of sales entries for a referral
+ */
+export const getSaleHistory = async (referralId: string) => {
+  return await prisma.saleEntry.findMany({
+    where: { referralId },
+    orderBy: { createdAt: 'desc' },
+  });
+};
+
+/**
+ * Modify a past sale entry safely, recalculating the wallet balances and totals.
+ */
+export const updateSaleEntry = async (saleId: string, updates: { saleAmount?: number; commissionRate?: number }) => {
+  const sale = await prisma.saleEntry.findUnique({ where: { id: saleId }, include: { referral: true } });
+  if (!sale) throw createError('Sale entry not found', 404);
+
+  const newAmount = updates.saleAmount ?? sale.saleAmount;
+  const newRate = updates.commissionRate ?? sale.commissionRate;
+  const newCommission = (newAmount * newRate) / 100;
+
+  const commissionDiff = newCommission - sale.commissionEarned;
+  const salesDiff = newAmount - sale.saleAmount;
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Update the sale entry itself
+    await tx.saleEntry.update({
+      where: { id: saleId },
+      data: {
+        saleAmount: newAmount,
+        commissionRate: newRate,
+        commissionEarned: newCommission,
+      }
+    });
+
+    // 2. Adjust Referral Totals
+    await tx.referral.update({
+      where: { id: sale.referralId },
+      data: {
+        totalSalesAmount: { increment: salesDiff },
+        commissionAmount: { increment: commissionDiff },
+      }
+    });
+
+    // 3. Adjust PIC Wallet Balance
+    await tx.wallet.update({
+      where: { picId: sale.picId },
+      data: {
+        totalEarnings: { increment: commissionDiff },
+        availableBalance: { increment: commissionDiff },
+      }
+    });
+  });
+
+  return { message: 'Sale updated successfully', commissionDiff };
 };
 
 /**

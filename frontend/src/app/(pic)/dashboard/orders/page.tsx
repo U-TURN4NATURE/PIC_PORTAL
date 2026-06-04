@@ -77,17 +77,21 @@ export default function PICOrdersPage() {
               ) : (
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-brand-sage/5 transition-colors">
-                    <td className="px-6 py-4 font-semibold text-gray-900">#{order.shopifyOrderNum || order.shopifyOrderId}</td>
-                    <td className="px-6 py-4">
-                      <p className="font-medium text-gray-800">{order.customerName || '—'}</p>
-                      <p className="text-xs text-gray-400">{order.customerEmail || ''}</p>
+                    <td className="px-6 py-4 font-semibold text-gray-900 truncate max-w-[120px]">
+                      <span title={order.id}>{order.id.slice(-8).toUpperCase()}</span>
                     </td>
-                    <td className="px-6 py-4 font-semibold text-gray-900">{formatCurrency(order.orderAmount)}</td>
-                    <td className="px-6 py-4 font-bold text-brand-forest">+{formatCurrency(order.commissionAmount)}</td>
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-gray-800">{order.referral?.personName || '—'}</p>
+                      <p className="text-xs text-gray-400">{order.referral?.personEmail || ''}</p>
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-gray-900">{formatCurrency(order.saleAmount)}</td>
+                    <td className="px-6 py-4 font-bold text-brand-forest">
+                      +{formatCurrency(order.commissionEarned)} <span className="text-xs text-brand-sage font-normal ml-1">({order.commissionRate}%)</span>
+                    </td>
                     <td className="px-6 py-4 text-gray-500">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${statusColors[order.status] || statusColors.PENDING}`}>
-                        {order.status}
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${statusColors.PAID}`}>
+                        COMPLETED
                       </span>
                     </td>
                   </tr>

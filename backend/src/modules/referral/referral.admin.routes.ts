@@ -5,6 +5,8 @@ import {
   handleGetReferralsByPIC,
   handleUpdateReferralStatus,
   handleUpdateReferralSales,
+  handleGetSaleHistory,
+  handleUpdateSaleEntry,
 } from './referral.controller';
 
 const router = Router();
@@ -23,5 +25,7 @@ router.patch('/:id/status', handleUpdateReferralStatus);
 
 // PATCH /api/admin/referrals/:id/sales — Manually enter sale amount
 router.patch('/:id/sales', handleUpdateReferralSales);
+router.get('/:id/sales/history', handleGetSaleHistory);
+router.patch('/sales/:saleId', handleUpdateSaleEntry);
 
 export default router;

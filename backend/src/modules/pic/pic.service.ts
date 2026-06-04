@@ -71,13 +71,14 @@ export const getOrders = async (picId: string, page = 1, limit = 10) => {
   const { skip } = parsePagination(String(page), String(limit));
 
   const [orders, total] = await Promise.all([
-    prisma.order.findMany({
+    prisma.saleEntry.findMany({
       where: { picId },
+      include: { referral: { select: { personName: true, personEmail: true } } },
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
     }),
-    prisma.order.count({ where: { picId } }),
+    prisma.saleEntry.count({ where: { picId } }),
   ]);
 
   return { orders, total };

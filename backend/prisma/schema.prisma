@@ -168,6 +168,7 @@ model PICPartner {
   notifications     Notification[]
   referrals         Referral[]
   followUpRequests  FollowUpRequest[]
+  sales             SaleEntry[]
 
   @@index([email])
   @@index([referralCode])
@@ -308,11 +309,38 @@ model Referral {
 
   pic               PICPartner     @relation(fields: [picId], references: [id], onDelete: Cascade)
   followUpRequests  FollowUpRequest[]
+  sales             SaleEntry[]
 
   @@unique([picId, personPhone])
   @@index([picId])
   @@index([status])
   @@map("referrals")
+}
+
+// ─────────────────────────────────────────────────
+// SALE ENTRY MODEL
+// ─────────────────────────────────────────────────
+
+model SaleEntry {
+  id                String         @id @default(cuid())
+  referralId        String
+  picId             String
+
+  saleAmount        Float
+  commissionRate    Float
+  commissionEarned  Float
+  
+  notes             String?        @db.Text
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  referral          Referral       @relation(fields: [referralId], references: [id], onDelete: Cascade)
+  pic               PICPartner     @relation(fields: [picId], references: [id], onDelete: Cascade)
+
+  @@index([referralId])
+  @@index([picId])
+  @@map("sale_entries")
 }
 
 // ─────────────────────────────────────────────────

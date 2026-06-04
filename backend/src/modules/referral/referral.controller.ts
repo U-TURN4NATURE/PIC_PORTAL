@@ -7,6 +7,8 @@ import {
   getAllReferrals,
   updateReferralStatus,
   updateReferralSales,
+  getSaleHistory,
+  updateSaleEntry,
 } from './referral.service';
 import { ReferralStatus } from '@prisma/client';
 
@@ -70,5 +72,21 @@ export const handleUpdateReferralSales = async (req: Request, res: Response): Pr
   const { id } = req.params;
   const { salesAmount, commissionRate } = req.body;
   const data = await updateReferralSales(id, Number(salesAmount), commissionRate ? Number(commissionRate) : undefined);
+  res.json({ success: true, data });
+};
+
+export const handleGetSaleHistory = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const data = await getSaleHistory(id);
+  res.json({ success: true, data });
+};
+
+export const handleUpdateSaleEntry = async (req: Request, res: Response): Promise<void> => {
+  const { saleId } = req.params;
+  const { saleAmount, commissionRate } = req.body;
+  const data = await updateSaleEntry(saleId, {
+    saleAmount: saleAmount ? Number(saleAmount) : undefined,
+    commissionRate: commissionRate ? Number(commissionRate) : undefined
+  });
   res.json({ success: true, data });
 };
