@@ -46,14 +46,21 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http:/
 const getFullUrl = (url: string) => url.startsWith('http') ? url : `${BASE_URL}${url}`;
 
 function DocModal({ url, label, onClose }: { url: string; label: string; onClose: () => void }) {
-  const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
+  const fullUrl = getFullUrl(url);
+  const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url) ||
+    (url.includes('cloudinary.com') && url.includes('/image/'));
+  const isCloudinaryPdf = url.includes('cloudinary.com') && !isImage;
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-gray-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-700" onClick={e => e.stopPropagation()}>
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <p className="font-semibold text-white">{label}</p>
           <div className="flex items-center gap-2">
-            <a href={getFullUrl(url)} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
+            <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+              <ExternalLink className="w-3 h-3" /> Open
+            </a>
+            <a href={fullUrl} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
               <Download className="w-3 h-3" /> Download
             </a>
             <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-700 text-gray-400">
@@ -63,9 +70,21 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
         </div>
         <div className="p-4 overflow-auto max-h-[calc(90vh-80px)]">
           {isImage ? (
-            <img src={getFullUrl(url)} alt={label} className="max-w-full rounded-lg" />
+            <img src={fullUrl} alt={label} className="max-w-full rounded-lg" />
+          ) : isCloudinaryPdf ? (
+            <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+              <FileText className="w-16 h-16 text-brand-gold opacity-70" />
+              <p className="text-white font-medium text-lg">{label}</p>
+              <p className="text-gray-400 text-sm max-w-sm">
+                This document cannot be previewed inline. Click the button below to open it in a new tab.
+              </p>
+              <a href={fullUrl} target="_blank" rel="noopener noreferrer"
+                className="flex items-center gap-2 px-6 py-3 bg-brand-gold text-gray-900 rounded-xl font-semibold hover:bg-yellow-500 transition-colors">
+                <ExternalLink className="w-4 h-4" /> Open Document
+              </a>
+            </div>
           ) : (
-            <iframe src={getFullUrl(url)} className="w-full h-[60vh] rounded-lg" title={label} />
+            <iframe src={fullUrl} className="w-full h-[60vh] rounded-lg" title={label} />
           )}
         </div>
       </div>
