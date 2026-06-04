@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import api from '@/lib/api';
+import api, { getFileUrl } from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -42,11 +42,12 @@ const ALL_REFERRAL_STATUSES = ['PENDING','CONTACTED','INTERESTED','BUYING','NOT_
 // Document Preview Modal
 // ─────────────────────────────────────────────────
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-const getFullUrl = (url: string) => url.startsWith('http') ? url : `${BASE_URL}${url}`;
+// ─────────────────────────────────────────────────
+// Document Preview Modal
+// ─────────────────────────────────────────────────
 
 function DocModal({ url, label, onClose }: { url: string; label: string; onClose: () => void }) {
-  const fullUrl = getFullUrl(url);
+  const fullUrl = getFileUrl(url);
   // Detect type by file extension (most reliable)
   const isPdf = /\.pdf(\?|$)/i.test(url);
   const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
@@ -672,7 +673,7 @@ function DocCard({ label, url, onPreview }: { label: string; url: string; onPrev
         <button onClick={onPreview} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors font-medium">
           <Eye className="w-3 h-3" /> Preview
         </button>
-        <a href={getFullUrl(url)} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest font-medium rounded-lg transition-colors border border-brand-forest/20">
+        <a href={getFileUrl(url)} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest font-medium rounded-lg transition-colors border border-brand-forest/20">
           <Download className="w-3 h-3" /> Download
         </a>
       </div>

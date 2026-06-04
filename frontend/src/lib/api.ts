@@ -5,6 +5,13 @@ const LOCAL_API_URL = 'http://localhost:5000/api';
 
 const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
 
+export const getFileUrl = (filePath: string) => {
+  if (!filePath) return '';
+  if (filePath.startsWith('http')) return filePath;
+  const baseUrl = isProduction ? 'https://picportal-production-a624.up.railway.app' : 'http://localhost:5000';
+  return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
+};
+
 // Force the correct Railway URL in production, ignoring any potentially incorrect Vercel env vars
 const api = axios.create({
   baseURL: isProduction ? PRODUCTION_API_URL : LOCAL_API_URL,
