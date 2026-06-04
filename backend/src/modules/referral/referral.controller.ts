@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import {
   addReferral,
   getPICReferrals,
@@ -7,7 +7,6 @@ import {
   getAllReferrals,
   updateReferralStatus,
   updateReferralSales,
-  addSaleEntry,
   getSaleHistory,
   updateSaleEntry,
   deleteSaleEntry,

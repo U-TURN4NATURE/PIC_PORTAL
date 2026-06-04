@@ -70,13 +70,13 @@ export default function AdminPICsPage() {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">PIC Management</h1>
-          <p className="text-gray-400">View and manage Partners in Change applications and accounts.</p>
+          <h1 className="text-3xl font-dm-serif text-brand-forest mb-1">PIC Management</h1>
+          <p className="text-gray-500">View and manage Partners in Change applications and accounts.</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 bg-gray-800 p-4 rounded-2xl border border-gray-700">
+      <div className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-2xl border border-brand-sage/20 shadow-sm">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
           <input
@@ -84,13 +84,13 @@ export default function AdminPICsPage() {
             placeholder="Search by name, email, phone or referral code..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+            className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30 focus:border-brand-forest/50"
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-gray-700 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+          className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30 focus:border-brand-forest/50"
         >
           <option value="">All Statuses</option>
           <option value="PENDING">Pending Review</option>
@@ -102,17 +102,17 @@ export default function AdminPICsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-400">
-            <thead className="text-xs text-gray-400 uppercase bg-gray-700/50 border-b border-gray-700">
+          <table className="w-full text-left text-sm text-gray-600">
+            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 font-medium text-white">Partner Name</th>
-                <th className="px-6 py-4 font-medium text-white">Contact</th>
-                <th className="px-6 py-4 font-medium text-white">Location</th>
-                <th className="px-6 py-4 font-medium text-white">Status</th>
-                <th className="px-6 py-4 font-medium text-white">Earnings</th>
-                <th className="px-6 py-4 font-medium text-white text-right">Actions</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">Partner Name</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">Contact</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">Location</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">Status</th>
+                <th className="px-6 py-4 font-semibold text-gray-700">Earnings</th>
+                <th className="px-6 py-4 font-semibold text-gray-700 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -132,36 +132,36 @@ export default function AdminPICsPage() {
                 </tr>
               ) : (
                 pics.map((pic) => (
-                  <tr key={pic.id} className="border-b border-gray-700 hover:bg-gray-700/20 transition-colors">
+                  <tr key={pic.id} className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center text-gray-300 font-bold border border-gray-600 shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-brand-forest/10 flex items-center justify-center text-brand-forest font-bold border border-brand-sage/30 shrink-0">
                           {pic.fullName.charAt(0)}
                         </div>
                         <div>
-                          <p className="font-medium text-white">{pic.fullName}</p>
+                          <p className="font-semibold text-gray-900">{pic.fullName}</p>
                           {pic.referralCode && (
-                            <p className="text-xs text-brand-gold mt-0.5">Code: {pic.referralCode}</p>
+                            <p className="text-xs text-brand-forest mt-0.5 font-medium">Code: {pic.referralCode}</p>
                           )}
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-300 truncate max-w-[150px]">{pic.email}</p>
+                      <p className="text-gray-800 truncate max-w-[150px]">{pic.email}</p>
                       <p className="text-xs text-gray-500">{pic.phone}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-300">{pic.city}</p>
+                      <p className="text-gray-800">{pic.city}</p>
                       <p className="text-xs text-gray-500">{pic.state}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                        pic.status === 'ACTIVE' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                        pic.status === 'APPROVED' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                        pic.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' :
-                        pic.status === 'REJECTED' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                        pic.status === 'SUSPENDED' ? 'bg-orange-500/10 text-orange-400 border-orange-500/20' :
-                        'bg-gray-500/10 text-gray-400 border-gray-500/20'
+                      <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${
+                        pic.status === 'ACTIVE' ? 'badge-approved' :
+                        pic.status === 'APPROVED' ? 'badge-approved opacity-80' :
+                        pic.status === 'PENDING' ? 'badge-pending' :
+                        pic.status === 'REJECTED' ? 'badge-rejected' :
+                        pic.status === 'SUSPENDED' ? 'badge-suspended' :
+                        'badge-suspended'
                       }`}>
                         {pic.status === 'APPROVED' ? 'Profile Incomplete' : pic.status}
                       </span>
@@ -170,33 +170,33 @@ export default function AdminPICsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-white">{formatCurrency(pic.wallet?.totalEarnings || 0)}</p>
+                      <p className="font-semibold text-gray-900">{formatCurrency(pic.wallet?.totalEarnings || 0)}</p>
                       <p className="text-xs text-gray-500">{pic._count?.orders || 0} orders</p>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end space-x-2">
-                        <Link href={`/admin/pics/${pic.id}`} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors" title="View Details">
+                        <Link href={`/admin/pics/${pic.id}`} className="p-2 text-gray-400 hover:text-brand-forest hover:bg-brand-forest/10 rounded-lg transition-colors" title="View Details">
                           <Eye className="w-4 h-4" />
                         </Link>
                         
                         {pic.status === 'PENDING' && (
                           <>
-                            <button onClick={() => handleStatusAction(pic.id, 'approve')} className="p-2 text-green-400 hover:text-green-300 hover:bg-green-400/10 rounded-lg transition-colors" title="Approve">
+                            <button onClick={() => handleStatusAction(pic.id, 'approve')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Approve">
                               <CheckCircle className="w-4 h-4" />
                             </button>
-                            <button onClick={() => handleStatusAction(pic.id, 'reject')} className="p-2 text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors" title="Reject">
+                            <button onClick={() => handleStatusAction(pic.id, 'reject')} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Reject">
                               <XCircle className="w-4 h-4" />
                             </button>
                           </>
                         )}
                         
                         {pic.status === 'APPROVED' && (
-                          <button onClick={() => handleStatusAction(pic.id, 'suspend')} className="p-2 text-yellow-400 hover:text-yellow-300 hover:bg-yellow-400/10 rounded-lg transition-colors" title="Suspend">
+                          <button onClick={() => handleStatusAction(pic.id, 'suspend')} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Suspend">
                             <Ban className="w-4 h-4" />
                           </button>
                         )}
 
-                        <button onClick={() => handleDelete(pic.id)} className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-colors" title="Delete">
+                        <button onClick={() => handleDelete(pic.id)} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete">
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
@@ -210,22 +210,22 @@ export default function AdminPICsPage() {
         
         {/* Pagination */}
         {meta && meta.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-700 flex items-center justify-between">
-            <span className="text-sm text-gray-400">
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+            <span className="text-sm text-gray-500">
               Showing page {meta.page} of {meta.totalPages}
             </span>
             <div className="flex space-x-2">
               <button 
                 onClick={() => setPage(p => Math.max(1, p - 1))}
                 disabled={!meta.hasPrev}
-                className="px-3 py-1 bg-gray-700 text-white rounded disabled:opacity-50"
+                className="px-3 py-1 bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50"
               >
                 Prev
               </button>
               <button 
                 onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))}
                 disabled={!meta.hasNext}
-                className="px-3 py-1 bg-gray-700 text-white rounded disabled:opacity-50"
+                className="px-3 py-1 bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 rounded disabled:opacity-50"
               >
                 Next
               </button>

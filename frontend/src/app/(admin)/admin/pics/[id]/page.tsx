@@ -55,9 +55,9 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-gray-800 rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-gray-700" onClick={e => e.stopPropagation()}>
-        <div className="flex items-center justify-between p-4 border-b border-gray-700">
-          <p className="font-semibold text-white">{label}</p>
+      <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden border border-brand-sage/20 shadow-xl" onClick={e => e.stopPropagation()}>
+        <div className="flex items-center justify-between p-4 border-b border-brand-sage/20 bg-gray-50">
+          <p className="font-semibold text-gray-900">{label}</p>
           <div className="flex items-center gap-2">
             <a href={fullUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
               <ExternalLink className="w-3 h-3" /> Open
@@ -65,7 +65,7 @@ function DocModal({ url, label, onClose }: { url: string; label: string; onClose
             <a href={fullUrl} download className="flex items-center gap-1 text-xs px-3 py-1.5 bg-brand-gold text-gray-900 rounded-lg font-medium hover:bg-yellow-500 transition-colors">
               <Download className="w-3 h-3" /> Download
             </a>
-            <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-700 text-gray-400">
+            <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-200 text-gray-500">
               <XCircle className="w-5 h-5" />
             </button>
           </div>
@@ -170,29 +170,29 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5 sticky top-0 bg-gray-800 pb-2 border-b border-gray-700 z-10">
+      <div className="bg-white border border-brand-sage/20 shadow-xl rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5 sticky top-0 bg-white pb-2 border-b border-gray-100 z-10">
           <div>
-            <h3 className="text-white font-semibold">Manage Sales</h3>
-            <p className="text-xs text-gray-400 mt-0.5">For: <span className="text-white">{referral.personName}</span></p>
+            <h3 className="text-brand-forest font-semibold">Manage Sales</h3>
+            <p className="text-xs text-gray-500 mt-0.5">For: <span className="text-gray-900 font-medium">{referral.personName}</span></p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-700 rounded-lg"><XCircle className="w-5 h-5 text-gray-400" /></button>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><XCircle className="w-5 h-5 text-gray-400" /></button>
         </div>
 
         {/* History Section */}
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-300 mb-3">Sale History</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">Sale History</h4>
           {loadingHistory ? (
             <div className="text-center py-4 text-gray-500 text-sm">Loading history...</div>
           ) : history.length === 0 ? (
-            <div className="text-center py-4 text-gray-500 text-sm border border-gray-700 border-dashed rounded-xl">No past sales found.</div>
+            <div className="text-center py-4 text-gray-500 text-sm border border-gray-200 border-dashed rounded-xl bg-gray-50">No past sales found.</div>
           ) : (
             <div className="space-y-2">
               {history.map(sale => (
-                <div key={sale.id} className="flex items-center justify-between bg-gray-700/30 border border-gray-700 p-3 rounded-xl">
+                <div key={sale.id} className="flex items-center justify-between bg-white border border-gray-200 shadow-sm p-3 rounded-xl">
                   <div>
-                    <p className="text-white font-medium text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-400 font-normal">({sale.commissionRate}% comm.)</span></p>
-                    <p className="text-xs text-gray-500 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-gray-900 font-semibold text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-500 font-normal">({sale.commissionRate}% comm.)</span></p>
+                    <p className="text-xs text-gray-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-brand-gold font-semibold text-sm">+₹{sale.commissionEarned.toFixed(2)}</p>
@@ -206,38 +206,38 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
         </div>
 
         {/* Form Section */}
-        <div className="space-y-4 bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-          <h4 className="text-sm font-medium text-gray-300 flex items-center justify-between">
+        <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-800 flex items-center justify-between">
             {editingSale ? 'Edit Sale Entry' : 'Add New Sale Entry'}
-            {editingSale && <button onClick={cancelEdit} className="text-xs text-gray-400 hover:text-white underline">Cancel Edit</button>}
+            {editingSale && <button onClick={cancelEdit} className="text-xs text-blue-500 hover:text-blue-700 underline">Cancel Edit</button>}
           </h4>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Sale Amount (₹) *</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Sale Amount (₹) *</label>
             <input
               type="number" min="1"
               value={salesAmount}
               onChange={e => setSalesAmount(e.target.value)}
               placeholder="e.g. 1500"
-              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Commission Rate (%)</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Commission Rate (%)</label>
             <input
               type="number" min="0" max="100"
               value={commissionRate}
               onChange={e => setCommissionRate(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
             />
           </div>
           {salesAmount && (
-            <div className="bg-brand-gold/10 border border-brand-gold/20 rounded-xl p-3 text-sm">
-              <span className="text-gray-400">{editingSale ? 'New Commission:' : 'Commission to credit:'} </span>
+            <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-xl p-3 text-sm">
+              <span className="text-gray-600 font-medium">{editingSale ? 'New Commission:' : 'Commission to credit:'} </span>
               <span className="text-brand-gold font-bold">₹{commission}</span>
             </div>
           )}
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">Cancel</button>
             <button onClick={handleSubmit} disabled={loading} className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 flex items-center justify-center gap-2">
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <IndianRupee className="w-4 h-4" />}
               {editingSale ? 'Update Sale' : 'Credit Commission'}
@@ -358,12 +358,12 @@ export default function PICDetailPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Link href="/admin/pics" className="p-2 rounded-xl bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-all">
+          <Link href="/admin/pics" className="p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all shadow-sm">
             <ArrowLeft className="w-5 h-5" />
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-white">{pic.fullName}</h1>
-            <p className="text-gray-400 text-sm mt-0.5">Partner In Charge — Detail View</p>
+            <h1 className="text-2xl font-dm-serif text-brand-forest">{pic.fullName}</h1>
+            <p className="text-gray-500 text-sm mt-0.5">Partner In Charge — Detail View</p>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -381,7 +381,7 @@ export default function PICDetailPage() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-800 border border-gray-700 rounded-xl p-1 w-fit">
+      <div className="flex gap-1 bg-gray-100 border border-gray-200 rounded-xl p-1 w-fit">
         {[
           { key: 'overview', label: 'Overview', icon: <User className="w-4 h-4" /> },
           { key: 'referrals', label: `Referrals (${referrals.length})`, icon: <Users className="w-4 h-4" /> },
@@ -390,7 +390,7 @@ export default function PICDetailPage() {
             key={tab.key}
             onClick={() => setActiveTab(tab.key as typeof activeTab)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.key ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
+              activeTab === tab.key ? 'bg-white text-brand-forest shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
             }`}
           >
             {tab.icon}{tab.label}
@@ -403,12 +403,18 @@ export default function PICDetailPage() {
         <div className="space-y-6">
           {/* Profile + Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6 space-y-5">
+            <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6 space-y-5">
               <div className="flex items-start justify-between">
-                <div className="w-16 h-16 rounded-2xl bg-gray-700 flex items-center justify-center text-2xl font-bold text-brand-gold border border-gray-600">
+                <div className="w-16 h-16 rounded-2xl bg-brand-forest/10 flex items-center justify-center text-2xl font-bold text-brand-forest border border-brand-sage/30">
                   {pic.fullName.charAt(0)}
                 </div>
-                <span className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${status.classes}`}>{status.label}</span>
+                <span className={`text-[10px] uppercase font-bold tracking-wider px-3 py-1.5 rounded-full ${
+                  pic.status === 'ACTIVE' ? 'badge-approved' :
+                  pic.status === 'APPROVED' ? 'badge-approved opacity-80' :
+                  pic.status === 'PENDING' ? 'badge-pending' :
+                  pic.status === 'REJECTED' ? 'badge-rejected' :
+                  'badge-suspended'
+                }`}>{status.label}</span>
               </div>
               <div className="space-y-3">
                 <InfoRow icon={<User className="w-4 h-4" />} label="Full Name" value={pic.fullName} />
@@ -429,15 +435,21 @@ export default function PICDetailPage() {
           </div>
 
           {/* Application Timeline */}
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-5">Application Timeline</h2>
+          <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-5">Application Timeline</h2>
             <div className="flex flex-wrap gap-6">
               <TimelineItem icon={<Calendar className="w-4 h-4" />} label="Registered" value={pic.createdAt} />
               <TimelineItem icon={<CheckCircle className="w-4 h-4 text-green-400" />} label="Approved" value={pic.approvedAt} empty="Not yet approved" />
               <TimelineItem icon={<User className="w-4 h-4 text-blue-400" />} label="Profile Completed" value={pic.profileCompletedAt} empty="Not completed" />
               <div className="flex flex-col gap-1">
                 <p className="text-xs text-gray-500 uppercase tracking-wide">Current Status</p>
-                <span className={`text-sm font-semibold px-3 py-1 rounded-full border w-fit ${status.classes}`}>{status.label}</span>
+                <span className={`text-[10px] font-bold px-3 py-1 rounded-full w-fit uppercase tracking-wider ${
+                  pic.status === 'ACTIVE' ? 'badge-approved' :
+                  pic.status === 'APPROVED' ? 'badge-approved opacity-80' :
+                  pic.status === 'PENDING' ? 'badge-pending' :
+                  pic.status === 'REJECTED' ? 'badge-rejected' :
+                  'badge-suspended'
+                }`}>{status.label}</span>
               </div>
             </div>
             {pic.rejectionReason && (
@@ -452,10 +464,10 @@ export default function PICDetailPage() {
           {(pic.aadhaarNumber || pic.panCard || pic.bankName) && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {(pic.aadhaarNumber || pic.panCard) && (
-                <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <CreditCard className="w-5 h-5 text-brand-gold" />
-                    <h2 className="text-base font-semibold text-white">Identity (KYC)</h2>
+                    <CreditCard className="w-5 h-5 text-brand-forest" />
+                    <h2 className="text-base font-semibold text-gray-900">Identity (KYC)</h2>
                   </div>
                   <div className="space-y-3">
                     {pic.aadhaarNumber && <InfoRow icon={<CreditCard className="w-4 h-4" />} label="Aadhaar" value={`XXXX XXXX ${pic.aadhaarNumber.slice(-4)}`} onCopy={() => copy(pic.aadhaarNumber, 'Aadhaar')} />}
@@ -464,10 +476,10 @@ export default function PICDetailPage() {
                 </div>
               )}
               {pic.bankName && (
-                <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+                <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6">
                   <div className="flex items-center gap-2 mb-4">
-                    <Building className="w-5 h-5 text-brand-gold" />
-                    <h2 className="text-base font-semibold text-white">Bank Details</h2>
+                    <Building className="w-5 h-5 text-brand-forest" />
+                    <h2 className="text-base font-semibold text-gray-900">Bank Details</h2>
                   </div>
                   <div className="space-y-3">
                     {pic.bankAccountName && <InfoRow icon={<User className="w-4 h-4" />} label="Account Holder" value={pic.bankAccountName} />}
@@ -482,10 +494,10 @@ export default function PICDetailPage() {
 
           {/* Documents */}
           {(pic.aadhaarDocument || pic.panDocument || pic.resumeDocument) && (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-5">
-                <FileText className="w-5 h-5 text-brand-gold" />
-                <h2 className="text-base font-semibold text-white">Uploaded Documents</h2>
+                <FileText className="w-5 h-5 text-brand-forest" />
+                <h2 className="text-base font-semibold text-gray-900">Uploaded Documents</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {pic.aadhaarDocument && <DocCard label="Aadhaar Document" url={pic.aadhaarDocument} onPreview={() => setDocModal({ url: pic.aadhaarDocument, label: 'Aadhaar Document' })} />}
@@ -497,10 +509,10 @@ export default function PICDetailPage() {
 
           {/* Professional Info */}
           {(pic.occupation || pic.whyJoin) && (
-            <div className="bg-gray-800 border border-gray-700 rounded-2xl p-6">
+            <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl p-6">
               <div className="flex items-center gap-2 mb-4">
-                <Briefcase className="w-5 h-5 text-brand-gold" />
-                <h2 className="text-base font-semibold text-white">Professional & PIC Details</h2>
+                <Briefcase className="w-5 h-5 text-brand-forest" />
+                <h2 className="text-base font-semibold text-gray-900">Professional & PIC Details</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {pic.occupation && <InfoRow icon={<Briefcase className="w-4 h-4" />} label="Occupation" value={pic.occupation} />}
@@ -520,14 +532,14 @@ export default function PICDetailPage() {
           )}
 
           {/* Recent Payouts */}
-          <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-white">Recent Payouts</h2>
+          <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Recent Payouts</h2>
               <span className="text-xs text-gray-500">Last 5</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">
-                <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3">Amount</th>
                     <th className="px-6 py-3">Method</th>
@@ -540,14 +552,14 @@ export default function PICDetailPage() {
                   {!pic.payouts?.length ? (
                     <tr><td colSpan={5} className="px-6 py-8 text-center text-gray-500">No payouts yet</td></tr>
                   ) : pic.payouts.map((p: any) => (
-                    <tr key={p.id} className="border-b border-gray-700/50 hover:bg-gray-700/20 transition-colors">
-                      <td className="px-6 py-4 text-white font-medium">{formatCurrency(p.amount)}</td>
-                      <td className="px-6 py-4 text-gray-300">{p.paymentMethod || 'UPI'}</td>
+                    <tr key={p.id} className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
+                      <td className="px-6 py-4 text-gray-900 font-medium">{formatCurrency(p.amount)}</td>
+                      <td className="px-6 py-4 text-gray-700">{p.paymentMethod || 'UPI'}</td>
                       <td className="px-6 py-4">
-                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${p.status === 'PAID' ? 'bg-green-500/10 text-green-400 border-green-500/20' : p.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>{p.status}</span>
+                        <span className={`text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded-full border ${p.status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' : p.status === 'PENDING' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' : 'bg-red-50 text-red-700 border-red-200'}`}>{p.status}</span>
                       </td>
-                      <td className="px-6 py-4 text-gray-400">{new Date(p.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
-                      <td className="px-6 py-4 text-gray-400">{p.processedAt ? new Date(p.processedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
+                      <td className="px-6 py-4 text-gray-500">{new Date(p.requestedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                      <td className="px-6 py-4 text-gray-500">{p.processedAt ? new Date(p.processedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -559,22 +571,22 @@ export default function PICDetailPage() {
 
       {/* ── REFERRALS TAB ── */}
       {activeTab === 'referrals' && (
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-700">
-            <h2 className="text-lg font-semibold text-white">People Referred by {pic.fullName}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Update status and manually enter sale amounts to credit commission to this PIC's wallet.</p>
+        <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl overflow-hidden">
+          <div className="px-6 py-4 border-b border-gray-100">
+            <h2 className="text-lg font-semibold text-gray-900">People Referred by {pic.fullName}</h2>
+            <p className="text-xs text-gray-500 mt-0.5">Update status and manually enter sale amounts to credit commission to this PIC's wallet.</p>
           </div>
           {referralsLoading ? (
             <div className="p-8 text-center text-gray-400">Loading...</div>
           ) : referrals.length === 0 ? (
             <div className="p-12 text-center">
-              <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+              <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500">No referrals added by this PIC yet.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+                <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                   <tr>
                     <th className="px-6 py-3">Person</th>
                     <th className="px-6 py-3">Contact</th>
@@ -585,45 +597,45 @@ export default function PICDetailPage() {
                     <th className="px-6 py-3 text-center">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-700/50">
+                <tbody className="divide-y divide-gray-100">
                   {referrals.map((ref: any) => {
                     const sc = REFERRAL_STATUS_CONFIG[ref.status] || REFERRAL_STATUS_CONFIG.PENDING;
                     return (
-                      <tr key={ref.id} className="hover:bg-gray-700/20 transition-colors">
+                      <tr key={ref.id} className="hover:bg-gray-50/80 transition-colors">
                         <td className="px-6 py-4">
-                          <p className="font-medium text-white">{ref.personName}</p>
+                          <p className="font-semibold text-gray-900">{ref.personName}</p>
                           <p className="text-gray-500 text-xs mt-0.5">{new Date(ref.createdAt).toLocaleDateString()}</p>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-1 text-gray-300 text-xs"><Phone className="w-3 h-3" />{ref.personPhone}</div>
-                          {ref.personEmail && <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5"><Mail className="w-3 h-3" />{ref.personEmail}</div>}
+                          <div className="flex items-center gap-1 text-gray-700 text-xs"><Phone className="w-3 h-3 text-gray-400" />{ref.personPhone}</div>
+                          {ref.personEmail && <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5"><Mail className="w-3 h-3 text-gray-400" />{ref.personEmail}</div>}
                         </td>
                         <td className="px-6 py-4">
                           <select
                             value={ref.status}
                             disabled={statusUpdating === ref.id}
                             onChange={e => handleUpdateStatus(ref.id, e.target.value)}
-                            className={`text-xs font-medium px-2.5 py-1.5 rounded-full border bg-transparent cursor-pointer focus:outline-none ${sc.color}`}
+                            className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1.5 rounded-full border bg-transparent cursor-pointer focus:outline-none ${sc.color}`}
                           >
                             {ALL_REFERRAL_STATUSES.map(s => (
-                              <option key={s} value={s} className="bg-gray-800 text-white">{REFERRAL_STATUS_CONFIG[s]?.label || s}</option>
+                              <option key={s} value={s} className="bg-white text-gray-900">{REFERRAL_STATUS_CONFIG[s]?.label || s}</option>
                             ))}
                           </select>
                           {ref.adminNotes && <p className="text-xs text-gray-500 mt-1 italic truncate max-w-[160px]">{ref.adminNotes}</p>}
                         </td>
-                        <td className="px-6 py-4 text-right text-gray-300 font-medium">₹{ref.totalSalesAmount.toFixed(0)}</td>
-                        <td className="px-6 py-4 text-right text-brand-gold font-semibold">₹{ref.commissionAmount.toFixed(2)}</td>
+                        <td className="px-6 py-4 text-right text-gray-900 font-semibold">₹{ref.totalSalesAmount.toFixed(0)}</td>
+                        <td className="px-6 py-4 text-right text-brand-gold font-bold">₹{ref.commissionAmount.toFixed(2)}</td>
                         <td className="px-6 py-4">
                           {ref.followUpRequests?.length > 0 ? (
-                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full font-medium">
                               <Flag className="w-3 h-3" /> {ref.followUpRequests.length} request{ref.followUpRequests.length > 1 ? 's' : ''}
                             </span>
-                          ) : <span className="text-gray-600 text-xs">None</span>}
+                          ) : <span className="text-gray-400 text-xs">None</span>}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <button
                             onClick={() => setSaleModal(ref)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold border border-brand-gold/20 rounded-lg text-xs font-medium transition-colors"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest border border-brand-forest/20 rounded-lg text-xs font-medium transition-colors shadow-sm"
                           >
                             <IndianRupee className="w-3 h-3" /> Add Sale
                           </button>
@@ -646,21 +658,21 @@ export default function PICDetailPage() {
 function DocCard({ label, url, onPreview }: { label: string; url: string; onPreview: () => void }) {
   const isImage = /\.(jpg|jpeg|png)(\?|$)/i.test(url);
   return (
-    <div className="bg-gray-700/50 border border-gray-600 rounded-xl p-4">
+    <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 hover:border-brand-sage/30 hover:shadow-sm transition-all">
       <div className="flex items-center gap-3 mb-3">
-        <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
-          <FileText className="w-5 h-5 text-brand-gold" />
+        <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center border border-gray-100 shadow-sm">
+          <FileText className="w-5 h-5 text-brand-forest" />
         </div>
         <div>
-          <p className="text-sm font-medium text-white">{label}</p>
-          <p className="text-xs text-gray-400">{isImage ? 'Image' : 'Document'}</p>
+          <p className="text-sm font-medium text-gray-900">{label}</p>
+          <p className="text-xs text-gray-500">{isImage ? 'Image' : 'Document'}</p>
         </div>
       </div>
       <div className="flex gap-2">
-        <button onClick={onPreview} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors">
+        <button onClick={onPreview} className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg transition-colors font-medium">
           <Eye className="w-3 h-3" /> Preview
         </button>
-        <a href={getFullUrl(url)} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold rounded-lg transition-colors">
+        <a href={getFullUrl(url)} download className="flex-1 flex items-center justify-center gap-1 py-1.5 text-xs bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest font-medium rounded-lg transition-colors border border-brand-forest/20">
           <Download className="w-3 h-3" /> Download
         </a>
       </div>
@@ -684,14 +696,14 @@ function InfoRow({ icon, label, value, badge, badgeClass, valueClass, onCopy }: 
 }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="text-gray-500 mt-0.5 shrink-0">{icon}</div>
+      <div className="text-gray-400 mt-0.5 shrink-0">{icon}</div>
       <div className="flex-1 min-w-0">
-        <p className="text-xs text-gray-500">{label}</p>
+        <p className="text-xs text-gray-500 font-medium">{label}</p>
         <div className="flex items-center gap-2 flex-wrap">
-          <p className={`text-sm text-gray-200 break-all ${valueClass || ''}`}>{value}</p>
-          {badge && <span className={`text-[10px] font-medium ${badgeClass}`}>{badge}</span>}
+          <p className={`text-sm text-gray-900 font-medium break-all ${valueClass || ''}`}>{value}</p>
+          {badge && <span className={`text-[10px] font-bold ${badgeClass}`}>{badge}</span>}
           {onCopy && (
-            <button onClick={onCopy} className="text-gray-600 hover:text-brand-gold transition-colors">
+            <button onClick={onCopy} className="text-gray-400 hover:text-brand-forest transition-colors">
               <Copy className="w-3 h-3" />
             </button>
           )}
@@ -703,11 +715,11 @@ function InfoRow({ icon, label, value, badge, badgeClass, valueClass, onCopy }: 
 
 function StatCard({ icon, label, value, bg }: { icon: React.ReactNode; label: string; value: string; bg: string }) {
   return (
-    <div className={`bg-gray-800 border rounded-2xl p-5 flex items-start gap-4 ${bg}`}>
-      <div className="p-2 rounded-xl bg-gray-700/50">{icon}</div>
+    <div className={`bg-white shadow-sm border rounded-2xl p-5 flex items-start gap-4 ${bg}`}>
+      <div className="p-2 rounded-xl bg-white/50 shadow-sm border border-black/5">{icon}</div>
       <div>
-        <p className="text-xs text-gray-400 mb-1">{label}</p>
-        <p className="text-xl font-bold text-white">{value}</p>
+        <p className="text-xs text-gray-500 mb-1 font-medium">{label}</p>
+        <p className="text-xl font-bold text-gray-900">{value}</p>
       </div>
     </div>
   );
@@ -720,9 +732,9 @@ function TimelineItem({ icon, label, value, empty }: { icon: React.ReactNode; la
       <div className="flex items-center gap-2">
         <span className="text-gray-400">{icon}</span>
         {value ? (
-          <p className="text-sm text-white">{new Date(value).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+          <p className="text-sm font-medium text-gray-900">{new Date(value).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
         ) : (
-          <p className="text-sm text-gray-500 italic">{empty || '—'}</p>
+          <p className="text-sm text-gray-400 italic">{empty || '—'}</p>
         )}
       </div>
     </div>

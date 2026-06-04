@@ -102,29 +102,29 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5 sticky top-0 bg-gray-800 pb-2 border-b border-gray-700 z-10">
+      <div className="bg-white border border-brand-sage/20 shadow-xl rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between mb-5 sticky top-0 bg-white pb-2 border-b border-gray-100 z-10">
           <div>
-            <h3 className="text-white font-semibold">Manage Sales</h3>
-            <p className="text-xs text-gray-400 mt-0.5">For: <span className="text-white">{referral.personName}</span></p>
+            <h3 className="text-brand-forest font-semibold">Manage Sales</h3>
+            <p className="text-xs text-gray-500 mt-0.5">For: <span className="text-gray-900 font-medium">{referral.personName}</span></p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-gray-700 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
         </div>
 
         {/* History Section */}
         <div className="mb-6">
-          <h4 className="text-sm font-medium text-gray-300 mb-3">Sale History</h4>
+          <h4 className="text-sm font-semibold text-gray-700 mb-3">Sale History</h4>
           {loadingHistory ? (
             <div className="text-center py-4 text-gray-500 text-sm">Loading history...</div>
           ) : history.length === 0 ? (
-            <div className="text-center py-4 text-gray-500 text-sm border border-gray-700 border-dashed rounded-xl">No past sales found.</div>
+            <div className="text-center py-4 text-gray-500 text-sm border border-gray-200 border-dashed rounded-xl bg-gray-50">No past sales found.</div>
           ) : (
             <div className="space-y-2">
               {history.map(sale => (
-                <div key={sale.id} className="flex items-center justify-between bg-gray-700/30 border border-gray-700 p-3 rounded-xl">
+                <div key={sale.id} className="flex items-center justify-between bg-white border border-gray-200 shadow-sm p-3 rounded-xl">
                   <div>
-                    <p className="text-white font-medium text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-400 font-normal">({sale.commissionRate}% comm.)</span></p>
-                    <p className="text-xs text-gray-500 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
+                    <p className="text-gray-900 font-semibold text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-500 font-normal">({sale.commissionRate}% comm.)</span></p>
+                    <p className="text-xs text-gray-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                   <div className="flex items-center gap-2">
                     <p className="text-brand-gold font-semibold text-sm">+₹{sale.commissionEarned.toFixed(2)}</p>
@@ -138,38 +138,38 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
         </div>
 
         {/* Form Section */}
-        <div className="space-y-4 bg-gray-900/50 p-4 rounded-xl border border-gray-700">
-          <h4 className="text-sm font-medium text-gray-300 flex items-center justify-between">
+        <div className="space-y-4 bg-gray-50 p-4 rounded-xl border border-gray-200">
+          <h4 className="text-sm font-semibold text-gray-800 flex items-center justify-between">
             {editingSale ? 'Edit Sale Entry' : 'Add New Sale Entry'}
-            {editingSale && <button onClick={cancelEdit} className="text-xs text-gray-400 hover:text-white underline">Cancel Edit</button>}
+            {editingSale && <button onClick={cancelEdit} className="text-xs text-blue-500 hover:text-blue-700 underline">Cancel Edit</button>}
           </h4>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Sale Amount (₹) *</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Sale Amount (₹) *</label>
             <input
               type="number" min="1"
               value={salesAmount}
               onChange={e => setSalesAmount(e.target.value)}
               placeholder="e.g. 1500"
-              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">Commission Rate (%)</label>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Commission Rate (%)</label>
             <input
               type="number" min="0" max="100"
               value={commissionRate}
               onChange={e => setCommissionRate(e.target.value)}
-              className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
             />
           </div>
           {salesAmount && (
-            <div className="bg-brand-gold/10 border border-brand-gold/20 rounded-xl p-3 text-sm">
-              <span className="text-gray-400">{editingSale ? 'New Commission:' : 'Commission to credit:'} </span>
+            <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-xl p-3 text-sm">
+              <span className="text-gray-600 font-medium">{editingSale ? 'New Commission:' : 'Commission to credit:'} </span>
               <span className="text-brand-gold font-bold">₹{commission}</span>
             </div>
           )}
           <div className="flex gap-3 pt-2">
-            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">Cancel</button>
             <button onClick={handleSubmit} disabled={loading} className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 flex items-center justify-center gap-2">
               {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <IndianRupee className="w-4 h-4" />}
               {editingSale ? 'Update Sale' : 'Credit Commission'}
@@ -250,8 +250,8 @@ export default function CustomersPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white">Customers</h1>
-        <p className="text-gray-400 text-sm mt-1">All people referred by PICs. Update their status and log sales here.</p>
+        <h1 className="text-2xl font-dm-serif text-brand-forest">Customers</h1>
+        <p className="text-gray-500 text-sm mt-1">All people referred by PICs. Update their status and log sales here.</p>
       </div>
 
       {/* Stats */}
@@ -262,25 +262,25 @@ export default function CustomersPage() {
           { label: 'Total Sales', value: formatCurrency(totalSales), sub: 'logged by admin' },
           { label: 'Total Commission', value: formatCurrency(totalCommission), sub: 'credited to PICs' },
         ].map(s => (
-          <div key={s.label} className="bg-gray-800 border border-gray-700 rounded-2xl p-4">
-            <p className="text-xs text-gray-400">{s.label}</p>
-            <p className="text-xl font-bold text-white mt-1">{s.value}</p>
-            <p className="text-xs text-gray-500 mt-0.5">{s.sub}</p>
+          <div key={s.label} className="bg-white shadow-sm border border-brand-sage/20 rounded-2xl p-4">
+            <p className="text-xs text-gray-500 font-medium">{s.label}</p>
+            <p className="text-xl font-bold text-gray-900 mt-1">{s.value}</p>
+            <p className="text-xs text-brand-forest/60 mt-0.5">{s.sub}</p>
           </div>
         ))}
       </div>
 
       {/* Filters */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white shadow-sm border border-brand-sage/20 rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
         {/* Search */}
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
             type="text"
             placeholder="Search by name, phone or PIC..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full bg-gray-700 border border-gray-600 rounded-xl pl-9 pr-4 py-2.5 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-9 pr-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
           />
         </div>
 
@@ -289,7 +289,7 @@ export default function CustomersPage() {
           <select
             value={selectedPic}
             onChange={e => setSelectedPic(e.target.value)}
-            className="appearance-none bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 pr-9 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40 cursor-pointer min-w-[180px]"
+            className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer min-w-[180px]"
           >
             <option value="all">All PICs</option>
             {pics.map(p => (
@@ -304,7 +304,7 @@ export default function CustomersPage() {
           <select
             value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value)}
-            className="appearance-none bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 pr-9 text-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-gold/40 cursor-pointer min-w-[160px]"
+            className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer min-w-[160px]"
           >
             <option value="all">All Statuses</option>
             {ALL_STATUSES.map(s => (
@@ -316,7 +316,7 @@ export default function CustomersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+      <div className="bg-white shadow-sm border border-brand-sage/20 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center text-gray-400">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-3" />Loading customers...
@@ -330,60 +330,60 @@ export default function CustomersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+              <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left">Customer</th>
-                  <th className="px-6 py-3 text-left">Contact</th>
-                  <th className="px-6 py-3 text-left">Referred By (PIC)</th>
-                  <th className="px-6 py-3 text-left">Status</th>
-                  <th className="px-6 py-3 text-right">Sales</th>
-                  <th className="px-6 py-3 text-right">Commission</th>
-                  <th className="px-6 py-3 text-center">Follow-ups</th>
-                  <th className="px-6 py-3 text-center">Add Sale</th>
+                  <th className="px-6 py-3 text-left font-semibold">Customer</th>
+                  <th className="px-6 py-3 text-left font-semibold">Contact</th>
+                  <th className="px-6 py-3 text-left font-semibold">Referred By (PIC)</th>
+                  <th className="px-6 py-3 text-left font-semibold">Status</th>
+                  <th className="px-6 py-3 text-right font-semibold">Sales</th>
+                  <th className="px-6 py-3 text-right font-semibold">Commission</th>
+                  <th className="px-6 py-3 text-center font-semibold">Follow-ups</th>
+                  <th className="px-6 py-3 text-center font-semibold">Add Sale</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700/50">
+              <tbody className="divide-y divide-gray-100">
                 {filtered.map((ref: any) => {
                   const sc = STATUS_CONFIG[ref.status] || STATUS_CONFIG.PENDING;
                   return (
-                    <tr key={ref.id} className="hover:bg-gray-700/20 transition-colors">
+                    <tr key={ref.id} className="hover:bg-gray-50/80 transition-colors">
                       <td className="px-6 py-4">
-                        <p className="font-medium text-white">{ref.personName}</p>
+                        <p className="font-semibold text-gray-900">{ref.personName}</p>
                         <p className="text-gray-500 text-xs mt-0.5">{new Date(ref.createdAt).toLocaleDateString('en-IN')}</p>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1 text-gray-300 text-xs"><Phone className="w-3 h-3" />{ref.personPhone}</div>
-                        {ref.personEmail && <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5"><Mail className="w-3 h-3" />{ref.personEmail}</div>}
+                        <div className="flex items-center gap-1 text-gray-600 text-xs"><Phone className="w-3 h-3 text-gray-400" />{ref.personPhone}</div>
+                        {ref.personEmail && <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5"><Mail className="w-3 h-3 text-gray-400" />{ref.personEmail}</div>}
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-white text-sm font-medium">{ref.pic?.fullName}</p>
-                        <p className="text-gray-500 text-xs">{ref.pic?.referralCode}</p>
+                        <p className="text-gray-900 text-sm font-semibold">{ref.pic?.fullName}</p>
+                        <p className="text-brand-forest text-xs font-medium">{ref.pic?.referralCode}</p>
                       </td>
                       <td className="px-6 py-4">
                         <select
                           value={ref.status}
                           disabled={statusUpdating === ref.id}
                           onChange={e => handleUpdateStatus(ref.id, e.target.value)}
-                          className={`text-xs font-medium px-2.5 py-1.5 rounded-full border bg-transparent cursor-pointer focus:outline-none ${sc.color}`}
+                          className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1.5 rounded-full border bg-transparent cursor-pointer focus:outline-none ${sc.color}`}
                         >
                           {ALL_STATUSES.map(s => (
-                            <option key={s} value={s} className="bg-gray-800 text-white">{STATUS_CONFIG[s].label}</option>
+                            <option key={s} value={s} className="bg-white text-gray-900">{STATUS_CONFIG[s].label}</option>
                           ))}
                         </select>
                       </td>
-                      <td className="px-6 py-4 text-right text-gray-300 font-medium">₹{ref.totalSalesAmount.toFixed(0)}</td>
-                      <td className="px-6 py-4 text-right text-brand-gold font-semibold">₹{ref.commissionAmount.toFixed(2)}</td>
+                      <td className="px-6 py-4 text-right text-gray-900 font-semibold">₹{ref.totalSalesAmount.toFixed(0)}</td>
+                      <td className="px-6 py-4 text-right text-brand-gold font-bold">₹{ref.commissionAmount.toFixed(2)}</td>
                       <td className="px-6 py-4 text-center">
                         {ref.followUpRequests?.length > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-orange-500/10 text-orange-400 border border-orange-500/20 rounded-full">
+                          <span className="inline-flex items-center gap-1 text-xs px-2 py-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full font-medium">
                             <Flag className="w-3 h-3" /> {ref.followUpRequests.length}
                           </span>
-                        ) : <span className="text-gray-600 text-xs">—</span>}
+                        ) : <span className="text-gray-400 text-xs">—</span>}
                       </td>
                       <td className="px-6 py-4 text-center">
                         <button
                           onClick={() => setSaleModal(ref)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-gold/10 hover:bg-brand-gold/20 text-brand-gold border border-brand-gold/20 rounded-lg text-xs font-medium transition-colors"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-forest/5 hover:bg-brand-forest/10 text-brand-forest border border-brand-forest/20 rounded-lg text-xs font-medium transition-colors shadow-sm"
                         >
                           <IndianRupee className="w-3 h-3" /> Add Sale
                         </button>
@@ -398,10 +398,10 @@ export default function CustomersPage() {
       </div>
 
       {/* What counts as a successful referral note */}
-      <div className="bg-brand-gold/5 border border-brand-gold/20 rounded-2xl p-4">
-        <p className="text-brand-gold text-sm font-semibold mb-1">💡 What counts as a Successful Referral?</p>
-        <p className="text-gray-400 text-xs leading-relaxed">
-          Since referrals are entered manually by PICs, a referral is considered <strong className="text-white">successful</strong> when the Admin updates its status to <strong className="text-green-400">Buying</strong> or <strong className="text-purple-400">Active Seller</strong>.
+      <div className="bg-brand-gold/10 border border-brand-gold/30 rounded-2xl p-4">
+        <p className="text-brand-forest text-sm font-bold mb-1">💡 What counts as a Successful Referral?</p>
+        <p className="text-gray-700 text-xs leading-relaxed">
+          Since referrals are entered manually by PICs, a referral is considered <strong className="text-gray-900">successful</strong> when the Admin updates its status to <strong className="text-green-700">Buying</strong> or <strong className="text-purple-700">Active Seller</strong>.
           This means the referred person has made a purchase and the PIC deserves their commission — which you can credit using the <strong className="text-brand-gold">"Add Sale"</strong> button.
         </p>
       </div>

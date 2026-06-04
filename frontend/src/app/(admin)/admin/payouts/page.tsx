@@ -53,13 +53,13 @@ export default function AdminPayoutsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Payouts</h1>
-          <p className="text-gray-400">Manage PIC withdrawal requests.</p>
+          <h1 className="text-2xl font-dm-serif text-brand-forest mb-1">Payouts</h1>
+          <p className="text-gray-500 text-sm">Manage PIC withdrawal requests.</p>
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 bg-gray-800 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+          className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-gray-900 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer"
         >
           <option value="">All Statuses</option>
           <option value="PENDING">Pending</option>
@@ -67,17 +67,17 @@ export default function AdminPayoutsPage() {
         </select>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+      <div className="bg-white shadow-sm border border-brand-sage/20 rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-400">
-            <thead className="text-xs text-gray-400 uppercase bg-gray-700/50 border-b border-gray-700">
+          <table className="w-full text-left text-sm text-gray-600">
+            <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-4 font-medium text-white">Date Requested</th>
-                <th className="px-6 py-4 font-medium text-white">PIC Partner</th>
-                <th className="px-6 py-4 font-medium text-white">Amount</th>
-                <th className="px-6 py-4 font-medium text-white">Payment Method</th>
-                <th className="px-6 py-4 font-medium text-white">Status</th>
-                <th className="px-6 py-4 font-medium text-white text-right">Actions</th>
+                <th className="px-6 py-4 font-semibold">Date Requested</th>
+                <th className="px-6 py-4 font-semibold">PIC Partner</th>
+                <th className="px-6 py-4 font-semibold">Amount</th>
+                <th className="px-6 py-4 font-semibold">Payment Method</th>
+                <th className="px-6 py-4 font-semibold">Status</th>
+                <th className="px-6 py-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -91,46 +91,46 @@ export default function AdminPayoutsPage() {
                 </tr>
               ) : (
                 payouts.map((payout) => (
-                  <tr key={payout.id} className="border-b border-gray-700 hover:bg-gray-700/20 transition-colors">
-                    <td className="px-6 py-4 text-gray-300">
+                  <tr key={payout.id} className="border-b border-gray-100 hover:bg-gray-50/80 transition-colors">
+                    <td className="px-6 py-4 text-gray-600">
                       {new Date(payout.requestedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-white">{payout.pic?.fullName}</p>
+                      <p className="font-semibold text-gray-900">{payout.pic?.fullName}</p>
                       <p className="text-xs text-gray-500">{payout.pic?.email}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-white text-lg">{formatCurrency(payout.amount)}</span>
+                      <span className="font-bold text-gray-900 text-lg">{formatCurrency(payout.amount)}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-gray-300">{payout.paymentMethod}</p>
+                      <p className="text-gray-900 font-medium">{payout.paymentMethod}</p>
                       {payout.paymentMethod === 'UPI' && (
-                        <p className="text-xs text-brand-gold">{payout.pic?.upiId}</p>
+                        <p className="text-xs text-brand-forest mt-0.5">{payout.pic?.upiId}</p>
                       )}
                       {payout.paymentMethod === 'BANK_TRANSFER' && (
-                        <div className="text-xs text-brand-gold mt-1">
+                        <div className="text-xs text-gray-500 mt-1">
                           A/C: {payout.pic?.bankAccountNumber} <br/>
                           IFSC: {payout.pic?.ifscCode}
                         </div>
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border flex items-center w-max ${
-                        payout.status === 'PAID' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
-                        'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border flex items-center w-max ${
+                        payout.status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' :
+                        'bg-yellow-50 text-yellow-700 border-yellow-200'
                       }`}>
                         {payout.status === 'PAID' ? <CheckCircle className="w-3 h-3 mr-1" /> : <Clock className="w-3 h-3 mr-1" />}
                         {payout.status}
                       </span>
                       {payout.transactionRef && (
-                        <p className="text-[10px] text-gray-500 mt-1">Ref: {payout.transactionRef}</p>
+                        <p className="text-[10px] text-gray-500 mt-1 font-medium">Ref: {payout.transactionRef}</p>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       {payout.status === 'PENDING' && (
                         <button 
                           onClick={() => handleMarkPaid(payout.id)}
-                          className="px-4 py-2 bg-green-500/20 text-green-400 hover:bg-green-500/30 rounded-lg transition-colors font-medium text-xs border border-green-500/30"
+                          className="px-4 py-2 bg-green-50 text-green-600 hover:bg-green-100 rounded-lg transition-colors font-medium text-xs border border-green-200 shadow-sm"
                         >
                           Mark as Paid
                         </button>

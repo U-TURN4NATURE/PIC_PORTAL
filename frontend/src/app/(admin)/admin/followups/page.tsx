@@ -77,28 +77,28 @@ function NotesModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-md p-6">
+      <div className="bg-white border border-brand-sage/20 shadow-xl rounded-2xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-white font-semibold">{actionLabel}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-700 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
+          <h3 className="text-brand-forest font-semibold">{actionLabel}</h3>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
         </div>
-        <div className="bg-gray-700/50 rounded-xl p-4 mb-4 text-sm">
-          <p className="text-gray-400">Referred Person: <span className="text-white font-medium">{followUp.referral.personName}</span></p>
-          <p className="text-gray-400 mt-1">Requested by PIC: <span className="text-white font-medium">{followUp.pic.fullName}</span></p>
-          <p className="text-gray-400 mt-1 italic">"{followUp.reason}"</p>
+        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4 text-sm">
+          <p className="text-gray-600">Referred Person: <span className="text-gray-900 font-semibold">{followUp.referral.personName}</span></p>
+          <p className="text-gray-600 mt-1">Requested by PIC: <span className="text-gray-900 font-semibold">{followUp.pic.fullName}</span></p>
+          <p className="text-gray-600 mt-1 italic">"{followUp.reason}"</p>
         </div>
         <div className="mb-4">
-          <label className="block text-sm text-gray-400 mb-1">Add Admin Notes (optional)</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Add Admin Notes (optional)</label>
           <textarea
             rows={3}
             value={notes}
             onChange={e => setNotes(e.target.value)}
             placeholder="e.g. Called the person, they will buy next week..."
-            className="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-gold/40"
+            className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-gray-900 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
           />
         </div>
         <div className="flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-600 rounded-xl text-sm text-gray-400 hover:bg-gray-700">Cancel</button>
+          <button onClick={onClose} className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
           <button onClick={submit} disabled={loading} className={`flex-1 py-2.5 text-white rounded-xl text-sm font-semibold disabled:opacity-60 flex items-center justify-center gap-2 ${btnColor}`}>
             {loading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
             {actionLabel}
@@ -148,19 +148,19 @@ export default function FollowUpRequestsPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-white">Follow-up Requests</h1>
+            <h1 className="text-2xl font-dm-serif text-brand-forest">Follow-up Requests</h1>
             {openCount > 0 && (
-              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-500/20 text-orange-400 border border-orange-500/30 rounded-full text-xs font-bold">
+              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-orange-50 text-orange-600 border border-orange-200 rounded-full text-xs font-bold uppercase tracking-wider">
                 {openCount} Open
               </span>
             )}
           </div>
-          <p className="text-gray-400 text-sm mt-1">PICs have requested admin follow-up for these referred people.</p>
+          <p className="text-gray-500 text-sm mt-1">PICs have requested admin follow-up for these referred people.</p>
         </div>
-        <button onClick={fetchFollowUps} className="p-2 rounded-xl bg-gray-800 border border-gray-700 text-gray-400 hover:text-white hover:border-gray-600 transition-all">
+        <button onClick={fetchFollowUps} className="p-2 rounded-xl bg-white shadow-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-all">
           <RefreshCw className="w-5 h-5" />
         </button>
       </div>
@@ -168,7 +168,7 @@ export default function FollowUpRequestsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         {/* Status Filter */}
-        <div className="flex gap-1 bg-gray-800 border border-gray-700 rounded-xl p-1">
+        <div className="flex gap-1 bg-gray-100 border border-gray-200 rounded-xl p-1">
           {[
             { value: '', label: 'All' },
             { value: 'OPEN', label: 'Open' },
@@ -179,8 +179,8 @@ export default function FollowUpRequestsPage() {
             <button
               key={opt.value}
               onClick={() => setStatusFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                statusFilter === opt.value ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                statusFilter === opt.value ? 'bg-white text-brand-forest shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
               }`}
             >
               {opt.label}
@@ -189,7 +189,7 @@ export default function FollowUpRequestsPage() {
         </div>
 
         {/* Priority Filter */}
-        <div className="flex gap-1 bg-gray-800 border border-gray-700 rounded-xl p-1">
+        <div className="flex gap-1 bg-gray-100 border border-gray-200 rounded-xl p-1">
           {[
             { value: '', label: 'All Priorities' },
             { value: 'HIGH', label: '🔴 High' },
@@ -199,8 +199,8 @@ export default function FollowUpRequestsPage() {
             <button
               key={opt.value}
               onClick={() => setPriorityFilter(opt.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                priorityFilter === opt.value ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-gray-200'
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                priorityFilter === opt.value ? 'bg-white text-brand-forest shadow-sm' : 'text-gray-500 hover:text-gray-900 hover:bg-white/50'
               }`}
             >
               {opt.label}
@@ -210,16 +210,16 @@ export default function FollowUpRequestsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden">
+      <div className="bg-white shadow-sm border border-brand-sage/20 rounded-2xl overflow-hidden">
         {loading ? (
           <div className="p-12 text-center">
-            <RefreshCw className="w-8 h-8 text-gray-600 mx-auto mb-3 animate-spin" />
+            <RefreshCw className="w-8 h-8 text-gray-400 mx-auto mb-3 animate-spin" />
             <p className="text-gray-500">Loading follow-up requests...</p>
           </div>
         ) : followUps.length === 0 ? (
           <div className="p-12 text-center">
-            <Flag className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-            <p className="text-gray-400 font-medium">No follow-up requests found</p>
+            <Flag className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+            <p className="text-gray-600 font-semibold">No follow-up requests found</p>
             <p className="text-gray-500 text-sm mt-1">
               {statusFilter === 'OPEN' ? 'All open requests have been actioned.' : 'No requests match the current filters.'}
             </p>
@@ -227,49 +227,49 @@ export default function FollowUpRequestsPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="text-xs text-gray-400 uppercase bg-gray-700/30 border-b border-gray-700">
+              <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="px-6 py-3 text-left">PIC</th>
-                  <th className="px-6 py-3 text-left">Referred Person</th>
-                  <th className="px-6 py-3 text-center">Priority</th>
-                  <th className="px-6 py-3 text-left">Reason</th>
-                  <th className="px-6 py-3 text-center">Status</th>
-                  <th className="px-6 py-3 text-left">Admin Notes</th>
-                  <th className="px-6 py-3 text-left">Date</th>
-                  <th className="px-6 py-3 text-center">Actions</th>
+                  <th className="px-6 py-3 text-left font-semibold">PIC</th>
+                  <th className="px-6 py-3 text-left font-semibold">Referred Person</th>
+                  <th className="px-6 py-3 text-center font-semibold">Priority</th>
+                  <th className="px-6 py-3 text-left font-semibold">Reason</th>
+                  <th className="px-6 py-3 text-center font-semibold">Status</th>
+                  <th className="px-6 py-3 text-left font-semibold">Admin Notes</th>
+                  <th className="px-6 py-3 text-left font-semibold">Date</th>
+                  <th className="px-6 py-3 text-center font-semibold">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-700/50">
+              <tbody className="divide-y divide-gray-100">
                 {followUps.map((fu) => {
                   const pc = PRIORITY_CONFIG[fu.priority] || PRIORITY_CONFIG.NORMAL;
                   const sc = STATUS_CONFIG[fu.status] || STATUS_CONFIG.OPEN;
                   return (
-                    <tr key={fu.id} className="hover:bg-gray-700/20 transition-colors">
+                    <tr key={fu.id} className="hover:bg-gray-50/80 transition-colors">
                       {/* PIC */}
                       <td className="px-6 py-4">
-                        <p className="font-medium text-white">{fu.pic.fullName}</p>
+                        <p className="font-semibold text-gray-900">{fu.pic.fullName}</p>
                         <p className="text-gray-500 text-xs mt-0.5">{fu.pic.phone}</p>
                       </td>
                       {/* Referred Person */}
                       <td className="px-6 py-4">
-                        <p className="font-medium text-gray-200">{fu.referral.personName}</p>
+                        <p className="font-semibold text-gray-800">{fu.referral.personName}</p>
                         <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5">
-                          <Phone className="w-3 h-3" />{fu.referral.personPhone}
+                          <Phone className="w-3 h-3 text-gray-400" />{fu.referral.personPhone}
                         </div>
                       </td>
                       {/* Priority */}
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${pc.color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border ${pc.color}`}>
                           {pc.icon} {pc.label}
                         </span>
                       </td>
                       {/* Reason */}
                       <td className="px-6 py-4 max-w-xs">
-                        <p className="text-gray-300 text-xs leading-relaxed line-clamp-2">{fu.reason}</p>
+                        <p className="text-gray-700 text-xs leading-relaxed line-clamp-2">{fu.reason}</p>
                       </td>
                       {/* Status */}
                       <td className="px-6 py-4 text-center">
-                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${sc.color}`}>
+                        <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold border ${sc.color}`}>
                           {fu.status.replace('_', ' ')}
                         </span>
                       </td>
@@ -278,7 +278,7 @@ export default function FollowUpRequestsPage() {
                         <p className="text-gray-500 text-xs italic line-clamp-2">{fu.adminNotes || '—'}</p>
                       </td>
                       {/* Date */}
-                      <td className="px-6 py-4 text-gray-400 text-xs whitespace-nowrap">
+                      <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
                         {new Date(fu.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                       </td>
                       {/* Actions */}
@@ -287,7 +287,7 @@ export default function FollowUpRequestsPage() {
                           {fu.status === 'OPEN' && (
                             <button
                               onClick={() => setActionModal({ followUp: fu, targetStatus: 'IN_PROGRESS' })}
-                              className="px-2.5 py-1.5 text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 border border-blue-500/20 rounded-lg font-medium transition-colors whitespace-nowrap"
+                              className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-bold bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg transition-colors whitespace-nowrap"
                             >
                               In Progress
                             </button>
@@ -296,20 +296,20 @@ export default function FollowUpRequestsPage() {
                             <>
                               <button
                                 onClick={() => setActionModal({ followUp: fu, targetStatus: 'DONE' })}
-                                className="px-2.5 py-1.5 text-xs bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 rounded-lg font-medium transition-colors"
+                                className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-bold bg-green-50 hover:bg-green-100 text-green-600 border border-green-200 rounded-lg transition-colors shadow-sm"
                               >
                                 Done
                               </button>
                               <button
                                 onClick={() => setActionModal({ followUp: fu, targetStatus: 'DISMISSED' })}
-                                className="px-2.5 py-1.5 text-xs bg-gray-500/10 hover:bg-gray-500/20 text-gray-400 border border-gray-500/20 rounded-lg font-medium transition-colors"
+                                className="px-2.5 py-1.5 text-[10px] uppercase tracking-wider font-bold bg-gray-50 hover:bg-gray-100 text-gray-600 border border-gray-200 rounded-lg transition-colors"
                               >
                                 Dismiss
                               </button>
                             </>
                           )}
                           {(fu.status === 'DONE' || fu.status === 'DISMISSED') && (
-                            <span className="text-gray-600 text-xs">Resolved</span>
+                            <span className="text-gray-400 text-xs font-medium">Resolved</span>
                           )}
                         </div>
                       </td>

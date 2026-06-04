@@ -46,122 +46,122 @@ export default function AdminSettingsPage() {
   };
 
   if (isLoading) {
-    return <div className="text-gray-400">Loading settings...</div>;
+    return <div className="text-gray-500">Loading settings...</div>;
   }
 
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-1">Shopify Integration</h1>
-        <p className="text-gray-400">Configure your connection to Shopify for automated order tracking and webhooks.</p>
+        <h1 className="text-2xl font-dm-serif text-brand-forest mb-1">Shopify Integration</h1>
+        <p className="text-gray-500 text-sm mt-1">Configure your connection to Shopify for automated order tracking and webhooks.</p>
       </div>
 
-      <div className="bg-gray-800 border border-gray-700 rounded-2xl overflow-hidden shadow-xl">
-        <div className="p-6 border-b border-gray-700 bg-gray-800/50 flex items-center space-x-4">
-          <div className="p-3 bg-brand-gold/10 text-brand-gold rounded-xl border border-brand-gold/20">
+      <div className="bg-white border border-brand-sage/20 rounded-2xl overflow-hidden shadow-sm">
+        <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center space-x-4">
+          <div className="p-3 bg-brand-forest/10 text-brand-forest rounded-xl border border-brand-sage/30">
             <Store className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-white">Store Connection</h2>
-            <p className="text-sm text-gray-400">API credentials will be securely encrypted in the database.</p>
+            <h2 className="text-xl font-bold text-gray-900">Store Connection</h2>
+            <p className="text-sm text-gray-500">API credentials will be securely encrypted in the database.</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Store Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Store Name</label>
               <div className="relative">
-                <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Store className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('storeName', { required: true })}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="e.g. U-Turn4Nature Official"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">Store URL</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Store URL</label>
               <div className="relative">
-                <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <LinkIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('storeUrl', { required: true })}
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="e.g. uturn4nature.myshopify.com"
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <hr className="border-gray-700 my-2" />
-              <h3 className="text-lg font-medium text-white mb-1">Admin API Keys</h3>
-              <p className="text-sm text-gray-400 mb-4">Required for fetching orders and generating discount codes.</p>
+              <hr className="border-gray-200 my-2" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Admin API Keys</h3>
+              <p className="text-sm text-gray-500 mb-4">Required for fetching orders and generating discount codes.</p>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">API Key</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">API Key</label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('apiKey')}
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="Enter new API Key..."
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">API Secret</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">API Secret</label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('apiSecret')}
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="Enter new API Secret..."
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Access Token</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Access Token</label>
               <div className="relative">
-                <ShieldCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <ShieldCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('accessToken')}
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="shpat_..."
                 />
               </div>
             </div>
 
             <div className="md:col-span-2">
-              <hr className="border-gray-700 my-2" />
-              <h3 className="text-lg font-medium text-white mb-1">Webhook Configuration</h3>
-              <p className="text-sm text-gray-400 mb-4">Required for receiving real-time order updates.</p>
+              <hr className="border-gray-200 my-2" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-1">Webhook Configuration</h3>
+              <p className="text-sm text-gray-500 mb-4">Required for receiving real-time order updates.</p>
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-300 mb-1">Webhook Secret (HMAC verification)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Webhook Secret (HMAC verification)</label>
               <div className="relative">
-                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+                <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                 <input 
                   {...register('webhookSecret')}
                   type="password"
-                  className="w-full pl-10 pr-4 py-3 bg-gray-900 border border-gray-700 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-brand-gold/50"
+                  className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   placeholder="Enter webhook secret..."
                 />
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                Webhook URL: <code className="bg-gray-900 px-2 py-1 rounded text-brand-gold">https://[your-domain]/api/webhooks/shopify</code>
+                Webhook URL: <code className="bg-gray-100 border border-gray-200 px-2 py-1 rounded text-brand-forest font-medium">https://[your-domain]/api/webhooks/shopify</code>
               </p>
             </div>
           </div>
 
-          <div className="pt-6 mt-6 border-t border-gray-700 flex justify-end">
+          <div className="pt-6 mt-6 border-t border-gray-100 flex justify-end">
             <button 
               type="submit" 
               disabled={isSaving}

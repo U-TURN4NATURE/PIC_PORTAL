@@ -50,8 +50,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   };
 
   if (isLoading || !isAuthenticated || user?.role !== 'ADMIN') {
-    return <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-gold"></div>
+    return <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-forest"></div>
     </div>;
   }
 
@@ -66,7 +66,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex">
+    <div className="min-h-screen bg-[#FDFBF7] text-gray-800 flex font-sans">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div 
@@ -76,13 +76,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Sidebar */}
-      <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-gray-800 border-r border-gray-700 z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-16 flex items-center justify-between px-6 border-b border-gray-700">
-          <div className="flex items-center space-x-2 text-brand-gold font-dm-serif text-xl">
-            <ShieldCheckIcon className="w-6 h-6" />
+      <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-brand-sage/20 shadow-sm z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="h-16 flex items-center justify-between px-6 border-b border-brand-sage/20 bg-brand-forest">
+          <div className="flex items-center space-x-2 text-white font-dm-serif text-xl">
+            <ShieldCheckIcon className="w-6 h-6 text-brand-gold" />
             <span>Admin Portal</span>
           </div>
-          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-gray-400">
+          <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-brand-sage hover:text-white">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -95,19 +95,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Link 
                 key={item.name} 
                 href={item.href}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-brand-gold/10 text-brand-gold border border-brand-gold/20' : 'text-gray-400 hover:text-gray-100 hover:bg-gray-700'}`}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-brand-forest/10 text-brand-forest border border-brand-forest/20 shadow-sm' : 'text-gray-600 hover:text-brand-forest hover:bg-brand-sage/10'}`}
               >
-                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-gold' : ''}`} />
+                <Icon className={`w-5 h-5 ${isActive ? 'text-brand-forest' : 'text-gray-500'}`} />
                 <span className="font-medium">{item.name}</span>
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 left-0 w-full p-4 border-t border-gray-700">
+        <div className="absolute bottom-0 left-0 w-full p-4 border-t border-brand-sage/20 bg-gray-50/50">
           <button 
             onClick={handleLogout}
-            className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl text-red-400 hover:bg-red-400/10 transition-colors"
+            className="flex items-center space-x-3 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-colors"
           >
             <LogOut className="w-5 h-5" />
             <span className="font-medium">Logout</span>
@@ -116,36 +116,36 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-[#FDFBF7]">
         {/* Top Header */}
-        <header className="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6 shrink-0">
+        <header className="h-16 bg-white border-b border-brand-sage/20 shadow-sm flex items-center justify-between px-6 shrink-0 z-30 relative">
           <div className="flex items-center">
             <button 
               onClick={() => setIsSidebarOpen(true)} 
-              className="lg:hidden text-gray-400 mr-4 hover:text-white"
+              className="lg:hidden text-brand-forest mr-4 hover:text-brand-olive"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h2 className="text-xl font-medium text-white hidden sm:block">
+            <h2 className="text-2xl font-dm-serif text-brand-forest hidden sm:block">
               {navItems.find(item => pathname.startsWith(item.href))?.name || 'Dashboard'}
             </h2>
           </div>
           <div className="flex items-center space-x-4">
-            <button className="relative p-2 text-gray-400 hover:text-brand-gold transition-colors">
+            <button className="relative p-2 text-gray-500 hover:text-brand-forest transition-colors">
               <Bell className="w-5 h-5" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
             </button>
-            <div className="flex items-center space-x-3 border-l border-gray-700 pl-4">
-              <div className="w-8 h-8 rounded-full bg-brand-gold/20 flex items-center justify-center text-brand-gold font-bold">
+            <div className="flex items-center space-x-3 border-l border-brand-sage/30 pl-4">
+              <div className="w-9 h-9 rounded-full bg-brand-forest text-white flex items-center justify-center font-bold shadow-sm border border-brand-olive">
                 {user?.name?.[0] || 'A'}
               </div>
-              <span className="text-sm font-medium hidden md:block">{user?.name}</span>
+              <span className="text-sm font-semibold text-gray-800 hidden md:block">{user?.name}</span>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto p-6 bg-gray-900">
+        <div className="flex-1 overflow-y-auto p-6">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>
