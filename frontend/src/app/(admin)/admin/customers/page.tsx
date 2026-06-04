@@ -119,17 +119,30 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
           ) : history.length === 0 ? (
             <div className="text-center py-4 text-gray-500 text-sm border border-gray-200 border-dashed rounded-xl bg-gray-50">No past sales found.</div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {history.map(sale => (
-                <div key={sale.id} className="flex items-center justify-between bg-white border border-gray-200 shadow-sm p-3 rounded-xl">
-                  <div>
-                    <p className="text-gray-900 font-semibold text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-500 font-normal">({sale.commissionRate}% comm.)</span></p>
-                    <p className="text-xs text-gray-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <p className="text-brand-gold font-semibold text-sm">+₹{sale.commissionEarned.toFixed(2)}</p>
-                    <button onClick={() => handleEditClick(sale)} className="text-xs text-blue-400 hover:text-blue-300 px-1">Edit</button>
-                    <button onClick={() => handleDeleteClick(sale.id)} disabled={loading} className="text-xs text-red-400 hover:text-red-300 px-1">Delete</button>
+                <div key={sale.id} className={`border rounded-xl p-3 transition-all ${editingSale?.id === sale.id ? 'border-blue-400 bg-blue-50' : 'border-gray-200 bg-white shadow-sm'}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <p className="text-gray-900 font-bold text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-500 font-normal">({sale.commissionRate}% commission)</span></p>
+                      <p className="text-xs text-green-600 font-semibold mt-0.5">+₹{sale.commissionEarned.toFixed(2)} credited</p>
+                      <p className="text-xs text-gray-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => handleEditClick(sale)}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 rounded-lg text-xs font-semibold transition-colors"
+                      >
+                        ✏️ Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteClick(sale.id)}
+                        disabled={loading}
+                        className="flex items-center gap-1 px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition-colors disabled:opacity-50"
+                      >
+                        🗑️ Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
