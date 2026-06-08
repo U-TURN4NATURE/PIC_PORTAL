@@ -69,8 +69,8 @@ export const verifyOTPSchema = z.object({
 // Step 2 — KYC & Bank Details (after admin approval)
 export const completeProfileKYCSchema = z.object({
   body: z.object({
-    aadhaarNumber: z.string().regex(/^\d{12}$/, 'Invalid Aadhaar number (12 digits required)'),
-    panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN card format (e.g. ABCDE1234F)'),
+    aadhaarNumber: z.string().regex(/^\d{12}$/, 'Invalid Aadhaar number (12 digits required)').optional().or(z.literal('')),
+    panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN card format (e.g. ABCDE1234F)').optional().or(z.literal('')),
     bankAccountName: z.string().min(2, 'Account holder name is required'),
     bankName: z.string().min(2, 'Bank name is required'),
     bankAccountNumber: z.string().min(8, 'Valid account number required'),

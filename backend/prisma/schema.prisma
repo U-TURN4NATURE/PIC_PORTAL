@@ -150,6 +150,7 @@ model PICPartner {
   status            PICStatus  @default(PENDING)
   profileCompleted  Boolean    @default(false)
   isEmailVerified   Boolean    @default(false)
+  isPolicyAccepted  Boolean    @default(false)
 
   // Timestamps for application timeline
   approvedAt        DateTime?

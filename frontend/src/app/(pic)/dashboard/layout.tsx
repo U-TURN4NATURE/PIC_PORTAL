@@ -25,6 +25,7 @@ import {
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import PolicyModal from '@/components/PolicyModal';
 
 // ─── Status Screens ───────────────────────────────
 
@@ -198,6 +199,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   if (user.status === 'APPROVED' && !user.profileCompleted) return <IncompleteProfileScreen user={user} />;
 
   // ─── Full Dashboard (ACTIVE users only) ─────────
+  const showPolicyModal = user.profileCompleted && user.status === 'ACTIVE' && user.isPolicyAccepted === false;
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Referrals', href: '/dashboard/referral', icon: User },
@@ -214,6 +216,14 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-gray-900 flex">
+      {showPolicyModal && (
+        <PolicyModal 
+          onAccept={() => {
+            initAuth(); // Refetches user data to update isPolicyAccepted
+          }} 
+        />
+      )}
+
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
         <div

@@ -298,6 +298,7 @@ export const getMe = async (userId: string, role: string) => {
       status: true,
       profileCompleted: true,
       isEmailVerified: true,
+      isPolicyAccepted: true,
       rejectionReason: true,
       createdAt: true,
       approvedAt: true,

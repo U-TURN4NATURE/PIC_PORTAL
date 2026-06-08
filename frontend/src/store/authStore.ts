@@ -13,6 +13,7 @@ interface User {
   profileImage?: string;
   referralCode?: string;
   rejectionReason?: string;
+  isPolicyAccepted?: boolean;
 }
 
 interface AuthState {

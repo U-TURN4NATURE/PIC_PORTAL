@@ -15,8 +15,8 @@ import {
 
 // ─── Step 2 Schema ───────────────────────────────
 const step2Schema = z.object({
-  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required'),
-  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)'),
+  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required').optional().or(z.literal('')),
+  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)').optional().or(z.literal('')),
   bankAccountName: z.string().min(2, 'Account holder name required'),
   bankName: z.string().min(2, 'Bank name required'),
   bankAccountNumber: z.string().min(8, 'Valid account number required'),
@@ -161,15 +161,12 @@ export default function CompleteProfilePage() {
   const form3 = useForm<Step3Values>({ resolver: zodResolver(step3Schema), mode: 'onTouched' });
 
   const onSubmitStep2 = async (data: Step2Values) => {
-    if (!aadhaarFile.file) { toast.error('Aadhaar document is required'); return; }
-    if (!panFile.file) { toast.error('PAN document is required'); return; }
-
     try {
       setIsLoading(true);
       const formData = new FormData();
       Object.entries(data).forEach(([k, v]) => v && formData.append(k, v));
-      formData.append('aadhaarDocument', aadhaarFile.file);
-      formData.append('panDocument', panFile.file);
+      if (aadhaarFile.file) formData.append('aadhaarDocument', aadhaarFile.file);
+      if (panFile.file) formData.append('panDocument', panFile.file);
 
       await api.post('/auth/complete-profile/kyc', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
@@ -252,10 +249,10 @@ export default function CompleteProfilePage() {
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Identity Information</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Aadhaar Number" error={form2.formState.errors.aadhaarNumber?.message}>
+                  <Field label="Aadhaar Number (Optional)" error={form2.formState.errors.aadhaarNumber?.message}>
                     <input {...form2.register('aadhaarNumber')} placeholder="123456789012" className={inputClass} maxLength={12} />
                   </Field>
-                  <Field label="PAN Number" error={form2.formState.errors.panCard?.message}>
+                  <Field label="PAN Number (Optional)" error={form2.formState.errors.panCard?.message}>
                     <input {...form2.register('panCard')} placeholder="ABCDE1234F" className={`${inputClass} uppercase`} maxLength={10} />
                   </Field>
                 </div>
@@ -269,17 +266,15 @@ export default function CompleteProfilePage() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <FileUpload
-                    label="Aadhaar Card"
+                    label="Aadhaar Card (Optional)"
                     accept=".pdf,.jpg,.jpeg,.png"
-                    required
                     value={aadhaarFile}
                     onChange={setAadhaarFile}
                     hint="PDF, JPG, JPEG, PNG — Max 5MB"
                   />
                   <FileUpload
-                    label="PAN Card"
+                    label="PAN Card (Optional)"
                     accept=".pdf,.jpg,.jpeg,.png"
-                    required
                     value={panFile}
                     onChange={setPanFile}
                     hint="PDF, JPG, JPEG, PNG — Max 5MB"

@@ -140,12 +140,23 @@ export const updateProfile = async (picId: string, data: any) => {
     where: { id: picId },
     data: updateData,
     select: {
-      id: true, fullName: true, phone: true, address: true,
-      state: true, city: true, pincode: true,
-      upiId: true, bankAccountNumber: true, ifscCode: true,
-      instagramProfile: true,
-    }
+      id: true, fullName: true, email: true, phone: true, profileImage: true,
+      address: true, state: true, city: true, pincode: true,
+      upiId: true, bankAccountNumber: true, ifscCode: true, instagramProfile: true,
+    },
   });
 
+  return pic;
+};
+
+export const acceptPolicy = async (picId: string) => {
+  const pic = await prisma.pICPartner.update({
+    where: { id: picId },
+    data: { isPolicyAccepted: true },
+    select: {
+      id: true,
+      isPolicyAccepted: true,
+    },
+  });
   return pic;
 };

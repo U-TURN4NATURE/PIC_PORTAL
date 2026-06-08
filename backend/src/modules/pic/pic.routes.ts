@@ -23,5 +23,6 @@ router.post('/payouts', picController.requestPayout);
 
 // Profile
 router.patch('/profile', picController.updateProfile);
+router.post('/accept-policy', picController.acceptPolicy);
 
 export default router;

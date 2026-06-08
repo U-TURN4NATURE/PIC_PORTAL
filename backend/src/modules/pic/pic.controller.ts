@@ -66,3 +66,12 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     next(error);
   }
 };
+
+export const acceptPolicy = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const pic = await picService.acceptPolicy(req.user!.id);
+    res.status(200).json(successResponse(pic, 'Policy accepted successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
