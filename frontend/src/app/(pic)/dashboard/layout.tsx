@@ -166,10 +166,10 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated || user?.role !== 'PIC') {
-        router.replace('/login'); // replace so back button doesn't loop back here
-      }
+    // Only redirect if we're fully done loading and definitely not authenticated.
+    // If isLoading is still true (API in-flight), wait — don't redirect prematurely.
+    if (!isLoading && (!isAuthenticated || user?.role !== 'PIC')) {
+      router.replace('/login');
     }
   }, [isAuthenticated, user, isLoading, router]);
 
@@ -184,13 +184,19 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     }
   };
 
-  // Loading spinner
-  if (isLoading || !isAuthenticated || user?.role !== 'PIC') {
+  // Show spinner ONLY when actively loading with no cached user.
+  // If we have a user from persisted state, render immediately.
+  if (isLoading && !user) {
     return (
       <div className="min-h-screen bg-brand-beige flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-forest" />
       </div>
     );
+  }
+
+  // Redirect handled by useEffect — render null briefly while it fires
+  if (!isAuthenticated || user?.role !== 'PIC') {
+    return null;
   }
 
   // Status-based screens (no sidebar for non-active users)

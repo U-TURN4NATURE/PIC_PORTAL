@@ -98,9 +98,12 @@ export const getPolicyDocument = async (req: Request, res: Response, next: NextF
       return;
     }
 
-    const pdfPath = path.resolve(__dirname, '../../assets/policy.pdf');
+    const pdfPath = path.resolve(process.cwd(), 'dist', 'assets', 'policy.pdf');
+    // In development (ts-node), fall back to src/assets
+    const devPath = path.resolve(process.cwd(), 'src', 'assets', 'policy.pdf');
+    const resolvedPath = fs.existsSync(pdfPath) ? pdfPath : devPath;
 
-    if (!fs.existsSync(pdfPath)) {
+    if (!fs.existsSync(resolvedPath)) {
       res.status(404).json(errorResponse('Policy document not found. Please contact support.'));
       return;
     }
@@ -111,7 +114,7 @@ export const getPolicyDocument = async (req: Request, res: Response, next: NextF
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.setHeader('X-Content-Type-Options', 'nosniff');
 
-    const stream = fs.createReadStream(pdfPath);
+    const stream = fs.createReadStream(resolvedPath);
     stream.pipe(res);
   } catch (error) {
     next(error);

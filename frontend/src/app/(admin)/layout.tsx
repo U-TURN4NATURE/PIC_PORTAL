@@ -32,10 +32,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated || user?.role !== 'ADMIN') {
-        router.replace('/admin/login'); // replace so back button doesn't loop back here
-      }
+    // Only redirect when loading is fully done and user is definitely not admin
+    if (!isLoading && (!isAuthenticated || user?.role !== 'ADMIN')) {
+      router.replace('/admin/login');
     }
   }, [isAuthenticated, user, isLoading, router]);
 
@@ -50,10 +49,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     }
   };
 
-  if (isLoading || !isAuthenticated || user?.role !== 'ADMIN') {
+  // Show spinner only when loading with no cached user
+  if (isLoading && !user) {
     return <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-brand-forest"></div>
     </div>;
+  }
+
+  // Redirect handled by useEffect — render nothing briefly
+  if (!isAuthenticated || user?.role !== 'ADMIN') {
+    return null;
   }
 
   const navItems = [
