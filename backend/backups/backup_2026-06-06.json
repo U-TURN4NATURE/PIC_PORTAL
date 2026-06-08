@@ -1,0 +1,320 @@
+{
+  "meta": {
+    "exportedAt": "2026-06-06T13:59:22.108Z",
+    "exportedBy": "backup-db.js",
+    "version": "1.0",
+    "counts": {
+      "admins": 2,
+      "picPartners": 2,
+      "wallets": 2,
+      "referrals": 2,
+      "saleEntries": 1,
+      "orders": 0,
+      "payouts": 0,
+      "notifications": 5,
+      "followUpRequests": 1,
+      "auditLogs": 2
+    }
+  },
+  "data": {
+    "admins": [
+      {
+        "id": "cmpy9jmfl0000phk3py2haem1",
+        "name": "Super Admin",
+        "email": "iteabhinavsharma@gmail.com",
+        "phone": "7983299389",
+        "password": "$2a$12$H4qKuh7TGW0FSF8aqltUOeqEHB5Ei3l7wWSlgVeaoE.WJttG5m4pu",
+        "createdAt": "2026-06-03T16:10:50.573Z",
+        "updatedAt": "2026-06-03T16:10:50.573Z"
+      },
+      {
+        "id": "cmpzn4je10000vugdmh81kq5c",
+        "name": "Abhishek Admin",
+        "email": "abku73@gmail.com",
+        "phone": null,
+        "password": "$2a$12$ZYR/HzmNsy4DtFBgV7k47OY98StLPUW.Wloxq0CGe/Cj/8rgPoX3m",
+        "createdAt": "2026-06-04T15:18:47.586Z",
+        "updatedAt": "2026-06-04T16:30:05.522Z"
+      }
+    ],
+    "picPartners": [
+      {
+        "id": "cmpy9z9k30000k6mj3wet4sjq",
+        "fullName": "Abhinav Sharma",
+        "email": "abhinavsharma75990@gmail.com",
+        "phone": "7983299389",
+        "password": "$2a$12$FZPqvJ/E0dTuaZVBclZjhOqwHbBGOf0ok7aX51jxvViyyIGqJYT0S",
+        "profileImage": null,
+        "address": "Greater Noida ",
+        "state": "Uttar Pradesh",
+        "city": "GREATER NOIDA",
+        "pincode": "201306",
+        "aadhaarNumber": "582459965475",
+        "panCard": "AVCYB0639F",
+        "aadhaarDocument": "https://res.cloudinary.com/dxvr20qlb/image/upload/v1780503866/pic-portal/docs/aadhaarDocument-1780503858462.pdf",
+        "panDocument": "https://res.cloudinary.com/dxvr20qlb/image/upload/v1780503870/pic-portal/docs/panDocument-1780503866169.pdf",
+        "bankAccountName": "ABHINAV",
+        "bankName": "SBIN0004152",
+        "bankAccountNumber": "35448742366",
+        "ifscCode": "SBIN0002617",
+        "branchName": "CP",
+        "upiId": null,
+        "occupation": "Student ",
+        "yearsOfExperience": "0-1 years",
+        "skills": "Sales marketing ",
+        "education": "12th Pass",
+        "experience": "0-1 years",
+        "whyJoin": "This is a testing phase",
+        "preferredWorkingArea": "Greater Noida",
+        "preferredDistrict": "Greater Noida ",
+        "availability": "Full Time",
+        "instagramProfile": null,
+        "resumeDocument": null,
+        "referralCode": "ABHI129",
+        "status": "ACTIVE",
+        "profileCompleted": true,
+        "isEmailVerified": true,
+        "approvedAt": "2026-06-03T16:23:14.548Z",
+        "profileCompletedAt": "2026-06-03T16:26:20.101Z",
+        "rejectionReason": null,
+        "rejectedAt": null,
+        "otpCode": null,
+        "otpExpiresAt": null,
+        "resetToken": null,
+        "resetTokenExpiry": null,
+        "createdAt": "2026-06-03T16:23:00.387Z",
+        "updatedAt": "2026-06-03T16:26:20.102Z"
+      },
+      {
+        "id": "cmpzohu9m0000aubefs4sqghn",
+        "fullName": "Sandeep",
+        "email": "sandeep75990@gmail.com",
+        "phone": "7599027698",
+        "password": "$2a$12$dH2lwvEPD80UPc7GWecExOgX0zaMS.LEt6MC.4pZTSg2inAiK/7.O",
+        "profileImage": null,
+        "address": "Noida",
+        "state": "Uttar Pradesh",
+        "city": "Noida",
+        "pincode": "201308",
+        "aadhaarNumber": "582459965458",
+        "panCard": "AVCYB0639Z",
+        "aadhaarDocument": "https://res.cloudinary.com/dxvr20qlb/image/upload/v1780588773/pic-portal/docs/aadhaarDocument-1780588769690.pdf",
+        "panDocument": "https://res.cloudinary.com/dxvr20qlb/image/upload/v1780588778/pic-portal/docs/panDocument-1780588773775.pdf",
+        "bankAccountName": "Testing",
+        "bankName": "Testing",
+        "bankAccountNumber": "354478526336",
+        "ifscCode": "SBIN0004512",
+        "branchName": "CP",
+        "upiId": null,
+        "occupation": "Testing",
+        "yearsOfExperience": "1-3 years",
+        "skills": "Sales marketing ",
+        "education": "Graduate",
+        "experience": "1-3 years",
+        "whyJoin": "testing phase 002 -- under testinig ",
+        "preferredWorkingArea": "Noida",
+        "preferredDistrict": "Noida",
+        "availability": "Part Time",
+        "instagramProfile": null,
+        "resumeDocument": null,
+        "referralCode": "SAND854",
+        "status": "ACTIVE",
+        "profileCompleted": true,
+        "isEmailVerified": true,
+        "approvedAt": "2026-06-04T15:58:03.168Z",
+        "profileCompletedAt": "2026-06-04T16:00:30.225Z",
+        "rejectionReason": null,
+        "rejectedAt": null,
+        "otpCode": null,
+        "otpExpiresAt": null,
+        "resetToken": null,
+        "resetTokenExpiry": null,
+        "createdAt": "2026-06-04T15:57:07.835Z",
+        "updatedAt": "2026-06-04T16:00:30.226Z"
+      }
+    ],
+    "wallets": [
+      {
+        "id": "cmpya3jx70007k6mjdo0gxjwp",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "totalEarnings": 450,
+        "pendingEarnings": 0,
+        "paidEarnings": 0,
+        "availableBalance": 450,
+        "updatedAt": "2026-06-04T09:19:48.295Z"
+      },
+      {
+        "id": "cmpzom6o50007aubewzlpl28c",
+        "picId": "cmpzohu9m0000aubefs4sqghn",
+        "totalEarnings": 500,
+        "pendingEarnings": 0,
+        "paidEarnings": 0,
+        "availableBalance": 500,
+        "updatedAt": "2026-06-04T16:28:24.110Z"
+      }
+    ],
+    "referrals": [
+      {
+        "id": "cmpz9tf3r000114frcvrwbgt7",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "personName": "Arpit",
+        "personEmail": null,
+        "personPhone": "8218918791",
+        "status": "BUYING",
+        "adminNotes": null,
+        "statusUpdatedAt": "2026-06-04T09:19:48.175Z",
+        "totalSalesAmount": 9000,
+        "commissionAmount": 450,
+        "commissionRate": 5,
+        "createdAt": "2026-06-04T09:06:13.815Z",
+        "updatedAt": "2026-06-04T09:19:48.176Z"
+      },
+      {
+        "id": "cmpzpkz8z0001gt3kni5yvd4r",
+        "picId": "cmpzohu9m0000aubefs4sqghn",
+        "personName": "Rahul",
+        "personEmail": null,
+        "personPhone": "7588452639",
+        "status": "BUYING",
+        "adminNotes": null,
+        "statusUpdatedAt": "2026-06-04T16:28:23.824Z",
+        "totalSalesAmount": 10000,
+        "commissionAmount": 500,
+        "commissionRate": 5,
+        "createdAt": "2026-06-04T16:27:33.875Z",
+        "updatedAt": "2026-06-04T16:28:23.825Z"
+      }
+    ],
+    "saleEntries": [
+      {
+        "id": "cmpzpm1wc0004gt3kfqq4h8c8",
+        "referralId": "cmpzpkz8z0001gt3kni5yvd4r",
+        "picId": "cmpzohu9m0000aubefs4sqghn",
+        "saleAmount": 10000,
+        "commissionRate": 5,
+        "commissionEarned": 500,
+        "notes": null,
+        "createdAt": "2026-06-04T16:28:23.964Z",
+        "updatedAt": "2026-06-04T16:28:23.964Z"
+      }
+    ],
+    "orders": [],
+    "payouts": [],
+    "notifications": [
+      {
+        "id": "cmpy9zklf0003k6mj748i94zc",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "adminId": null,
+        "type": "PIC_APPROVED",
+        "title": "Application Approved! 🎉",
+        "message": "Congratulations! Your PIC application has been approved. Please login and complete your KYC and profile details to get your referral code and start earning.",
+        "isRead": false,
+        "metadata": {
+          "referralCode": "ABHI129"
+        },
+        "createdAt": "2026-06-03T16:23:14.692Z"
+      },
+      {
+        "id": "cmpzaacvu00026wbf9uqvgyha",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "adminId": null,
+        "type": "NEW_COMMISSION",
+        "title": "New Commission Earned! 🎉",
+        "message": "You earned ₹250.00 commission for referral: Arpit.",
+        "isRead": false,
+        "metadata": {
+          "commission": 250,
+          "referralId": "cmpz9tf3r000114frcvrwbgt7",
+          "salesAmount": 5000
+        },
+        "createdAt": "2026-06-04T09:19:24.091Z"
+      },
+      {
+        "id": "cmpzaavnh00056wbfp55e91wc",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "adminId": null,
+        "type": "NEW_COMMISSION",
+        "title": "New Commission Earned! 🎉",
+        "message": "You earned ₹200.00 commission for referral: Arpit.",
+        "isRead": false,
+        "metadata": {
+          "commission": 200,
+          "referralId": "cmpz9tf3r000114frcvrwbgt7",
+          "salesAmount": 4000
+        },
+        "createdAt": "2026-06-04T09:19:48.413Z"
+      },
+      {
+        "id": "cmpzoj12b0003aubeje1ax527",
+        "picId": "cmpzohu9m0000aubefs4sqghn",
+        "adminId": null,
+        "type": "PIC_APPROVED",
+        "title": "Application Approved! 🎉",
+        "message": "Congratulations! Your PIC application has been approved. Please login and complete your KYC and profile details to get your referral code and start earning.",
+        "isRead": false,
+        "metadata": {
+          "referralCode": "SAND854"
+        },
+        "createdAt": "2026-06-04T15:58:03.299Z"
+      },
+      {
+        "id": "cmpzpm2480006gt3kfm67wtva",
+        "picId": "cmpzohu9m0000aubefs4sqghn",
+        "adminId": null,
+        "type": "NEW_COMMISSION",
+        "title": "New Commission Earned! 🎉",
+        "message": "You earned ₹500.00 commission for referral: Rahul.",
+        "isRead": false,
+        "metadata": {
+          "commission": 500,
+          "referralId": "cmpzpkz8z0001gt3kni5yvd4r",
+          "salesAmount": 10000
+        },
+        "createdAt": "2026-06-04T16:28:24.249Z"
+      }
+    ],
+    "followUpRequests": [
+      {
+        "id": "cmpza20tn000314fr8o4eda76",
+        "picId": "cmpy9z9k30000k6mj3wet4sjq",
+        "referralId": "cmpz9tf3r000114frcvrwbgt7",
+        "reason": "Team contact him.",
+        "priority": "NORMAL",
+        "status": "OPEN",
+        "adminNotes": null,
+        "resolvedAt": null,
+        "createdAt": "2026-06-04T09:12:55.211Z",
+        "updatedAt": "2026-06-04T09:12:55.211Z"
+      }
+    ],
+    "auditLogs": [
+      {
+        "id": "cmpy9zkpe0005k6mj8ylx023z",
+        "actorId": "cmpy9jmfl0000phk3py2haem1",
+        "actorRole": "ADMIN",
+        "action": "APPROVE_PIC",
+        "targetId": "cmpy9z9k30000k6mj3wet4sjq",
+        "targetType": "PICPartner",
+        "metadata": {
+          "referralCode": "ABHI129"
+        },
+        "ipAddress": null,
+        "createdAt": "2026-06-03T16:23:14.834Z"
+      },
+      {
+        "id": "cmpzoj15z0005aubepa6ycaom",
+        "actorId": "cmpy9jmfl0000phk3py2haem1",
+        "actorRole": "ADMIN",
+        "action": "APPROVE_PIC",
+        "targetId": "cmpzohu9m0000aubefs4sqghn",
+        "targetType": "PICPartner",
+        "metadata": {
+          "referralCode": "SAND854"
+        },
+        "ipAddress": null,
+        "createdAt": "2026-06-04T15:58:03.431Z"
+      }
+    ],
+    "shopifySettings": []
+  }
+}

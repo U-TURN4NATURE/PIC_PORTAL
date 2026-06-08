@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { protect, restrictToPIC } from '../../middleware/auth.middleware';
 import {
   handleAddReferral,
+  handleBulkAddReferrals,
+  handleUpdateHandledBy,
   handleGetPICReferrals,
   handleGetPICReferralStats,
 } from './referral.controller';
@@ -13,6 +15,12 @@ router.use(protect, restrictToPIC);
 
 // POST /api/pic/referrals — PIC adds a new referral
 router.post('/', handleAddReferral);
+
+// POST /api/pic/referrals/bulk — PIC bulk uploads referrals
+router.post('/bulk', handleBulkAddReferrals);
+
+// PATCH /api/pic/referrals/:id/handled-by — PIC updates handledBy
+router.patch('/:id/handled-by', handleUpdateHandledBy);
 
 // GET /api/pic/referrals — PIC gets their own referrals
 router.get('/', handleGetPICReferrals);

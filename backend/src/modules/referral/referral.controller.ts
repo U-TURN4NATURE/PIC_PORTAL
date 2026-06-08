@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import {
   addReferral,
+  addBulkReferrals,
+  updateReferralHandledBy,
   getPICReferrals,
   getPICReferralStats,
   getAdminReferralsByPIC,
@@ -11,7 +13,7 @@ import {
   updateSaleEntry,
   deleteSaleEntry,
 } from './referral.service';
-import { ReferralStatus } from '@prisma/client';
+import { ReferralStatus, HandledBy } from '@prisma/client';
 
 // ─────────────────────────────────────────────────
 // PIC Controllers
@@ -21,6 +23,24 @@ export const handleAddReferral = async (req: Request, res: Response): Promise<vo
   const picId = (req as any).user.id;
   const data = await addReferral(picId, req.body);
   res.status(201).json({ success: true, data });
+};
+
+export const handleBulkAddReferrals = async (req: Request, res: Response): Promise<void> => {
+  const picId = (req as any).user.id;
+  const { referrals } = req.body;
+  if (!Array.isArray(referrals)) {
+    res.status(400).json({ success: false, message: 'Invalid payload format' });
+    return;
+  }
+  const result = await addBulkReferrals(picId, referrals);
+  res.status(201).json({ success: true, count: result.count });
+};
+
+export const handleUpdateHandledBy = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { handledBy } = req.body;
+  const data = await updateReferralHandledBy(id, handledBy as HandledBy);
+  res.json({ success: true, data });
 };
 
 export const handleGetPICReferrals = async (req: Request, res: Response): Promise<void> => {

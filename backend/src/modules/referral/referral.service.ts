@@ -1,6 +1,6 @@
 import prisma from '../../config/database';
 import { createError } from '../../middleware/error.middleware';
-import { ReferralStatus } from '@prisma/client';
+import { ReferralStatus, HandledBy } from '@prisma/client';
 import { parsePagination } from '../../utils/pagination.utils';
 
 // ─────────────────────────────────────────────────
@@ -14,7 +14,7 @@ const COMMISSION_RATE = parseFloat(process.env.COMMISSION_RATE || '5.0');
  */
 export const addReferral = async (
   picId: string,
-  data: { personName: string; personPhone: string; personEmail?: string }
+  data: { personName: string; personPhone: string; personEmail?: string; handledBy?: HandledBy }
 ) => {
   // Block duplicate phone under same PIC
   const existing = await prisma.referral.findUnique({
@@ -31,7 +31,42 @@ export const addReferral = async (
       personPhone: data.personPhone,
       personEmail: data.personEmail || null,
       commissionRate: COMMISSION_RATE,
+      handledBy: data.handledBy || 'U_TURN_NATURE',
     },
+  });
+};
+
+/**
+ * PIC adds referrals in bulk
+ */
+export const addBulkReferrals = async (
+  picId: string,
+  referrals: { personName: string; personPhone: string; personEmail?: string; handledBy?: HandledBy }[]
+) => {
+  const result = await prisma.referral.createMany({
+    data: referrals.map(r => ({
+      picId,
+      personName: r.personName,
+      personPhone: r.personPhone,
+      personEmail: r.personEmail || null,
+      commissionRate: COMMISSION_RATE,
+      handledBy: r.handledBy || 'U_TURN_NATURE',
+    })),
+    skipDuplicates: true,
+  });
+  return result;
+};
+
+/**
+ * PIC updates the handledBy status of a referral
+ */
+export const updateReferralHandledBy = async (
+  referralId: string,
+  handledBy: HandledBy
+) => {
+  return prisma.referral.update({
+    where: { id: referralId },
+    data: { handledBy },
   });
 };
 

@@ -21,6 +21,7 @@ interface Referral {
   personPhone: string;
   personEmail?: string;
   status: ReferralStatus;
+  handledBy?: 'PIC' | 'U_TURN_NATURE';
   adminNotes?: string;
   totalSalesAmount: number;
   commissionAmount: number;
@@ -164,8 +165,9 @@ export default function ReferralPage() {
   const [followUpModal, setFollowUpModal] = useState<Referral | null>(null);
 
   // Add Referral Form State
-  const [form, setForm] = useState({ personName: '', personPhone: '', personEmail: '' });
+  const [form, setForm] = useState({ personName: '', personPhone: '', personEmail: '', handledBy: 'U_TURN_NATURE' });
   const [submitting, setSubmitting] = useState(false);
+  const [bulkUploading, setBulkUploading] = useState(false);
 
   const fetchReferrals = useCallback(async () => {
     setLoading(true);
@@ -202,13 +204,73 @@ export default function ReferralPage() {
     try {
       await api.post('/pic/referrals', form);
       toast.success(`${form.personName} added to your referrals!`);
-      setForm({ personName: '', personPhone: '', personEmail: '' });
+      setForm({ personName: '', personPhone: '', personEmail: '', handledBy: 'U_TURN_NATURE' });
       fetchReferrals();
       setActiveTab('my-referrals');
     } catch (err: any) {
       toast.error(err?.response?.data?.message || 'Failed to add referral');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleBulkUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    setBulkUploading(true);
+    try {
+      const text = await file.text();
+      const rows = text.split('\n').map(r => r.trim()).filter(r => r);
+      if (rows.length < 2) throw new Error('File is empty or missing data rows');
+      
+      const referrals = [];
+      // Skip header row
+      for (let i = 1; i < rows.length; i++) {
+        // Simple CSV parse handling commas
+        const cols = rows[i].split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+        if (cols.length >= 2 && cols[0] && cols[1]) {
+          referrals.push({
+            personName: cols[0],
+            personPhone: cols[1],
+            personEmail: cols[2] || undefined,
+            handledBy: cols[3]?.toLowerCase().includes('pic') ? 'PIC' : 'U_TURN_NATURE'
+          });
+        }
+      }
+      
+      if (referrals.length === 0) throw new Error('No valid referrals found in file');
+      
+      const res = await api.post('/pic/referrals/bulk', { referrals });
+      toast.success(`Successfully uploaded ${res.data.count} referrals!`);
+      fetchReferrals();
+      setActiveTab('my-referrals');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload bulk referrals');
+    } finally {
+      setBulkUploading(false);
+      e.target.value = '';
+    }
+  };
+
+  const downloadTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8,Name,Phone,Email,Handled By (PIC or U-Turn)\nRahul Sharma,9876543210,rahul@example.com,PIC\nAnita Verma,9123456789,anita@example.com,U-Turn";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "referral_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleAssignToMe = async (referral: Referral) => {
+    try {
+      await api.patch(`/pic/referrals/${referral.id}/handled-by`, { handledBy: 'PIC' });
+      toast.success('You are now handling this referral.');
+      fetchReferrals();
+    } catch (err) {
+      toast.error('Failed to update referral.');
     }
   };
 
@@ -260,57 +322,98 @@ export default function ReferralPage() {
 
       {/* Tab: Add Referral */}
       {activeTab === 'add' && (
-        <div className="bg-white border border-brand-sage/30 rounded-2xl p-8 shadow-sm max-w-lg">
-          <h2 className="text-xl font-semibold text-brand-forest mb-1">Add a New Referral</h2>
-          <p className="text-sm text-gray-500 mb-6">Enter the details of the person you are referring.</p>
-          <form onSubmit={handleAddReferral} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
-              <input
-                type="text"
-                value={form.personName}
-                onChange={e => setForm(f => ({ ...f, personName: e.target.value }))}
-                placeholder="e.g. Rahul Sharma"
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white border border-brand-sage/30 rounded-2xl p-8 shadow-sm max-w-lg">
+            <h2 className="text-xl font-semibold text-brand-forest mb-1">Add a New Referral</h2>
+            <p className="text-sm text-gray-500 mb-6">Enter the details of the person you are referring.</p>
+            <form onSubmit={handleAddReferral} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
                 <input
-                  type="tel"
-                  value={form.personPhone}
-                  onChange={e => setForm(f => ({ ...f, personPhone: e.target.value }))}
-                  placeholder="9876543210"
-                  className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                  type="text"
+                  value={form.personName}
+                  onChange={e => setForm(f => ({ ...f, personName: e.target.value }))}
+                  placeholder="e.g. Rahul Sharma"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                   required
                 />
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-gray-400 font-normal">(optional)</span></label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number <span className="text-red-500">*</span></label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="tel"
+                    value={form.personPhone}
+                    onChange={e => setForm(f => ({ ...f, personPhone: e.target.value }))}
+                    placeholder="9876543210"
+                    className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email Address <span className="text-gray-400 font-normal">(optional)</span></label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={form.personEmail}
+                    onChange={e => setForm(f => ({ ...f, personEmail: e.target.value }))}
+                    placeholder="rahul@example.com"
+                    className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Handled By <span className="text-red-500">*</span></label>
+                <select
+                  value={form.handledBy}
+                  onChange={e => setForm(f => ({ ...f, handledBy: e.target.value }))}
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                >
+                  <option value="U_TURN_NATURE">Followed up by U-Turn4Nature</option>
+                  <option value="PIC">Followed up by Me (PIC)</option>
+                </select>
+              </div>
+              <button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-brand-forest text-white py-3 rounded-xl font-semibold hover:bg-brand-olive transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
+              >
+                {submitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
+                {submitting ? 'Adding...' : 'Add Referral'}
+              </button>
+            </form>
+          </div>
+
+          <div className="bg-white border border-brand-sage/30 rounded-2xl p-8 shadow-sm h-fit max-w-lg">
+            <h2 className="text-xl font-semibold text-brand-forest mb-1">Bulk Upload</h2>
+            <p className="text-sm text-gray-500 mb-6">Upload multiple referrals at once using a CSV file.</p>
+            
+            <div className="space-y-4">
+              <button 
+                onClick={downloadTemplate}
+                className="w-full border-2 border-dashed border-gray-300 text-gray-600 py-3 rounded-xl font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+              >
+                📥 Download CSV Template
+              </button>
+              
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="email"
-                  value={form.personEmail}
-                  onChange={e => setForm(f => ({ ...f, personEmail: e.target.value }))}
-                  placeholder="rahul@example.com"
-                  className="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                <input 
+                  type="file" 
+                  accept=".csv"
+                  onChange={handleBulkUpload}
+                  disabled={bulkUploading}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
                 />
+                <div className={`w-full ${bulkUploading ? 'bg-gray-100' : 'bg-brand-forest hover:bg-brand-olive'} text-white py-3 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2 pointer-events-none`}>
+                  {bulkUploading ? <RefreshCw className="w-4 h-4 animate-spin text-gray-500" /> : <Users className="w-4 h-4" />}
+                  {bulkUploading ? <span className="text-gray-500">Uploading...</span> : 'Upload CSV File'}
+                </div>
               </div>
             </div>
-            <button
-              type="submit"
-              disabled={submitting}
-              className="w-full bg-brand-forest text-white py-3 rounded-xl font-semibold hover:bg-brand-olive transition-colors disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {submitting ? <RefreshCw className="w-4 h-4 animate-spin" /> : <UserPlus className="w-4 h-4" />}
-              {submitting ? 'Adding...' : 'Add Referral'}
-            </button>
-          </form>
+          </div>
         </div>
       )}
 
@@ -367,13 +470,25 @@ export default function ReferralPage() {
                               <Flag className="w-3 h-3" />
                               {latestFollowUp.status === 'OPEN' ? 'Requested' : 'In Progress'}
                             </span>
+                          ) : ref.handledBy === 'PIC' ? (
+                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
+                              <UserPlus className="w-3 h-3" /> Handled by Me
+                            </span>
                           ) : (
-                            <button
-                              onClick={() => setFollowUpModal(ref)}
-                              className="inline-flex items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-medium transition-colors"
-                            >
-                              <Flag className="w-3 h-3" /> Request
-                            </button>
+                            <div className="flex flex-col gap-2 items-center">
+                              <button
+                                onClick={() => handleAssignToMe(ref)}
+                                className="w-full inline-flex justify-center items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition-colors"
+                              >
+                                <UserPlus className="w-3 h-3" /> Follow by Me
+                              </button>
+                              <button
+                                onClick={() => setFollowUpModal(ref)}
+                                className="w-full inline-flex justify-center items-center gap-1 px-3 py-1.5 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg text-xs font-medium transition-colors"
+                              >
+                                <Flag className="w-3 h-3" /> Follow by U-Turn
+                              </button>
+                            </div>
                           )}
                         </td>
                       </tr>

@@ -65,6 +65,11 @@ enum NotificationType {
   SYSTEM
 }
 
+enum HandledBy {
+  PIC
+  U_TURN_NATURE
+}
+
 enum ActorRole {
   ADMIN
   PIC
@@ -298,6 +303,7 @@ model Referral {
   status            ReferralStatus @default(PENDING)
   adminNotes        String?        @db.Text
   statusUpdatedAt   DateTime?
+  handledBy         HandledBy      @default(U_TURN_NATURE)
 
   // Sales — manually updated by Admin
   totalSalesAmount  Float          @default(0)
