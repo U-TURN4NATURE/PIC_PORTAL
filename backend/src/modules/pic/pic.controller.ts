@@ -88,7 +88,7 @@ export const acceptPolicy = async (req: Request, res: Response, next: NextFuncti
 export const getPolicyDocument = async (req: Request, res: Response, next: NextFunction) => {
   try {
     // Double-check the PIC is ACTIVE in the database (JWT alone is not enough)
-    const pic = await prisma.pIC.findUnique({
+    const pic = await prisma.pICPartner.findUnique({
       where: { id: req.user!.id },
       select: { status: true },
     });
