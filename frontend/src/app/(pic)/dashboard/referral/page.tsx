@@ -157,7 +157,7 @@ function FollowUpModal({
 // Main Page
 // ─────────────────────────────────────────────────
 export default function ReferralPage() {
-  const [activeTab, setActiveTab] = useState<'add' | 'my-referrals' | 'follow-ups'>('add');
+  const [activeTab, setActiveTab] = useState<'add' | 'my-referrals' | 'uturn-referrals' | 'follow-ups'>('add');
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [followUps, setFollowUps] = useState<FollowUpRequest[]>([]);
   const [stats, setStats] = useState<any>(null);
@@ -303,8 +303,9 @@ export default function ReferralPage() {
       <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
         {[
           { key: 'add', label: 'Add Referral', icon: <UserPlus className="w-4 h-4" /> },
-          { key: 'my-referrals', label: `All Referrals (${referrals.length})`, icon: <Users className="w-4 h-4" /> },
-          { key: 'follow-ups', label: `Follow-up Requests (${followUps.length})`, icon: <Flag className="w-4 h-4" /> },
+          { key: 'my-referrals', label: `Follow by Me (${referrals.filter(r => r.handledBy === 'PIC').length})`, icon: <Users className="w-4 h-4" /> },
+          { key: 'uturn-referrals', label: `Follow by U-Turn (${referrals.filter(r => r.handledBy === 'U_TURN_NATURE').length})`, icon: <Flag className="w-4 h-4" /> },
+          { key: 'follow-ups', label: `Follow-up Requests (${followUps.length})`, icon: <TrendingUp className="w-4 h-4" /> },
         ].map(tab => (
           <button
             key={tab.key}
@@ -417,16 +418,16 @@ export default function ReferralPage() {
         </div>
       )}
 
-      {/* Tab: My Referrals */}
-      {activeTab === 'my-referrals' && (
+      {/* Tabs: Referrals Lists */}
+      {(activeTab === 'my-referrals' || activeTab === 'uturn-referrals') && (
         <div className="bg-white border border-brand-sage/30 rounded-2xl shadow-sm overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-gray-400">Loading referrals...</div>
-          ) : referrals.length === 0 ? (
+          ) : referrals.filter(r => r.handledBy === (activeTab === 'my-referrals' ? 'PIC' : 'U_TURN_NATURE')).length === 0 ? (
             <div className="p-12 text-center">
               <Users className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">No referrals yet</p>
-              <p className="text-gray-400 text-sm mt-1">Go to "Add Referral" tab to add your first referral.</p>
+              <p className="text-gray-500 font-medium">No referrals found</p>
+              <p className="text-gray-400 text-sm mt-1">You don't have any referrals assigned to {activeTab === 'my-referrals' ? 'you' : 'U-Turn Nature'}.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -442,7 +443,7 @@ export default function ReferralPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {referrals.map(ref => {
+                  {referrals.filter(r => r.handledBy === (activeTab === 'my-referrals' ? 'PIC' : 'U_TURN_NATURE')).map(ref => {
                     const sc = STATUS_CONFIG[ref.status];
                     const latestFollowUp = ref.followUpRequests?.[0];
                     const hasOpenFollowUp = latestFollowUp?.status === 'OPEN' || latestFollowUp?.status === 'IN_PROGRESS';

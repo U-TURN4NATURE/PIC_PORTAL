@@ -203,6 +203,7 @@ export default function CustomersPage() {
   const [loading, setLoading] = useState(true);
   const [selectedPic, setSelectedPic] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedHandledBy, setSelectedHandledBy] = useState<string>('all');
   const [search, setSearch] = useState('');
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
   const [saleModal, setSaleModal] = useState<any | null>(null);
@@ -238,11 +239,12 @@ export default function CustomersPage() {
   const filtered = referrals.filter(r => {
     const picMatch = selectedPic === 'all' || r.picId === selectedPic;
     const statusMatch = selectedStatus === 'all' || r.status === selectedStatus;
+    const handledByMatch = selectedHandledBy === 'all' || r.handledBy === selectedHandledBy;
     const searchMatch = !search ||
       r.personName.toLowerCase().includes(search.toLowerCase()) ||
       r.personPhone.includes(search) ||
       r.pic?.fullName?.toLowerCase().includes(search.toLowerCase());
-    return picMatch && statusMatch && searchMatch;
+    return picMatch && statusMatch && handledByMatch && searchMatch;
   });
 
   // Stats
@@ -317,12 +319,26 @@ export default function CustomersPage() {
           <select
             value={selectedStatus}
             onChange={e => setSelectedStatus(e.target.value)}
-            className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer min-w-[160px]"
+            className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer min-w-[150px]"
           >
             <option value="all">All Statuses</option>
             {ALL_STATUSES.map(s => (
               <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
             ))}
+          </select>
+          <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+        </div>
+
+        {/* Handled By Filter */}
+        <div className="relative">
+          <select
+            value={selectedHandledBy}
+            onChange={e => setSelectedHandledBy(e.target.value)}
+            className="appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 pr-9 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 cursor-pointer min-w-[150px]"
+          >
+            <option value="all">Handled By: All</option>
+            <option value="PIC">Handled By: PIC</option>
+            <option value="U_TURN_NATURE">Handled By: U-Turn</option>
           </select>
           <Filter className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
         </div>
@@ -348,6 +364,7 @@ export default function CustomersPage() {
                   <th className="px-6 py-3 text-left font-semibold">Customer</th>
                   <th className="px-6 py-3 text-left font-semibold">Contact</th>
                   <th className="px-6 py-3 text-left font-semibold">Referred By (PIC)</th>
+                  <th className="px-6 py-3 text-left font-semibold">Handled By</th>
                   <th className="px-6 py-3 text-left font-semibold">Status</th>
                   <th className="px-6 py-3 text-right font-semibold">Sales</th>
                   <th className="px-6 py-3 text-right font-semibold">Commission</th>
@@ -371,6 +388,13 @@ export default function CustomersPage() {
                       <td className="px-6 py-4">
                         <p className="text-gray-900 text-sm font-semibold">{ref.pic?.fullName}</p>
                         <p className="text-brand-forest text-xs font-medium">{ref.pic?.referralCode}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        {ref.handledBy === 'PIC' ? (
+                          <span className="inline-flex items-center px-2 py-1 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-[10px] font-bold tracking-wider uppercase">PIC</span>
+                        ) : (
+                          <span className="inline-flex items-center px-2 py-1 bg-orange-50 text-orange-700 border border-orange-200 rounded-md text-[10px] font-bold tracking-wider uppercase">U-Turn</span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <select
