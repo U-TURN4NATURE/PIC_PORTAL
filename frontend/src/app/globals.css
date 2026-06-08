@@ -5,11 +5,11 @@
    ============================================================ */
 @theme {
   /* Brand Colors */
-  --color-brand-forest: #2D5016;
+  --color-brand-forest: #2E7D32;
   --color-brand-olive: #6B7C3A;
   --color-brand-sage: #A8B89A;
-  --color-brand-beige: #F5F0E8;
-  --color-brand-gold: #C9A84C;
+  --color-brand-beige: #F8F6F0;
+  --color-brand-gold: #D4AF37;
   --color-brand-brown: #8B6B47;
 
   /* Semantic Colors */
@@ -70,6 +70,13 @@
   @keyframes shimmer {
     0% { background-position: -200% 0; }
     100% { background-position: 200% 0; }
+  }
+
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
   }
 }
 
