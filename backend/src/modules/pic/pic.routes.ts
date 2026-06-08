@@ -25,4 +25,7 @@ router.post('/payouts', picController.requestPayout);
 router.patch('/profile', picController.updateProfile);
 router.post('/accept-policy', picController.acceptPolicy);
 
+// Policy Document — protected: only ACTIVE PICs can access
+router.get('/policy-document', picController.getPolicyDocument);
+
 export default router;

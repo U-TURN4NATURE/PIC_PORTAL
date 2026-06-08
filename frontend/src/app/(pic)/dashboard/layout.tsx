@@ -235,11 +235,14 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-brand-sage/30 shadow-[4px_0_24px_rgba(45,80,22,0.02)] z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-20 flex items-center justify-between px-6 border-b border-brand-sage/20 bg-gradient-to-r from-brand-forest/5 to-transparent">
-          <div className="flex items-center space-x-2 text-white font-dm-serif text-xl">
-            <div className="bg-white px-2 py-1 rounded-md flex items-center shadow-sm">
-              <Image src="/logo_2.jpg" alt="U-Turn4Nature" width={100} height={30} className="object-contain mix-blend-multiply" />
-            </div>
-            <span className="text-sm font-medium opacity-80 border-l border-brand-sage/30 pl-2 text-brand-forest">PIC Portal</span>
+          <div className="flex items-center gap-2.5">
+              <div className="bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+                <Image src="/logo_1.jpg" alt="U-Turn4Nature" width={40} height={40} className="object-contain w-9 h-9 rounded-full" />
+              </div>
+              <div>
+                <span className="block text-xs font-bold text-brand-forest leading-tight">U-Turn4Nature</span>
+                <span className="block text-[9px] text-pink-500 font-semibold leading-tight">PIC Portal</span>
+              </div>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-brand-forest/50">
             <X className="w-5 h-5" />

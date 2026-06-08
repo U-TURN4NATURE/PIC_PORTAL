@@ -176,9 +176,14 @@ function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16 sm:h-20">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={160} height={50} className="object-contain mix-blend-multiply" />
-          <span className="hidden sm:block h-7 w-px bg-gray-300" />
-          <span className="hidden sm:block text-xs font-semibold text-brand-forest tracking-widest uppercase">PIC Portal</span>
+          {/* Compact circular badge logo — perfect for navbar */}
+          <div className="bg-white rounded-full p-1 shadow-md border border-gray-100 flex-shrink-0">
+            <Image src="/logo_1.jpg" alt="U-Turn4Nature" width={52} height={52} className="object-contain w-12 h-12 rounded-full" />
+          </div>
+          <div>
+            <span className="block text-sm font-bold text-brand-forest leading-tight">U-Turn4Nature</span>
+            <span className="block text-[10px] text-pink-500 font-semibold leading-tight tracking-wide">Homemade Goodness</span>
+          </div>
         </div>
 
         {/* Nav links */}
@@ -626,7 +631,10 @@ function Footer() {
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
         {/* Brand */}
         <div className="lg:col-span-1">
-          <Image src="/logo_2.jpg" alt="U-Turn4Nature" width={140} height={45} className="object-contain mb-4 bg-white rounded-lg p-1.5" />
+          {/* Full stacked logo — best for footer where space is available */}
+          <div className="bg-white rounded-2xl p-3 inline-block mb-4 shadow-md border border-gray-100">
+            <Image src="/logo_2.jpg" alt="U-Turn4Nature" width={180} height={80} className="object-contain h-20 w-auto" />
+          </div>
           <p className="text-sm leading-relaxed text-gray-400 mb-4">India's first exclusive pure homemade grocery brand. Creating dignified livelihoods for rural women.</p>
           <p className="text-xs text-brand-gold font-semibold">#100MillionWomen #HomemadeRevolution</p>
         </div>
