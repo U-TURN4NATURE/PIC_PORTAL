@@ -39,13 +39,14 @@ export default function LoginPage() {
         toast.success('Welcome back!');
 
         // Smart redirect based on status and profile completion
+        // Use replace() so back button from dashboard doesn't return to login
         if (user.status === 'ACTIVE') {
-          router.push('/dashboard');
+          router.replace('/dashboard');
         } else if ((user.status === 'APPROVED') && !user.profileCompleted) {
-          router.push('/complete-profile');
+          router.replace('/complete-profile');
         } else {
           // PENDING or other states — go to dashboard (will show status screen)
-          router.push('/dashboard');
+          router.replace('/dashboard');
         }
       }
     } catch (error: any) {
@@ -63,7 +64,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md p-8 glass-card rounded-2xl relative z-10 mx-4">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={220} height={80} className="object-contain mix-blend-multiply" />
+            <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-100">
+              <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={200} height={80} className="object-contain h-20 w-auto" />
+            </div>
           </div>
           <p className="text-brand-olive text-sm mt-2">Partners in Change (PIC) Portal</p>
         </div>

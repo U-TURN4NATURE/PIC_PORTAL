@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
       if (res.data.success) {
         setUser(res.data.data.user);
         toast.success('Admin login successful');
-        router.push('/admin/dashboard');
+        router.replace('/admin/dashboard'); // replace so back button doesn't return to login
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');

@@ -168,7 +168,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated || user?.role !== 'PIC') {
-        router.push('/login');
+        router.replace('/login'); // replace so back button doesn't loop back here
       }
     }
   }, [isAuthenticated, user, isLoading, router]);
@@ -177,7 +177,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     try {
       await api.post('/auth/logout');
       logout();
-      router.push('/login');
+      router.replace('/login'); // replace so back button can't return to dashboard after logout
       toast.success('Logged out successfully');
     } catch {
       toast.error('Logout failed');

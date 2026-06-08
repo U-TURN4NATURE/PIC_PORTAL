@@ -195,7 +195,7 @@ export default function CompleteProfilePage() {
 
       toast.success('Profile completed! Welcome to the PIC Portal! 🎉');
       await initAuth(); // Refresh user state
-      router.push('/dashboard');
+      router.replace('/dashboard'); // replace so back button doesn't return to this form
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to complete profile');
     } finally {
