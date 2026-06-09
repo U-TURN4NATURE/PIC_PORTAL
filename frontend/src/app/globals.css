@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ============================================================
@@ -5,11 +6,12 @@
    ============================================================ */
 @theme {
   /* Brand Colors */
-  --color-brand-forest: #2E7D32;
+  --color-brand-forest: #1B4332;
+  --color-brand-green-cta: #2ECC71;
   --color-brand-olive: #6B7C3A;
   --color-brand-sage: #A8B89A;
-  --color-brand-beige: #F8F6F0;
-  --color-brand-gold: #D4AF37;
+  --color-brand-beige: #FDFAF4;
+  --color-brand-gold: #D4A017;
   --color-brand-brown: #8B6B47;
   --color-brand-pink: #E91E8C;
 
@@ -73,11 +75,17 @@
     100% { background-position: 200% 0; }
   }
 
-  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee: marquee 28s linear infinite;
 
   @keyframes marquee {
     0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
+    100% { transform: translateX(-33.333%); }
+  }
+
+  @keyframes waPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(37,211,102,0.55); }
+    70%  { box-shadow: 0 0 0 14px rgba(37,211,102,0); }
+    100% { box-shadow: 0 0 0 0 rgba(37,211,102,0); }
   }
 }
 
@@ -99,8 +107,13 @@
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
+    font-family: 'Inter', sans-serif;
     font-feature-settings: "rlig" 1, "calt" 1;
     line-height: 1.6;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 
   ::selection {
