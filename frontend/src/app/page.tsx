@@ -16,6 +16,7 @@ import {
 const G = '#1B4332';       // deep forest green
 const G2 = '#2ECC71';      // vibrant CTA green
 const GOLD = '#D4A017';    // warm earthy gold
+const PINK = '#E91E8C';    // e-commerce brand pink (co-brand accent)
 const CREAM = '#FDFAF4';   // warm cream background
 const CHARCOAL = '#1C1C1C';
 const WA = '#25D366';
@@ -207,8 +208,8 @@ function Navbar() {
 
   return (
     <>
-      {/* 3px top accent line */}
-      <div className="fixed top-0 left-0 right-0 h-[3px] z-[60]" style={{ background: `linear-gradient(90deg, ${G}, ${G2}, ${GOLD})` }} />
+      {/* 3px top accent line — green + pink co-brand */}
+      <div className="fixed top-0 left-0 right-0 h-[3px] z-[60]" style={{ background: `linear-gradient(90deg, ${G}, ${PINK}, ${G2})` }} />
 
       <nav className={`fixed top-[3px] left-0 right-0 z-50 transition-all duration-300 ${scrolled
         ? 'bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5'
@@ -242,11 +243,11 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-2.5">
             <Link href="/login"
               className="px-4 py-2 text-sm font-bold rounded-lg border transition-all hover:-translate-y-0.5"
-              style={{ color: G, borderColor: `${G}30` }}
+              style={{ color: PINK, borderColor: `${PINK}30` }}
             >Login</Link>
             <Link href="/register"
               className="flex items-center gap-2 px-5 py-2.5 text-white text-sm font-bold rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg"
-              style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)`, boxShadow: '0 4px 14px rgba(46,204,113,0.35)' }}
+              style={{ background: `linear-gradient(135deg, ${PINK}, #c4157a)`, boxShadow: `0 4px 14px ${PINK}40` }}
             >
               Register Free <ArrowRight className="w-4 h-4" />
             </Link>
@@ -276,7 +277,7 @@ function Navbar() {
                 style={{ color: G, borderColor: `${G}30` }}>Login</Link>
               <Link href="/register" onClick={() => setMenuOpen(false)}
                 className="w-full text-center py-3 rounded-xl text-sm font-bold text-white"
-                style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)` }}>
+                style={{ background: `linear-gradient(135deg, ${PINK}, #c4157a)` }}>
                 Register Free — Takes 2 Minutes
               </Link>
             </div>
@@ -300,7 +301,7 @@ function Ticker() {
     '🏛️ FSSAI Certified',
   ];
   return (
-    <div className="overflow-hidden py-0 mt-[75px]" style={{ background: G }}>
+    <div className="overflow-hidden py-0 mt-[75px]" style={{ background: `linear-gradient(90deg, ${G} 0%, ${PINK} 50%, ${G} 100%)` }}>
       <div className="inline-flex gap-16 animate-marquee py-3 whitespace-nowrap">
         {[...items, ...items, ...items].map((t, i) => (
           <span key={i} className="text-sm font-bold tracking-wide text-white flex items-center gap-2">
@@ -333,43 +334,54 @@ function Hero() {
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-8 py-28 text-center text-white">
         <FadeSection>
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-8"
-            style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(8px)' }}>
-            <Leaf className="w-4 h-4" style={{ color: G2 }} />
-            India's Homemade Revolution · #100MillionWomen
+          {/* Policy badge */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-6"
+            style={{ background: `${PINK}22`, border: `1px solid ${PINK}60`, backdropFilter: 'blur(8px)' }}>
+            <Leaf className="w-4 h-4" style={{ color: PINK }} />
+            <span style={{ color: '#FFB3D9' }}>India's Homemade Revolution · #100MillionWomen</span>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-5" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>
-            Earn{' '}
-            <span style={{ color: G2 }}>₹35,000/month.</span>
-            <br />Empower Rural Women.
+          {/* PIC Policy Tagline — do not change */}
+          <h1 className="font-bold leading-tight mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <span className="block text-3xl sm:text-4xl lg:text-5xl text-white mb-1">A Lifetime Business</span>
+            <span className="block text-3xl sm:text-4xl lg:text-5xl text-white mb-4">Opportunity</span>
+            <span className="block text-base sm:text-lg font-semibold mb-2" style={{ color: G2 }}>Become</span>
+            <span className="block text-3xl sm:text-4xl lg:text-5xl font-extrabold" style={{ color: PINK }}>
+              &ldquo;Partner in Change&rdquo;
+            </span>
           </h1>
 
-          <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto mb-10">
-            Join 10,000+ PICs earning lifelong income by sharing authentic homemade products — no investment, no inventory.
+          <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto mb-10 mt-4">
+            This program gives individuals a chance to{' '}
+            <strong style={{ color: PINK }}>earn lifelong income</strong> and become{' '}
+            <strong style={{ color: G2 }}>co-architects of women empowerment.</strong>
           </p>
 
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
             <Link href="/register"
-              className="group flex items-center justify-center gap-2 px-8 py-4 text-gray-900 font-bold text-base rounded-full transition-all hover:-translate-y-1 hover:shadow-2xl"
-              style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)`, boxShadow: '0 8px 28px rgba(46,204,113,0.45)' }}>
-              Join Free — Takes 2 Minutes
+              className="group flex items-center justify-center gap-2 px-8 py-4 text-white font-bold text-base rounded-full transition-all hover:-translate-y-1 hover:shadow-2xl"
+              style={{ background: `linear-gradient(135deg, ${PINK}, #c4157a)`, boxShadow: `0 8px 28px ${PINK}55` }}>
+              Join Now — Register Free
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <a href="#how-it-works"
               className="flex items-center justify-center gap-2 px-8 py-4 font-semibold text-base rounded-full transition-all hover:-translate-y-0.5"
-              style={{ border: '2px solid rgba(255,255,255,0.5)', color: 'white' }}>
+              style={{ border: `2px solid ${G2}80`, color: G2 }}>
               See How It Works ↓
             </a>
           </div>
 
           {/* Stat chips */}
           <div className="flex flex-wrap justify-center gap-3">
-            {['10,000+ Partners', '97% Retention', '₹35K Avg. Earning'].map(s => (
-              <span key={s} className="px-4 py-2 rounded-full text-sm font-bold text-white"
-                style={{ background: 'rgba(255,255,255,0.13)', border: '1px solid rgba(255,255,255,0.25)', backdropFilter: 'blur(6px)' }}>
-                {s}
+            {[
+              { label: '10,000+ Partners', color: G2 },
+              { label: '97% Retention', color: PINK },
+              { label: '₹35K Avg. Earning', color: GOLD },
+            ].map(({ label, color }) => (
+              <span key={label} className="px-4 py-2 rounded-full text-sm font-bold"
+                style={{ background: `${color}20`, border: `1px solid ${color}50`, color, backdropFilter: 'blur(6px)' }}>
+                {label}
               </span>
             ))}
           </div>
@@ -808,28 +820,31 @@ function FinalCTA() {
 
           <div className="relative z-10">
             <div className="inline-block px-5 py-2 rounded-full text-sm font-bold mb-6"
-              style={{ background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.2)' }}>
-              💗 A Lifetime Business Opportunity
+              style={{ background: `${PINK}22`, border: `1px solid ${PINK}50` }}>
+              <span style={{ color: '#FFB3D9' }}>💗 A Lifetime Business Opportunity</span>
             </div>
-            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 leading-tight"
+            <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-3 leading-tight"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>
-              Start Your Journey Today
+              Join Now as a
             </h2>
+            <p className="text-3xl sm:text-4xl font-extrabold mb-8" style={{ color: PINK, textShadow: '0 2px 20px rgba(233,30,140,0.4)' }}>
+              &ldquo;Partner in Change&rdquo;
+            </p>
             <p className="text-white/80 text-lg max-w-xl mx-auto mb-10">
               Join 10,000+ PICs earning lifelong income while becoming co-architects of women empowerment across India.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-6">
               <Link href="/register"
-                className="group flex items-center justify-center gap-2 px-8 py-4 font-bold text-lg rounded-full transition-all hover:-translate-y-1 hover:shadow-xl"
-                style={{ background: CREAM, color: G }}>
+                className="group flex items-center justify-center gap-2 px-8 py-4 font-bold text-lg rounded-full transition-all hover:-translate-y-1 hover:shadow-xl text-white"
+                style={{ background: `linear-gradient(135deg, ${PINK}, #c4157a)`, boxShadow: `0 8px 28px ${PINK}55` }}>
                 Register Free
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link href="/login"
                 className="flex items-center justify-center gap-2 px-8 py-4 font-semibold text-lg rounded-full transition-all hover:-translate-y-0.5"
-                style={{ border: '2px solid rgba(255,255,255,0.4)', color: 'white' }}>
-                Login
+                style={{ border: `2px solid ${CREAM}60`, color: CREAM }}>
+                Already a PIC? Login
               </Link>
             </div>
             <p className="text-white/50 text-sm">No investment · No inventory · Earn forever</p>
@@ -855,7 +870,10 @@ function Footer() {
             <Image src="/logo_2.jpg" alt="U-Turn4Nature logo" width={180} height={80} className="object-contain h-20 w-auto" loading="lazy" />
           </div>
           <p className="text-sm leading-relaxed text-gray-400 mb-4">India's first exclusive pure homemade grocery brand. Creating dignified livelihoods for rural women.</p>
-          <p className="text-xs font-semibold" style={{ color: GOLD }}>#100MillionWomen #HomemadeRevolution</p>
+          <p className="text-xs font-semibold">
+            <span style={{ color: GOLD }}>#100MillionWomen </span>
+            <span style={{ color: PINK }}>#PartnerInChange</span>
+          </p>
         </div>
 
         {/* Quick Links */}
@@ -986,9 +1004,9 @@ function MobileStickyBar() {
           {WA_SVG}
         </a>
         <Link href="/register"
-          className="flex-1 text-center py-3.5 rounded-2xl font-bold text-gray-900 text-base shadow-lg"
-          style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)` }}>
-          Join Free — Takes 2 Minutes
+          className="flex-1 text-center py-3.5 rounded-2xl font-bold text-white text-base shadow-lg"
+          style={{ background: `linear-gradient(135deg, ${PINK}, #c4157a)` }}>
+          Register Free — Join Now
         </Link>
       </div>
     </div>
