@@ -384,12 +384,16 @@ export const markPayoutPaid = async (payoutId: string, adminId: string, transact
       data: { status: PayoutStatus.PAID, processedAt: new Date(), transactionRef },
     });
 
-    // Update wallet: move from pendingEarnings/availableBalance to paidEarnings
+    // ✅ CORRECT wallet update on mark-paid:
+    // - availableBalance was ALREADY decremented when the PIC submitted the request
+    //   (in pic.service.ts requestPayout). Do NOT decrement it again here.
+    // - pendingEarnings was incremented on request — now move it to paidEarnings.
     await tx.wallet.update({
       where: { picId: payout.picId },
       data: {
-        paidEarnings: { increment: payout.amount },
-        availableBalance: { decrement: payout.amount },
+        pendingEarnings: { decrement: payout.amount }, // clear from pending
+        paidEarnings: { increment: payout.amount },    // move to paid
+        // availableBalance: already deducted at request time — do NOT touch it here
       },
     });
 

@@ -4,8 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import {
-  ArrowRight, Play, CheckCircle2, Users, Heart, TrendingUp,
-  ShieldCheck, Star, MapPin, Leaf, Award, Zap, Gift,
+  ArrowRight, CheckCircle2, Users, Heart, TrendingUp,
+  ShieldCheck, Star, MapPin, Leaf, Award, Gift,
   ChevronLeft, ChevronRight, Phone, Mail, Share2, Video, MessageCircle
 } from 'lucide-react';
 
@@ -147,12 +147,12 @@ function FadeSection({ children, className = '', delay = 0 }: { children: React.
 // ──────────────────────────────────────────────────────────────
 
 function Ticker() {
-  const items = ['🌿 100% Homemade', '✅ Women-Led Production', '💰 No Investment Required', '📅 Monthly Earnings', '🏛️ FSSAI Certified', '🚀 10,000+ Active PICs', '🌾 500+ SHGs Empowered'];
+  const items = ['🌿 100% Homemade', '✅ Women-Led Production', '💰 No Investment Required', '📅 Monthly Earnings', '🏛️ FSSAI Certified', '🚀 10,000+ Active PICs', '🌾 500+ SHGs Empowered', '💗 Partner in Change'];
   return (
-    <div className="bg-brand-forest text-white py-2.5 overflow-hidden whitespace-nowrap">
-      <div className="inline-flex gap-12 animate-marquee">
+    <div className="overflow-hidden whitespace-nowrap py-0" style={{background: 'linear-gradient(90deg, #2E7D32 0%, #E91E8C 50%, #2E7D32 100%)'}}>
+      <div className="inline-flex gap-12 animate-marquee py-2.5">
         {[...items, ...items].map((t, i) => (
-          <span key={i} className="text-sm font-medium tracking-wide">{t}</span>
+          <span key={i} className="text-sm font-semibold tracking-wide text-white">{t}</span>
         ))}
       </div>
     </div>
@@ -182,7 +182,7 @@ function Navbar() {
           </div>
           <div>
             <span className="block text-sm font-bold text-brand-forest leading-tight">U-Turn4Nature</span>
-            <span className="block text-[10px] text-pink-500 font-semibold leading-tight tracking-wide">Homemade Goodness</span>
+            <span className="block text-[10px] font-bold leading-tight tracking-wide" style={{color:'#E91E8C'}}>Partner in Change</span>
           </div>
         </div>
 
@@ -196,10 +196,17 @@ function Navbar() {
 
         {/* CTAs */}
         <div className="flex items-center gap-3">
-          <Link href="/login" className="hidden sm:block px-4 py-2 text-brand-forest font-semibold text-sm hover:bg-brand-forest/5 rounded-lg transition-colors">
+          <Link href="/login"
+            className="hidden sm:block px-4 py-2 font-semibold text-sm rounded-lg transition-all hover:-translate-y-0.5"
+            style={{color:'#E91E8C'}}
+            onMouseEnter={e => (e.currentTarget.style.background='rgba(233,30,140,0.08)')}
+            onMouseLeave={e => (e.currentTarget.style.background='transparent')}
+          >
             Login
           </Link>
-          <Link href="/register" className="px-5 py-2.5 bg-brand-forest text-white font-semibold text-sm rounded-xl hover:bg-brand-forest/90 transition-all shadow-md shadow-brand-forest/20 hover:shadow-lg hover:shadow-brand-forest/30 hover:-translate-y-0.5 flex items-center gap-2">
+          <Link href="/register"
+            className="px-5 py-2.5 text-white font-bold text-sm rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg flex items-center gap-2"
+            style={{background:'linear-gradient(135deg,#E91E8C,#c4157a)', boxShadow:'0 4px 14px rgba(233,30,140,0.35)'}}>
             Register Free
             <ArrowRight className="w-4 h-4" />
           </Link>
@@ -227,48 +234,54 @@ function Hero() {
 
         {/* Left */}
         <div>
-          <div className="inline-flex items-center gap-2 bg-brand-forest/10 border border-brand-forest/20 rounded-full px-4 py-1.5 mb-6">
+          <div className="inline-flex items-center gap-2 bg-gradient-to-r from-brand-forest/10 to-pink-100 border border-brand-pink/30 rounded-full px-4 py-1.5 mb-6">
             <Leaf className="w-4 h-4 text-brand-forest" />
             <span className="text-brand-forest text-sm font-semibold">India's Homemade Revolution · #100MillionWomen</span>
           </div>
 
-          <h1 className="font-dm-serif text-4xl sm:text-5xl lg:text-6xl text-gray-900 leading-tight mb-5">
-            Earn Monthly While{' '}
-            <span className="text-brand-forest relative">
-              Promoting
-              <svg className="absolute -bottom-1 left-0 w-full" viewBox="0 0 300 8" preserveAspectRatio="none" fill="none">
-                <path d="M0 6 Q75 2 150 6 Q225 10 300 6" stroke="#D4AF37" strokeWidth="3" strokeLinecap="round"/>
+          <h1 className="font-dm-serif leading-tight mb-4">
+            <span className="block text-3xl sm:text-4xl lg:text-5xl text-gray-900 font-bold mb-1">A Lifetime Business</span>
+            <span className="block text-3xl sm:text-4xl lg:text-5xl text-gray-900 font-bold mb-4">Opportunity</span>
+            <span className="block text-lg sm:text-xl text-brand-forest font-semibold mb-2">Become</span>
+            <span className="block text-3xl sm:text-4xl lg:text-5xl font-extrabold" style={{color: '#E91E8C'}}>
+              &ldquo;Partner in Change&rdquo;
+              <svg className="w-full mt-1" viewBox="0 0 400 6" preserveAspectRatio="none" fill="none">
+                <path d="M0 4 Q100 1 200 4 Q300 7 400 4" stroke="#E91E8C" strokeWidth="3" strokeLinecap="round" opacity="0.5"/>
               </svg>
-            </span>{' '}
-            Healthy Homemade Food
+            </span>
           </h1>
 
-          <p className="text-gray-600 text-lg sm:text-xl leading-relaxed mb-8 max-w-lg">
-            Join India's Homemade Revolution and Support Rural Women Entrepreneurs. Become a{' '}
-            <strong className="text-brand-forest">Partner in Change</strong> — not a sales agent, but a community leader and food ambassador.
+          <p className="text-gray-600 text-base sm:text-lg leading-relaxed mb-8 max-w-lg italic">
+            This program gives individuals a chance not only to{' '}
+            <strong style={{color: '#E91E8C'}}>earn lifelong income</strong> but also to become{' '}
+            <strong className="text-brand-forest">co-architects of women empowerment.</strong>
           </p>
 
           {/* Trust badges */}
           <div className="grid grid-cols-2 gap-2.5 mb-8 max-w-md">
-            {['✔ 100% Homemade', '✔ Women-led Production', '✔ No Investment Required', '✔ Monthly Earnings'].map((b) => (
-              <div key={b} className="flex items-center gap-2 bg-white border border-brand-sage/40 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 shadow-sm">
-                {b}
+            {[
+              { label: '✔ 100% Homemade', pink: false },
+              { label: '✔ Women-led Production', pink: true },
+              { label: '✔ No Investment Required', pink: true },
+              { label: '✔ Monthly Earnings', pink: false },
+            ].map(({ label, pink }) => (
+              <div key={label} className="flex items-center gap-2 bg-white rounded-lg px-3 py-2 text-sm font-semibold shadow-sm"
+                style={{border: `1px solid ${pink ? 'rgba(233,30,140,0.3)' : 'rgba(46,125,50,0.25)'}`, color: pink ? '#E91E8C' : '#2E7D32'}}>
+                {label}
               </div>
             ))}
           </div>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link href="/register" className="group flex items-center justify-center gap-2 px-8 py-4 bg-brand-forest text-white font-bold text-base rounded-2xl shadow-xl shadow-brand-forest/30 hover:bg-brand-forest/90 hover:shadow-brand-forest/40 hover:-translate-y-1 transition-all duration-200">
+            <Link href="/register" className="group flex items-center justify-center gap-2 px-8 py-4 text-white font-bold text-base rounded-2xl shadow-xl hover:-translate-y-1 transition-all duration-200" style={{background: 'linear-gradient(135deg, #E91E8C 0%, #c4157a 100%)', boxShadow: '0 8px 24px rgba(233,30,140,0.35)'}}>
+              Join Now — Register Free
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link href="/register" className="group flex items-center justify-center gap-2 px-8 py-4 bg-brand-forest text-white font-bold text-base rounded-2xl shadow-xl shadow-brand-forest/30 hover:bg-brand-forest/90 hover:-translate-y-1 transition-all duration-200">
               Register Free
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <button className="group flex items-center justify-center gap-3 px-8 py-4 bg-white border-2 border-brand-sage/50 text-brand-forest font-semibold text-base rounded-2xl hover:border-brand-forest/40 hover:bg-brand-forest/5 transition-all duration-200">
-              <span className="w-10 h-10 rounded-full bg-brand-gold flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                <Play className="w-4 h-4 text-white fill-white" />
-              </span>
-              Watch How It Works
-            </button>
           </div>
 
           <p className="mt-5 text-xs text-gray-400">Free to join · No credit card · No inventory · Earn forever</p>
@@ -325,12 +338,13 @@ function StatsBar() {
     <FadeSection>
       <section className="bg-white border-y border-gray-100 py-10">
         <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {STATS.map(({ value, label, icon: Icon }) => (
+          {STATS.map(({ value, label, icon: Icon }, idx) => (
             <div key={label} className="group">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-brand-forest/8 mb-3 group-hover:bg-brand-forest/15 transition-colors">
-                <Icon className="w-6 h-6 text-brand-forest" />
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3 group-hover:scale-110 transition-transform"
+                style={{background: idx % 2 === 0 ? 'linear-gradient(135deg,#2E7D32,#6B7C3A)' : 'linear-gradient(135deg,#E91E8C,#c4157a)'}}>
+                <Icon className="w-6 h-6 text-white" />
               </div>
-              <p className="text-3xl font-dm-serif font-bold text-brand-forest">{value}</p>
+              <p className="text-3xl font-dm-serif font-bold" style={{color: idx % 2 === 0 ? '#2E7D32' : '#E91E8C'}}>{value}</p>
               <p className="text-sm text-gray-500 mt-1 font-medium">{label}</p>
             </div>
           ))}
@@ -346,28 +360,34 @@ function StatsBar() {
 
 function HowItWorks() {
   return (
-    <section id="how-it-works" className="py-20 bg-[#F8F6F0]">
+    <section id="how-it-works" className="py-24" style={{background:'linear-gradient(180deg,#F8F6F0 0%,#fff 100%)'}}>
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
-        <FadeSection className="text-center mb-14">
-          <span className="inline-block bg-brand-forest/10 text-brand-forest text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">Simple 4-Step Process</span>
+        <FadeSection className="text-center mb-16">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 text-white" style={{background:'linear-gradient(135deg,#2E7D32,#E91E8C)'}}>Simple 4-Step Process</span>
           <h2 className="font-dm-serif text-4xl sm:text-5xl text-gray-900 mb-4">How It Works</h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">From registration to monthly income — it's simpler than you think.</p>
         </FadeSection>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {HOW_STEPS.map(({ step, icon: Icon, title, desc }, i) => (
-            <FadeSection key={step} delay={i * 120}>
-              <div className="group relative bg-white rounded-2xl p-7 shadow-sm border border-gray-100 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 text-center h-full">
-                {/* Connector line */}
-                {i < HOW_STEPS.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-px bg-dashed border-t-2 border-dashed border-brand-sage z-10" />
-                )}
-                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-forest to-brand-olive text-white mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-brand-forest/20">
+            <FadeSection key={step} delay={i * 130}>
+              <div className="group relative bg-white rounded-3xl p-7 shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 text-center h-full overflow-hidden">
+                {/* Top accent bar */}
+                <div className="absolute top-0 left-0 right-0 h-1 rounded-t-3xl"
+                  style={{background: i % 2 !== 0 ? 'linear-gradient(90deg,#E91E8C,#c4157a)' : 'linear-gradient(90deg,#2E7D32,#6B7C3A)'}} />
+                {/* Background step number watermark */}
+                <div className="absolute -bottom-3 -right-2 text-[80px] font-dm-serif font-black select-none leading-none"
+                  style={{color: i % 2 !== 0 ? 'rgba(233,30,140,0.06)' : 'rgba(46,125,50,0.06)'}}>{step}</div>
+                {/* Icon */}
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl text-white mb-5 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-lg"
+                  style={{background: i % 2 !== 0 ? 'linear-gradient(135deg,#E91E8C,#c4157a)' : 'linear-gradient(135deg,#2E7D32,#6B7C3A)', boxShadow: i % 2 !== 0 ? '0 8px 24px rgba(233,30,140,0.35)' : '0 8px 24px rgba(46,125,50,0.35)'}}>
                   <Icon className="w-7 h-7" />
                 </div>
-                <div className="absolute top-5 right-5 text-5xl font-dm-serif font-bold text-gray-100 select-none">{step}</div>
+                {/* Step pill */}
+                <div className="inline-block text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-3"
+                  style={{background: i % 2 !== 0 ? 'rgba(233,30,140,0.1)' : 'rgba(46,125,50,0.1)', color: i % 2 !== 0 ? '#E91E8C' : '#2E7D32'}}>Step {step}</div>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">{title}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{desc}</p>
+                <p className="text-gray-500 text-sm leading-relaxed relative z-10">{desc}</p>
               </div>
             </FadeSection>
           ))}
@@ -383,58 +403,88 @@ function HowItWorks() {
 
 function IncomeSection() {
   return (
-    <section id="income" className="py-20 bg-white">
+    <section id="income" className="py-24 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
-        <FadeSection className="text-center mb-14">
-          <span className="inline-block bg-brand-gold/15 text-amber-700 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">Earning Potential</span>
+        <FadeSection className="text-center mb-16">
+          <span className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 text-white" style={{background:'linear-gradient(135deg,#D4AF37,#b8941e)'}}>Earning Potential</span>
           <h2 className="font-dm-serif text-4xl sm:text-5xl text-gray-900 mb-4">Your Income, Your Choice</h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">The more awareness you spread, the more you earn — every month, for life.</p>
         </FadeSection>
 
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
           {INCOME_TIERS.map(({ name, customers, monthly, icon: Icon, color, badge, features, highlight }, i) => (
-            <FadeSection key={name} delay={i * 120}>
-              <div className={`relative rounded-3xl overflow-hidden h-full flex flex-col ${highlight ? 'ring-2 ring-brand-forest shadow-2xl shadow-brand-forest/20 scale-105' : 'border border-gray-200 shadow-lg'}`}>
-                {/* Card header */}
-                <div className={`bg-gradient-to-br ${color} p-8 text-white`}>
-                  {highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-gold text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg">
-                      ⭐ {badge}
-                    </div>
-                  )}
-                  {!highlight && (
-                    <div className="absolute top-4 right-4 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full">{badge}</div>
-                  )}
-                  <Icon className="w-10 h-10 mb-4 opacity-90" />
-                  <h3 className="text-xl font-bold mb-1">{name}</h3>
-                  <p className="text-white/70 text-sm mb-5">{customers} Customers</p>
-                  <div>
-                    <span className="text-4xl font-dm-serif font-bold">{monthly}</span>
-                    <span className="text-white/60 text-sm ml-1">/month</span>
-                  </div>
-                </div>
+            <FadeSection key={name} delay={i * 130}>
+              {/* Outer wrapper — no overflow-hidden so badge is never clipped */}
+              <div className={`relative h-full flex flex-col transition-all duration-300 ${
+                highlight ? 'scale-105 z-10' : 'hover:-translate-y-1'
+              }`} style={{paddingTop: highlight ? '18px' : '0'}}>
 
-                {/* Card body */}
-                <div className="bg-white flex-1 p-6 flex flex-col">
-                  <ul className="space-y-3 flex-1 mb-6">
-                    {features.map((f) => (
-                      <li key={f} className="flex items-center gap-3 text-sm text-gray-600">
-                        <CheckCircle2 className="w-4 h-4 text-brand-forest flex-shrink-0" />
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href="/register" className={`block text-center py-3 rounded-xl font-bold text-sm transition-all hover:-translate-y-0.5 ${highlight ? 'bg-brand-forest text-white shadow-lg shadow-brand-forest/25 hover:shadow-brand-forest/40' : 'border-2 border-brand-forest text-brand-forest hover:bg-brand-forest/5'}`}>
-                    Start as {name}
-                  </Link>
+                {/* "Most Popular" badge sits OUTSIDE the card so it's fully visible */}
+                {highlight && (
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 bg-brand-gold text-white text-xs font-bold px-5 py-1.5 rounded-full shadow-lg tracking-wide whitespace-nowrap">
+                    ⭐ {badge}
+                  </div>
+                )}
+
+                {/* Inner card with overflow-hidden for decorative shapes */}
+                <div className={`rounded-3xl overflow-hidden flex-1 flex flex-col ${
+                  highlight
+                    ? 'ring-2 ring-brand-forest shadow-2xl shadow-brand-forest/25'
+                    : 'border border-gray-100 shadow-lg'
+                }`}>
+                  {/* Card header */}
+                  <div className={`bg-gradient-to-br ${color} p-8 text-white relative`}>
+                    {/* Decorative circle */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+                    {!highlight && (
+                      <div className="absolute top-4 right-4 bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">{badge}</div>
+                    )}
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                    <h3 className="text-xl font-bold mb-1">{name}</h3>
+                    <p className="text-white/70 text-sm mb-5 flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5" />{customers} Active Customers
+                    </p>
+                    <div className="flex items-end gap-1">
+                      <span className="text-4xl font-dm-serif font-bold">{monthly}</span>
+                      <span className="text-white/60 text-sm mb-1">/month</span>
+                    </div>
+                  </div>
+
+                  {/* Card body */}
+                  <div className="bg-white flex-1 p-6">
+                    <ul className="space-y-3">
+                      {features.map((f) => (
+                        <li key={f} className="flex items-center gap-3 text-sm text-gray-600">
+                          <div className="w-5 h-5 rounded-full bg-brand-forest/10 flex items-center justify-center flex-shrink-0">
+                            <CheckCircle2 className="w-3.5 h-3.5 text-brand-forest" />
+                          </div>
+                          {f}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
             </FadeSection>
           ))}
         </div>
 
+        {/* WhatsApp CTA below cards */}
         <FadeSection>
-          <p className="text-center text-gray-400 text-sm mt-8">* Income estimates based on 5% contribution rate. Actual earnings depend on customer purchase frequency.</p>
+          <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a
+              href="https://wa.me/917703944883?text=Hi%2C%20I%20want%20to%20become%20a%20Partner%20in%20Change%20with%20U-Turn4Nature"
+              target="_blank" rel="noreferrer"
+              className="inline-flex items-center gap-3 px-8 py-4 text-white font-bold text-base rounded-2xl shadow-xl hover:-translate-y-1 transition-all duration-200"
+              style={{background:'linear-gradient(135deg,#25D366,#128C7E)', boxShadow:'0 8px 24px rgba(37,211,102,0.35)'}}
+            >
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+              Chat on WhatsApp
+            </a>
+            <p className="text-gray-400 text-sm">* Earnings based on 5% contribution. Actual income depends on customer activity.</p>
+          </div>
         </FadeSection>
       </div>
     </section>
@@ -445,11 +495,20 @@ function IncomeSection() {
 // Product Showcase
 // ──────────────────────────────────────────────────────────────
 
+const PRODUCT_COLORS = [
+  'linear-gradient(135deg,#2E7D32,#6B7C3A)',
+  'linear-gradient(135deg,#E91E8C,#c4157a)',
+  'linear-gradient(135deg,#D4AF37,#b8941e)',
+  'linear-gradient(135deg,#2E7D32,#6B7C3A)',
+  'linear-gradient(135deg,#E91E8C,#c4157a)',
+  'linear-gradient(135deg,#D4AF37,#b8941e)',
+];
+
 function ProductShowcase() {
   return (
-    <section id="products" className="py-20 bg-[#F8F6F0]">
+    <section id="products" className="py-24 bg-[#F8F6F0]">
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
-        <FadeSection className="flex flex-col lg:flex-row gap-12 items-center">
+        <FadeSection className="flex flex-col lg:flex-row gap-14 items-center">
           {/* Left */}
           <div className="flex-1">
             <span className="inline-block bg-brand-forest/10 text-brand-forest text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">What You'll Promote</span>
@@ -457,10 +516,13 @@ function ProductShowcase() {
             <p className="text-gray-500 text-lg mb-8 max-w-md">Every product is made by rural women in their homes or village SHG kitchens — pure, natural, and loved by families across India.</p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {PRODUCTS.map(({ name, emoji, desc }) => (
-                <div key={name} className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all">
-                  <span className="text-3xl mb-2 block">{emoji}</span>
-                  <p className="font-semibold text-gray-900 text-sm">{name}</p>
+              {PRODUCTS.map(({ name, emoji, desc }, idx) => (
+                <div key={name} className="group bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-200">
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-3 group-hover:scale-110 transition-transform duration-200"
+                    style={{background: PRODUCT_COLORS[idx]}}>
+                    {emoji}
+                  </div>
+                  <p className="font-bold text-gray-900 text-sm">{name}</p>
                   <p className="text-xs text-gray-400 mt-0.5">{desc}</p>
                 </div>
               ))}
@@ -473,10 +535,19 @@ function ProductShowcase() {
               <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
                 <Image src="/product_collage.png" alt="Homemade Products" width={520} height={420} className="object-cover w-full h-[380px] sm:h-[420px]" />
               </div>
-              <div className="absolute -bottom-5 -right-5 bg-brand-gold text-white rounded-2xl p-4 shadow-xl">
-                <p className="text-xs font-semibold opacity-80 mb-1">Customer Retention</p>
-                <p className="text-2xl font-dm-serif font-bold">97%</p>
+              {/* Floating badge - retention */}
+              <div className="absolute -bottom-5 -right-5 rounded-2xl p-4 shadow-xl text-white"
+                style={{background:'linear-gradient(135deg,#D4AF37,#b8941e)'}}>
+                <p className="text-xs font-semibold opacity-80 mb-0.5">Customer Retention</p>
+                <p className="text-3xl font-dm-serif font-bold">97%</p>
                 <p className="text-xs opacity-70">repeat purchases</p>
+              </div>
+              {/* Floating badge - women */}
+              <div className="absolute -top-5 -left-5 rounded-2xl p-4 shadow-xl text-white"
+                style={{background:'linear-gradient(135deg,#E91E8C,#c4157a)'}}>
+                <p className="text-xs font-semibold opacity-80 mb-0.5">Women Empowered</p>
+                <p className="text-2xl font-dm-serif font-bold">500+</p>
+                <p className="text-xs opacity-70">SHG Villages</p>
               </div>
             </div>
           </div>
@@ -497,30 +568,34 @@ function SuccessStories() {
     <section id="stories" className="py-20 bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
         <FadeSection className="text-center mb-14">
-          <span className="inline-block bg-pink-50 text-pink-700 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4">Real Women · Real Earnings</span>
+          <span className="inline-block text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4" style={{background:'linear-gradient(135deg,#E91E8C,#c4157a)'}}>Real Women · Real Earnings</span>
           <h2 className="font-dm-serif text-4xl sm:text-5xl text-gray-900 mb-4">Success Stories</h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">Thousands of women across India are earning monthly with U-Turn4Nature PIC.</p>
         </FadeSection>
 
         {/* Desktop grid */}
-        <div className="hidden md:grid md:grid-cols-3 gap-6">
+        <div className="hidden md:grid md:grid-cols-3 gap-8">
           {SUCCESS_STORIES.map(({ name, location, income, img, quote }, i) => (
-            <FadeSection key={name} delay={i * 100}>
-              <div className="bg-[#F8F6F0] rounded-3xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all group">
-                <div className="relative h-56 overflow-hidden">
-                  <Image src={img} alt={name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <FadeSection key={name} delay={i * 110}>
+              <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
+                <div className="relative h-60 overflow-hidden">
+                  <Image src={img} alt={name} fill className="object-cover group-hover:scale-107 transition-transform duration-700" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                   <div className="absolute bottom-4 left-4 text-white">
                     <p className="font-bold text-lg leading-tight">{name}</p>
-                    <p className="text-sm text-white/80 flex items-center gap-1"><MapPin className="w-3 h-3" />{location}</p>
+                    <p className="text-sm text-white/80 flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{location}</p>
                   </div>
-                  <div className="absolute top-4 right-4 bg-brand-gold text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg">{income}</div>
+                  <div className="absolute top-4 right-4 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg"
+                    style={{background:'linear-gradient(135deg,#E91E8C,#c4157a)'}}>{income}</div>
                 </div>
-                <div className="p-5">
-                  <div className="flex mb-3">
-                    {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />)}
+                <div className="p-6">
+                  <div className="flex gap-0.5 mb-3">
+                    {[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-brand-gold text-brand-gold" />)}
                   </div>
-                  <p className="text-gray-600 text-sm leading-relaxed italic">"{quote}"</p>
+                  <div className="relative">
+                    <span className="absolute -top-1 -left-1 text-5xl font-dm-serif leading-none" style={{color:'rgba(233,30,140,0.15)'}}>&ldquo;</span>
+                    <p className="text-gray-600 text-sm leading-relaxed italic pl-4">{quote}</p>
+                  </div>
                 </div>
               </div>
             </FadeSection>
@@ -529,29 +604,32 @@ function SuccessStories() {
 
         {/* Mobile carousel */}
         <div className="md:hidden">
-          <div className="bg-[#F8F6F0] rounded-3xl overflow-hidden border border-gray-100 shadow-sm">
+          <div className="bg-white rounded-3xl overflow-hidden shadow-lg">
             <div className="relative h-64 overflow-hidden">
               <Image src={SUCCESS_STORIES[active].img} alt={SUCCESS_STORIES[active].name} fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
               <div className="absolute bottom-4 left-4 text-white">
                 <p className="font-bold text-xl">{SUCCESS_STORIES[active].name}</p>
                 <p className="text-sm text-white/80">{SUCCESS_STORIES[active].location}</p>
               </div>
-              <div className="absolute top-4 right-4 bg-brand-gold text-white text-sm font-bold px-3 py-1 rounded-full">{SUCCESS_STORIES[active].income}</div>
+              <div className="absolute top-4 right-4 text-white text-sm font-bold px-3 py-1.5 rounded-full"
+                style={{background:'linear-gradient(135deg,#E91E8C,#c4157a)'}}>{SUCCESS_STORIES[active].income}</div>
             </div>
             <div className="p-5">
-              <div className="flex mb-3">{[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4 fill-brand-gold text-brand-gold" />)}</div>
-              <p className="text-gray-600 text-sm italic">"{SUCCESS_STORIES[active].quote}"</p>
+              <div className="flex gap-0.5 mb-3">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4 fill-brand-gold text-brand-gold" />)}</div>
+              <p className="text-gray-600 text-sm italic">&ldquo;{SUCCESS_STORIES[active].quote}&rdquo;</p>
             </div>
           </div>
-          <div className="flex justify-center gap-4 mt-4">
-            <button onClick={() => setActive(a => (a - 1 + SUCCESS_STORIES.length) % SUCCESS_STORIES.length)} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all">
+          <div className="flex justify-center items-center gap-4 mt-5">
+            <button onClick={() => setActive(a => (a - 1 + SUCCESS_STORIES.length) % SUCCESS_STORIES.length)} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow hover:shadow-md transition-all">
               <ChevronLeft className="w-5 h-5 text-gray-600" />
             </button>
             {SUCCESS_STORIES.map((_, i) => (
-              <button key={i} onClick={() => setActive(i)} className={`w-2.5 h-2.5 rounded-full transition-all ${i === active ? 'bg-brand-forest scale-125' : 'bg-gray-300'}`} />
+              <button key={i} onClick={() => setActive(i)}
+                className="rounded-full transition-all duration-300"
+                style={{width: i === active ? '24px' : '10px', height:'10px', background: i === active ? '#E91E8C' : '#d1d5db'}} />
             ))}
-            <button onClick={() => setActive(a => (a + 1) % SUCCESS_STORIES.length)} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow-sm hover:shadow-md transition-all">
+            <button onClick={() => setActive(a => (a + 1) % SUCCESS_STORIES.length)} className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center shadow hover:shadow-md transition-all">
               <ChevronRight className="w-5 h-5 text-gray-600" />
             </button>
           </div>
@@ -568,14 +646,19 @@ function SuccessStories() {
 function TrustSection() {
   return (
     <FadeSection>
-      <section className="py-14 bg-brand-forest">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8">
-          <p className="text-center text-brand-sage text-sm font-semibold uppercase tracking-widest mb-8">Certified · Verified · Trusted</p>
-          <div className="flex flex-wrap justify-center gap-4">
+      <section className="py-16 relative overflow-hidden" style={{background:'linear-gradient(135deg,#1b5e20 0%,#2E7D32 40%,#E91E8C 100%)'}}>
+        {/* Decorative blobs */}
+        <div className="absolute top-0 right-0 w-72 h-72 bg-white/5 rounded-full translate-x-1/3 -translate-y-1/2 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/5 rounded-full -translate-x-1/3 translate-y-1/2 blur-3xl pointer-events-none" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 relative z-10">
+          <p className="text-center text-white/70 text-xs font-bold uppercase tracking-widest mb-8 letter-spacing-wider">Certified · Verified · Trusted by Thousands</p>
+          <div className="flex flex-wrap justify-center gap-3">
             {TRUST_BADGES.map(({ icon, label }) => (
-              <div key={label} className="flex items-center gap-2.5 bg-white/10 border border-white/20 rounded-2xl px-5 py-3 text-white backdrop-blur-sm hover:bg-white/20 transition-colors">
+              <div key={label}
+                className="flex items-center gap-2.5 rounded-2xl px-5 py-3 text-white backdrop-blur-sm hover:scale-105 transition-transform duration-200 cursor-default"
+                style={{background:'rgba(255,255,255,0.12)', border:'1px solid rgba(255,255,255,0.25)'}}>
                 <span className="text-xl">{icon}</span>
-                <span className="text-sm font-semibold">{label}</span>
+                <span className="text-sm font-bold">{label}</span>
               </div>
             ))}
           </div>
@@ -594,26 +677,33 @@ function FinalCTA() {
     <FadeSection>
       <section className="py-20 bg-[#F8F6F0]">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
-          <div className="bg-gradient-to-br from-brand-forest to-brand-olive rounded-3xl p-10 sm:p-16 text-white relative overflow-hidden shadow-2xl">
+          <div className="rounded-3xl p-10 sm:p-16 text-white relative overflow-hidden shadow-2xl"
+            style={{background: 'linear-gradient(135deg, #2E7D32 0%, #E91E8C 60%, #c4157a 100%)'}}>
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 blur-2xl" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-brand-gold/10 rounded-full translate-y-1/3 -translate-x-1/4 blur-2xl" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/4 blur-2xl" />
+              <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/3 -translate-x-1/4 blur-2xl" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-brand-gold/10 rounded-full blur-3xl" />
             </div>
-            <Zap className="w-12 h-12 text-brand-gold mx-auto mb-4 relative z-10" />
-            <h2 className="font-dm-serif text-4xl sm:text-5xl mb-4 relative z-10">Ready to Start Earning?</h2>
-            <p className="text-brand-sage text-lg mb-8 max-w-xl mx-auto relative z-10">
-              Join 10,000+ PICs who are earning monthly while making a real difference in India's rural women empowerment movement.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center relative z-10">
-              <Link href="/register" className="group flex items-center justify-center gap-2 px-8 py-4 bg-brand-gold text-white font-bold text-lg rounded-2xl hover:bg-amber-500 transition-all shadow-xl hover:-translate-y-1">
-                Register Free Now
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href="/login" className="flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/30 text-white font-semibold text-lg rounded-2xl hover:bg-white/20 transition-all">
-                Already a PIC? Login
-              </Link>
+            <div className="relative z-10">
+              <div className="inline-block bg-white/20 border border-white/30 backdrop-blur-sm rounded-full px-5 py-2 text-sm font-bold mb-5 text-white">
+                💗 A Lifetime Business Opportunity
+              </div>
+              <h2 className="font-dm-serif text-4xl sm:text-5xl mb-2">Join Now as a</h2>
+              <p className="font-dm-serif text-3xl sm:text-4xl font-extrabold mb-6" style={{color:'#FFD6EE', textShadow:'0 2px 10px rgba(0,0,0,0.2)'}}>"Partner in Change"</p>
+              <p className="text-white/90 text-lg mb-8 max-w-xl mx-auto">
+                Join 10,000+ PICs earning lifelong income while becoming co-architects of women empowerment across India.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link href="/register" className="group flex items-center justify-center gap-2 px-8 py-4 bg-white font-bold text-lg rounded-2xl transition-all shadow-xl hover:-translate-y-1 hover:shadow-2xl" style={{color:'#E91E8C'}}>
+                  Join Now — Register Free
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                </Link>
+                <Link href="/login" className="flex items-center justify-center gap-2 px-8 py-4 bg-white/10 border border-white/30 text-white font-semibold text-lg rounded-2xl hover:bg-white/20 transition-all">
+                  Already a PIC? Login
+                </Link>
+              </div>
+              <p className="mt-6 text-white/70 text-sm">No investment · No inventory · No selling pressure · Just share awareness</p>
             </div>
-            <p className="mt-6 text-brand-sage/70 text-sm relative z-10">No investment · No inventory · No selling pressure · Just share awareness</p>
           </div>
         </div>
       </section>
