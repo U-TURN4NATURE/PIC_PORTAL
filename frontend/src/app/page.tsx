@@ -6,8 +6,8 @@ import { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight, CheckCircle2, Users, Heart, TrendingUp,
   ShieldCheck, Star, MapPin, Leaf, Award, Gift,
-  ChevronLeft, ChevronRight, Phone, Mail, Share2, Video,
-  MessageCircle, Menu, X, ChevronDown, ChevronUp, ArrowUpCircle
+  ChevronLeft, ChevronRight, Phone, Mail,
+  Menu, X, ChevronDown, ChevronUp, ArrowUpCircle
 } from 'lucide-react';
 
 // ──────────────────────────────────────────────────────────────
@@ -26,17 +26,19 @@ const WA = '#25D366';
 // ──────────────────────────────────────────────────────────────
 
 const STATS = [
-  { value: '10,000+', label: 'Active Partners', icon: Users },
-  { value: '2,50,000+', label: 'Happy Customers', icon: Heart },
-  { value: '500+', label: 'Women SHGs', icon: Award },
+  { value: '100+', label: 'PICs and Mentors', icon: Users },
+  { value: '50,000+', label: 'Happy Customers', icon: Heart },
+  { value: '60,000+', label: 'Women Empowered', icon: Award },
   { value: '₹35,000', label: 'Avg. Monthly Earning', icon: TrendingUp },
 ];
 
 const HOW_STEPS = [
   { step: '01', icon: ShieldCheck, title: 'Register Free', desc: 'Sign up in 2 minutes. No fees, no investment, no inventory required.' },
-  { step: '02', icon: Heart, title: 'Share Awareness', desc: 'Share your unique referral link with friends, family & community.' },
-  { step: '03', icon: Gift, title: 'Customers Purchase', desc: 'Your contacts discover & buy authentic homemade products online.' },
-  { step: '04', icon: TrendingUp, title: 'Earn Monthly', desc: 'Get 5% on every purchase made by your contacts – for life.' },
+  { step: '02', icon: Heart, title: '1-2-1 & LOI', desc: 'Brief discussion, offer letter, Orientation on Products USP and how to proceed — Offline/Online.' },
+  { step: '03', icon: Gift, title: 'Share Awareness', desc: 'Share your referral link/website. Your contacts discover & buy authentic homemade products online.' },
+  { step: '04', icon: TrendingUp, title: 'Earn Monthly', desc: 'Get 5%+ on every purchase made by your referral — lifelong.' },
+  { step: '05', icon: Award, title: 'Rewards & Benefits', desc: 'Vacation with RWEs, company share opportunity, extra bonus, discounts. Connect with our Networks.' },
+  { step: '06', icon: Star, title: 'Build Your Business', desc: 'We support PIC women to start their own business with complete handholding — Impact #100MillionWomen.' },
 ];
 
 const INCOME_TIERS = [
@@ -47,7 +49,7 @@ const INCOME_TIERS = [
     icon: Leaf,
     color: `from-emerald-500 to-green-600`,
     badge: 'Begin Your Journey',
-    features: ['Personal referral link', 'Monthly payouts', 'PIC dashboard', 'Dedicated support'],
+    features: [],
   },
   {
     name: 'Growth Partner',
@@ -55,8 +57,8 @@ const INCOME_TIERS = [
     monthly: '₹60,000',
     icon: TrendingUp,
     color: `from-[#1B4332] to-[#2d6a4f]`,
-    badge: 'Most Popular',
-    features: ['Everything in Starter', 'Priority support', 'Performance bonuses', 'SHG mentoring access'],
+    badge: 'Growth Partner',
+    features: [],
     highlight: true,
   },
   {
@@ -66,7 +68,7 @@ const INCOME_TIERS = [
     icon: Award,
     color: 'from-yellow-500 to-amber-600',
     badge: 'Top Performer',
-    features: ['Everything in Growth', 'Community leader badge', 'Special recognition', 'Exclusive events'],
+    features: [],
   },
 ];
 
@@ -95,7 +97,6 @@ const SUCCESS_STORIES = [
 ];
 
 const TRUST_BADGES = [
-  { icon: '🏛️', label: 'FSSAI Certified' },
   { icon: '🔒', label: 'Secure Payments' },
   { icon: '✅', label: 'Verified Products' },
   { icon: '👩‍🌾', label: 'Women-Led Movement' },
@@ -104,12 +105,14 @@ const TRUST_BADGES = [
 ];
 
 const PRODUCTS = [
-  { name: 'Homemade Atta', emoji: '🌾', desc: 'Stone-ground · Village SHG' },
-  { name: 'Cold-Pressed Oils', emoji: '🫙', desc: 'Kachi Ghani · Unrefined' },
-  { name: 'Village Ghee', emoji: '🧈', desc: 'Pure A2 Cow · Desi' },
-  { name: 'Sun-dried Pickles', emoji: '🥒', desc: 'Traditional · No preservatives' },
-  { name: 'Organic Jaggery', emoji: '🍯', desc: 'No chemicals · No sugar' },
-  { name: 'Artisan Snacks', emoji: '🥜', desc: 'Roasted · Village-made' },
+  { name: 'Homemade Chakki Atta', emoji: '🌾', desc: 'Stone-ground · Village SHG' },
+  { name: 'Wood-Cold-Pressed Oils', emoji: '🫙', desc: 'Kachi Ghani · Unrefined' },
+  { name: 'Bilona Ghee', emoji: '🧈', desc: 'Pure A2 Cow · Desi Method' },
+  { name: 'Homemade Pickle', emoji: '🥒', desc: 'Traditional · No preservatives' },
+  { name: 'Natural Jaggery', emoji: '🍯', desc: 'No chemicals · No sugar' },
+  { name: 'Homemade Snacks', emoji: '🥜', desc: 'Roasted · Village-made' },
+  { name: 'State Specific Products', emoji: '🗺️', desc: 'Regional specialities · Authentic' },
+  { name: 'Many More Products', emoji: '✨', desc: 'Growing catalogue · New arrivals' },
 ];
 
 const PRODUCT_GRADIENTS = [
@@ -119,6 +122,8 @@ const PRODUCT_GRADIENTS = [
   'linear-gradient(135deg,#1B4332,#2d6a4f)',
   'linear-gradient(135deg,#7b2d8b,#9c4db8)',
   'linear-gradient(135deg,#b5451b,#d4630a)',
+  'linear-gradient(135deg,#0f7ea8,#1b9fd4)',
+  'linear-gradient(135deg,#E91E8C,#c4157a)',
 ];
 
 const FAQ = [
@@ -298,7 +303,6 @@ function Ticker() {
     '✅ Women-Led Production',
     '💰 No Investment Required',
     '📅 Monthly Earnings',
-    '🏛️ FSSAI Certified',
   ];
   return (
     <div className="overflow-hidden py-0 mt-[75px]" style={{ background: `linear-gradient(90deg, ${G} 0%, ${PINK} 50%, ${G} 100%)` }}>
@@ -372,19 +376,7 @@ function Hero() {
             </a>
           </div>
 
-          {/* Stat chips */}
-          <div className="flex flex-wrap justify-center gap-3">
-            {[
-              { label: '10,000+ Partners', color: G2 },
-              { label: '97% Retention', color: PINK },
-              { label: '₹35K Avg. Earning', color: GOLD },
-            ].map(({ label, color }) => (
-              <span key={label} className="px-4 py-2 rounded-full text-sm font-bold"
-                style={{ background: `${color}20`, border: `1px solid ${color}50`, color, backdropFilter: 'blur(6px)' }}>
-                {label}
-              </span>
-            ))}
-          </div>
+
         </FadeSection>
       </div>
     </section>
@@ -427,16 +419,13 @@ function HowItWorks() {
       <div className="max-w-6xl mx-auto px-4 sm:px-8">
         <FadeSection className="text-center mb-16">
           <span className="inline-block text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4 text-white"
-            style={{ background: `linear-gradient(135deg, ${G}, #2d6a4f)` }}>Simple 4-Step Process</span>
+            style={{ background: `linear-gradient(135deg, ${G}, #2d6a4f)` }}>Your Journey to Success</span>
           <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>How It Works</h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">From registration to monthly income — it's simpler than you think.</p>
         </FadeSection>
 
-        {/* Desktop timeline */}
-        <div className="hidden lg:grid lg:grid-cols-4 gap-0 relative">
-          {/* Dashed connector */}
-          <div className="absolute top-[52px] left-[15%] right-[15%] h-px"
-            style={{ backgroundImage: `repeating-linear-gradient(90deg, ${G}40 0, ${G}40 8px, transparent 8px, transparent 16px)` }} />
+        {/* Desktop timeline — 3-col x 2-row grid for 6 steps */}
+        <div className="hidden lg:grid lg:grid-cols-3 gap-8 relative">
           {HOW_STEPS.map(({ step, icon: Icon, title, desc }, i) => (
             <FadeSection key={step} delay={i * 120}>
               <div className="flex flex-col items-center text-center px-4 group">
@@ -504,52 +493,29 @@ function IncomeSection() {
         </FadeSection>
 
         <div className="grid md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-          {INCOME_TIERS.map(({ name, customers, monthly, icon: Icon, color, badge, features, highlight }, i) => (
+          {INCOME_TIERS.map(({ name, customers, monthly, icon: Icon, color, highlight }, i) => (
             <FadeSection key={name} delay={i * 130}>
               <div className={`relative h-full flex flex-col transition-all duration-300 ${highlight ? 'scale-105 z-10' : 'hover:-translate-y-1'}`}
-                style={{ paddingTop: highlight ? '18px' : '0' }}>
-
-                {highlight && (
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 text-white text-xs font-bold px-5 py-1.5 rounded-full shadow-lg tracking-wide whitespace-nowrap"
-                    style={{ background: `linear-gradient(135deg, ${GOLD}, #b8941e)` }}>
-                    ⭐ {badge}
-                  </div>
-                )}
+                style={{ paddingTop: highlight ? '0' : '0' }}>
 
                 <div className={`rounded-3xl overflow-hidden flex-1 flex flex-col ${highlight
                   ? 'shadow-2xl ring-2 ring-[#1B4332]'
                   : 'border border-gray-100 shadow-lg hover:shadow-2xl'
                 }`}>
-                  <div className={`bg-gradient-to-br ${color} p-8 text-white relative`}>
+                  <div className={`bg-gradient-to-br ${color} p-10 text-white relative flex-1 flex flex-col justify-center`}>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-                    {!highlight && (
-                      <div className="absolute top-4 right-4 bg-white/20 border border-white/30 text-white text-xs font-bold px-3 py-1 rounded-full backdrop-blur-sm">{badge}</div>
-                    )}
-                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5">
+                    <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center mb-5 relative z-10">
                       <Icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold mb-1">{name}</h3>
-                    <p className="text-white/70 text-sm mb-5 flex items-center gap-1.5">
+                    <h3 className="text-xl font-bold mb-1 relative z-10">{name}</h3>
+                    <p className="text-white/70 text-sm mb-5 flex items-center gap-1.5 relative z-10">
                       <Users className="w-3.5 h-3.5" />{customers} Active Customers
                     </p>
-                    <div className="flex items-end gap-1">
+                    <div className="flex items-end gap-1 relative z-10">
                       <span className="text-4xl font-bold" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{monthly}</span>
                       <span className="text-white/60 text-sm mb-1">/month</span>
                     </div>
-                  </div>
-
-                  <div className="bg-white flex-1 p-6">
-                    <ul className="space-y-3">
-                      {features.map(f => (
-                        <li key={f} className="flex items-center gap-3 text-sm text-gray-600">
-                          <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                            style={{ background: `${G}15` }}>
-                            <CheckCircle2 className="w-3.5 h-3.5" style={{ color: G }} />
-                          </div>
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
                   </div>
                 </div>
               </div>
@@ -565,7 +531,7 @@ function IncomeSection() {
               style={{ background: `linear-gradient(135deg, ${WA}, #128C7E)`, boxShadow: '0 8px 24px rgba(37,211,102,0.35)' }}>
               {WA_SVG} Chat with us on WhatsApp
             </a>
-            <p className="text-gray-400 text-sm">* Earnings based on 5% commission. Actual income depends on customer activity.</p>
+            <p className="text-gray-400 text-sm">* Estimated earning based on approx 5% of total purchase. Actual earning depends on awareness and purchase.</p>
           </div>
         </FadeSection>
       </div>
@@ -662,7 +628,7 @@ function SuccessStories() {
         <FadeSection className="text-center mb-14">
           <span className="inline-block text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-4"
             style={{ background: `linear-gradient(135deg, ${G}, #2d6a4f)` }}>Real Women · Real Earnings</span>
-          <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>Success Stories</h2>
+          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.02em' }}>What Customers, Rural Women Entrepreneurs (RWE), PICs and Mentors Says!</h2>
           <p className="text-gray-500 max-w-xl mx-auto text-lg">Thousands of women across India are earning monthly with U-Turn4Nature PIC.</p>
         </FadeSection>
 
@@ -918,19 +884,46 @@ function Footer() {
             </a>
           </div>
           <div className="flex gap-3">
-            {[
-              { icon: Share2, href: 'https://www.instagram.com/uturn4nature/', label: 'Instagram', hover: '#E1306C' },
-              { icon: Video, href: 'https://www.youtube.com/@u-turn4nature', label: 'YouTube', hover: '#FF0000' },
-              { icon: MessageCircle, href: 'https://www.facebook.com/UTurn4Nature', label: 'Facebook', hover: '#1877F2' },
-            ].map(({ icon: Icon, href, label, hover }) => (
-              <a key={href} href={href} target="_blank" rel="noreferrer" aria-label={label}
-                className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
-                style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = hover; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
-                <Icon className="w-4 h-4 text-white" />
-              </a>
-            ))}
+            {/* Instagram */}
+            <a href="https://www.instagram.com/uturn4nature/" target="_blank" rel="noreferrer" aria-label="Instagram"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#E1306C'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+              </svg>
+            </a>
+            {/* YouTube */}
+            <a href="https://www.youtube.com/@u-turn4nature" target="_blank" rel="noreferrer" aria-label="YouTube"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FF0000'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
+                <path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+              </svg>
+            </a>
+            {/* Facebook */}
+            <a href="https://www.facebook.com/UTurn4Nature" target="_blank" rel="noreferrer" aria-label="Facebook"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#1877F2'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              </svg>
+            </a>
+            {/* WhatsApp */}
+            <a href={WA_HREF} target="_blank" rel="noreferrer" aria-label="WhatsApp"
+              className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:-translate-y-0.5"
+              style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.1)' }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#25D366'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+            </a>
           </div>
         </div>
       </div>
@@ -941,7 +934,6 @@ function Footer() {
           <p>© 2026 U-TURN4NATURE LLP. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-3 justify-center">
             <span className="px-2 py-0.5 rounded bg-white/5 text-gray-500">GSTIN: 09AAFFU8734N2ZC</span>
-            <span className="px-2 py-0.5 rounded bg-white/5 text-gray-500">🏛️ FSSAI Certified</span>
             <span>Plot No. 4, Ecotech 3, Greater Noida – 201306</span>
           </div>
         </div>
