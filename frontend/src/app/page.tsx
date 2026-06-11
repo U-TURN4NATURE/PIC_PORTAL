@@ -225,8 +225,8 @@ function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <div className="bg-white rounded-full p-0.5 shadow-md border border-gray-100">
-              <Image src="/logo_1.jpg" alt="U-Turn4Nature logo" width={44} height={44} className="w-11 h-11 rounded-full object-contain" />
+            <div className="bg-white rounded-full p-0.5 shadow-md border border-gray-100 flex items-center justify-center overflow-hidden">
+              <img src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" alt="U-Turn4Nature logo" width={44} height={44} className="w-11 h-11 rounded-full object-cover" />
             </div>
             <div className="hidden xs:block">
               <span className="block text-sm font-bold leading-tight" style={{ color: G }}>U-Turn4Nature</span>
@@ -841,8 +841,8 @@ function Footer() {
 
         {/* Brand */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl p-3 inline-block mb-5 shadow-md">
-            <Image src="/logo_2.jpg" alt="U-Turn4Nature logo" width={180} height={80} className="object-contain h-20 w-auto" loading="lazy" />
+          <div className="bg-white rounded-2xl p-3 inline-block mb-5 shadow-md overflow-hidden">
+            <img src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" alt="U-Turn4Nature logo" className="object-cover h-20 w-auto rounded-xl" loading="lazy" />
           </div>
           <p className="text-sm leading-relaxed text-gray-400 mb-4">India's first exclusive pure homemade grocery brand. Creating dignified livelihoods for rural women.</p>
           <p className="text-xs font-semibold">
