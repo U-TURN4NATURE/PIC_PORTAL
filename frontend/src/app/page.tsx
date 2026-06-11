@@ -658,8 +658,6 @@ function SuccessStories() {
                     <p className="font-bold text-lg leading-tight">{name}</p>
                     <p className="text-sm text-white/80 flex items-center gap-1 mt-0.5"><MapPin className="w-3 h-3" />{location}</p>
                   </div>
-                  <div className="absolute top-4 right-4 text-white text-sm font-bold px-3 py-1.5 rounded-full shadow-lg"
-                    style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)` }}>{income}</div>
                 </div>
                 <div className="p-6">
                   <div className="flex gap-0.5 mb-3">
@@ -685,8 +683,6 @@ function SuccessStories() {
                 <p className="font-bold text-xl">{SUCCESS_STORIES[active].name}</p>
                 <p className="text-sm text-white/80">{SUCCESS_STORIES[active].location}</p>
               </div>
-              <div className="absolute top-4 right-4 text-white text-sm font-bold px-3 py-1.5 rounded-full"
-                style={{ background: `linear-gradient(135deg, ${G2}, #27ae60)` }}>{SUCCESS_STORIES[active].income}</div>
             </div>
             <div className="p-5">
               <div className="flex gap-0.5 mb-3">{[...Array(5)].map((_, j) => <Star key={j} className="w-4 h-4" style={{ fill: GOLD, color: GOLD }} />)}</div>
