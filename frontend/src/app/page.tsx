@@ -209,6 +209,7 @@ function Navbar() {
     { label: 'Stories', href: '#stories' },
     { label: 'Products', href: '#products' },
     { label: 'FAQ', href: '#faq' },
+    { label: 'About Us', href: 'https://www.u-turn.in/about-us', external: true },
   ];
 
   return (
@@ -237,6 +238,8 @@ function Navbar() {
           <div className="hidden md:flex items-center gap-7">
             {links.map(l => (
               <a key={l.href} href={l.href}
+                target={(l as any).external ? '_blank' : undefined}
+                rel={(l as any).external ? 'noreferrer' : undefined}
                 className="text-sm font-semibold text-gray-600 hover:text-[#1B4332] transition-colors relative group">
                 {l.label}
                 <span className="absolute -bottom-0.5 left-0 w-0 h-0.5 rounded-full group-hover:w-full transition-all duration-300" style={{ background: G }} />
@@ -271,7 +274,10 @@ function Navbar() {
           style={{ background: 'white', borderTop: `1px solid ${G}15` }}>
           <div className="px-4 py-5 space-y-1">
             {links.map(l => (
-              <a key={l.href} href={l.href} onClick={() => setMenuOpen(false)}
+              <a key={l.href} href={l.href}
+                target={(l as any).external ? '_blank' : undefined}
+                rel={(l as any).external ? 'noreferrer' : undefined}
+                onClick={() => setMenuOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                 {l.label}
               </a>
