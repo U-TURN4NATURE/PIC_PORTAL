@@ -105,12 +105,12 @@ const TRUST_BADGES = [
 ];
 
 const PRODUCTS = [
-  { name: 'Homemade Chakki Atta', img: 'https://img.clevup.in/378284/homemadempchakkiattanaturalorganic-1780159278020.png?width=600&format=webp', desc: 'Stone-ground · Village SHG', link: 'https://www.u-turn.in/collections/atta-flour' },
-  { name: 'Wood-Cold-Pressed Oils', img: 'https://img.clevup.in/378284/ColdPressedBlack-1720010819686-1773488089243.jpeg?width=600&format=webp', desc: 'Kachi Ghani · Unrefined', link: 'https://www.u-turn.in/collections/cold-pressed-oils' },
-  { name: 'Bilona Ghee', img: 'https://img.clevup.in/378284/Ghee-1773482703603.png?width=600&format=webp', desc: 'Pure A2 Cow · Desi Method', link: 'https://www.u-turn.in/collections/ghee' },
-  { name: 'Homemade Pickle', img: 'https://img.clevup.in/378284/PICKLEIGRED-1763141259774.png?width=600&format=webp', desc: 'Traditional · No preservatives', link: 'https://www.u-turn.in/collections/pickles' },
-  { name: 'Natural Jaggery', img: 'https://img.clevup.in/378284/JaggerycubesBack-1720026344172-1774074073818.png?width=600&format=webp', desc: 'No chemicals · No sugar', link: 'https://www.u-turn.in/collections/jaggery' },
-  { name: 'Homemade Snacks', img: 'https://img.clevup.in/378284/RagiChipsPeriPeriFront-1772884317651.png?width=600&format=webp', desc: 'Roasted · Village-made', link: 'https://www.u-turn.in/collections/snacks' },
+  { name: 'Homemade Chakki Atta', img: 'https://img.clevup.in/378284/homemadempchakkiattanaturalorganic-1780159278020.png?width=600&format=webp', desc: 'Stone-ground · Village SHG', link: 'https://www.u-turn.in/products/mp-chakki-wheat-attahomemade-with-fiber-5kg' },
+  { name: 'Wood-Cold-Pressed Oils', img: 'https://img.clevup.in/378284/ColdPressedBlack-1720010819686-1773488089243.jpeg?width=600&format=webp', desc: 'Kachi Ghani · Unrefined', link: 'https://www.u-turn.in/categories/wood-cold-pressed-oil' },
+  { name: 'Bilona Ghee', img: 'https://img.clevup.in/378284/Ghee-1773482703603.png?width=600&format=webp', desc: 'Pure A2 Cow · Desi Method', link: 'https://www.u-turn.in/products/gir-cow-bilona-ghee-1lx5' },
+  { name: 'Homemade Pickle', img: 'https://img.clevup.in/378284/PICKLEIGRED-1763141259774.png?width=600&format=webp', desc: 'Traditional · No preservatives', link: 'https://www.u-turn.in/categories/pickles-papad-etc' },
+  { name: 'Natural Jaggery', img: 'https://img.clevup.in/378284/JaggerycubesBack-1720026344172-1774074073818.png?width=600&format=webp', desc: 'No chemicals · No sugar', link: 'https://www.u-turn.in/categories/jaggery-gur-khand' },
+  { name: 'Homemade Snacks', img: 'https://img.clevup.in/378284/RagiChipsPeriPeriFront-1772884317651.png?width=600&format=webp', desc: 'Roasted · Village-made', link: 'https://www.u-turn.in/categories/home-made-snacks' },
   { name: 'State Specific Products', img: '', desc: 'Regional specialities · Authentic', link: 'https://www.u-turn.in' },
   { name: 'Many More Products', img: '', desc: 'Growing catalogue · New arrivals', link: 'https://www.u-turn.in' },
 ];
@@ -183,7 +183,7 @@ function FadeSection({ children, className = '', delay = 0 }: { children: React.
 
 const WA_SVG = (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
   </svg>
 );
 
@@ -220,22 +220,25 @@ function Navbar() {
       <nav className={`fixed top-[3px] left-0 right-0 z-50 transition-all duration-300 ${scrolled
         ? 'bg-white/95 backdrop-blur-lg shadow-lg shadow-black/5'
         : 'bg-white/80 backdrop-blur-md'
-      }`}>
+        }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-8 flex items-center justify-between h-16 sm:h-[72px]">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 flex-shrink-0">
-            <img 
-              src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" 
-              alt="U-Turn4Nature logo" 
-              className="h-10 sm:h-12 w-auto object-contain" 
+            <img
+              src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp"
+              alt="U-Turn4Nature logo"
+              className="h-10 sm:h-12 w-auto object-contain"
             />
             <div className="hidden xs:block border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
-              <span className="block text-lg font-black leading-none tracking-tight text-gray-900 mb-0.5">
-                U-Turn<span style={{ color: PINK }}>4</span>Nature
+              <span className="block text-xl font-bold leading-[1.1] tracking-tight" style={{ color: G }}>
+                U-Turn
               </span>
-              <span className="block text-[9px] font-bold leading-none tracking-widest uppercase" style={{ color: G }}>
-                Partner in Change
+              <span className="block text-xl font-bold leading-[1.1] tracking-tight mb-1">
+                <span style={{ color: PINK }}>4</span> <span style={{ color: G }}>Nature</span>
+              </span>
+              <span className="block text-[10px] font-semibold leading-none tracking-wide" style={{ color: PINK }}>
+                Homemade Goodness
               </span>
             </div>
           </Link>
@@ -513,7 +516,7 @@ function IncomeSection() {
                 <div className={`rounded-3xl overflow-hidden flex-1 flex flex-col ${highlight
                   ? 'shadow-2xl ring-2 ring-[#1B4332]'
                   : 'border border-gray-100 shadow-lg hover:shadow-2xl'
-                }`}>
+                  }`}>
                   <div className={`bg-gradient-to-br ${color} p-10 text-white relative flex-1 flex flex-col justify-center`}>
                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
                     <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
@@ -850,11 +853,14 @@ function Footer() {
           <div className="bg-white rounded-xl py-3 px-4 inline-flex items-center gap-3 mb-5 shadow-md">
             <img src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" alt="U-Turn4Nature logo" className="object-contain h-12 w-auto" loading="lazy" />
             <div className="border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
-              <span className="block text-xl font-black leading-none tracking-tight text-gray-900 mb-1">
-                U-Turn<span style={{ color: PINK }}>4</span>Nature
+              <span className="block text-2xl font-bold leading-[1.1] tracking-tight" style={{ color: G }}>
+                U-Turn
               </span>
-              <span className="block text-[10px] font-bold leading-none tracking-widest uppercase" style={{ color: G }}>
-                Partner in Change
+              <span className="block text-2xl font-bold leading-[1.1] tracking-tight mb-1">
+                <span style={{ color: PINK }}>4</span> <span style={{ color: G }}>Nature</span>
+              </span>
+              <span className="block text-xs font-semibold leading-none tracking-wide" style={{ color: PINK }}>
+                Homemade Goodness
               </span>
             </div>
           </div>
@@ -914,7 +920,7 @@ function Footer() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#E1306C'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
               </svg>
             </a>
             {/* YouTube */}
@@ -924,7 +930,7 @@ function Footer() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FF0000'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
-                <path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z"/>
+                <path d="M23.495 6.205a3.007 3.007 0 00-2.088-2.088c-1.87-.501-9.396-.501-9.396-.501s-7.507-.01-9.396.501A3.007 3.007 0 00.527 6.205a31.247 31.247 0 00-.522 5.805 31.247 31.247 0 00.522 5.783 3.007 3.007 0 002.088 2.088c1.868.502 9.396.502 9.396.502s7.506 0 9.396-.502a3.007 3.007 0 002.088-2.088 31.247 31.247 0 00.5-5.783 31.247 31.247 0 00-.5-5.805zM9.609 15.601V8.408l6.264 3.602z" />
               </svg>
             </a>
             {/* Facebook */}
@@ -934,7 +940,7 @@ function Footer() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#1877F2'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
-                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
               </svg>
             </a>
             {/* WhatsApp */}
@@ -944,7 +950,7 @@ function Footer() {
               onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#25D366'; }}
               onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)'; }}>
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" color="white">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
               </svg>
             </a>
           </div>
