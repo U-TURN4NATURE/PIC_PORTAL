@@ -326,7 +326,7 @@ function Hero() {
     <section className="relative min-h-screen flex items-center overflow-hidden" style={{ background: CREAM }}>
       {/* Full-width dark gradient over collage */}
       <div className="absolute inset-0 z-0">
-        <Image src="/product_collage.png" alt="U-Turn4Nature homemade products" fill className="object-cover" priority />
+        <Image src="/ghar_ka_khana.jpeg" alt="Ghar ka bana hi khana - U-Turn4Nature homemade products" fill className="object-cover" priority />
         <div className="absolute inset-0" style={{
           background: 'linear-gradient(135deg, rgba(13,40,24,0.92) 0%, rgba(27,67,50,0.85) 50%, rgba(13,40,24,0.7) 100%)'
         }} />
@@ -582,24 +582,18 @@ function ProductShowcase() {
           ))}
         </div>
 
-        {/* Image with floating badges */}
+        {/* Ghar ka bana hi khana — full-width image, no distortion */}
         <FadeSection>
-          <div className="mt-16 relative max-w-2xl mx-auto">
-            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
-              <Image src="/product_collage.png" alt="Homemade products from U-Turn4Nature village SHGs" width={800} height={480}
-                className="object-cover w-full h-[360px]" loading="lazy" />
-            </div>
-            <div className="absolute -bottom-5 -right-5 rounded-2xl p-4 shadow-xl text-white"
-              style={{ background: `linear-gradient(135deg, ${GOLD}, #b8941e)` }}>
-              <p className="text-xs font-semibold opacity-80 mb-0.5">Customer Retention</p>
-              <p className="text-3xl font-bold">97%</p>
-              <p className="text-xs opacity-70">repeat purchases</p>
-            </div>
-            <div className="absolute -top-5 -left-5 rounded-2xl p-4 shadow-xl text-white"
-              style={{ background: `linear-gradient(135deg, ${G}, #2d6a4f)` }}>
-              <p className="text-xs font-semibold opacity-80 mb-0.5">Women Empowered</p>
-              <p className="text-2xl font-bold">500+</p>
-              <p className="text-xs opacity-70">SHG Villages</p>
+          <div className="mt-16 relative max-w-4xl mx-auto">
+            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white" style={{ background: '#f5e642' }}>
+              <Image
+                src="/ghar_ka_khana.jpeg"
+                alt="Ghar ka bana hi khana - Homemade products by U-Turn4Nature"
+                width={1200}
+                height={630}
+                className="w-full h-auto object-contain"
+                loading="lazy"
+              />
             </div>
           </div>
         </FadeSection>
