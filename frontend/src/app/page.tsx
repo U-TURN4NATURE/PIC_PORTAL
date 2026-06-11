@@ -105,14 +105,14 @@ const TRUST_BADGES = [
 ];
 
 const PRODUCTS = [
-  { name: 'Homemade Chakki Atta', emoji: '🌾', desc: 'Stone-ground · Village SHG' },
-  { name: 'Wood-Cold-Pressed Oils', emoji: '🫙', desc: 'Kachi Ghani · Unrefined' },
-  { name: 'Bilona Ghee', emoji: '🧈', desc: 'Pure A2 Cow · Desi Method' },
-  { name: 'Homemade Pickle', emoji: '🥒', desc: 'Traditional · No preservatives' },
-  { name: 'Natural Jaggery', emoji: '🍯', desc: 'No chemicals · No sugar' },
-  { name: 'Homemade Snacks', emoji: '🥜', desc: 'Roasted · Village-made' },
-  { name: 'State Specific Products', emoji: '🗺️', desc: 'Regional specialities · Authentic' },
-  { name: 'Many More Products', emoji: '✨', desc: 'Growing catalogue · New arrivals' },
+  { name: 'Homemade Chakki Atta', img: 'https://img.clevup.in/378284/homemadempchakkiattanaturalorganic-1780159278020.png?width=600&format=webp', desc: 'Stone-ground · Village SHG', link: 'https://www.u-turn.in/collections/atta-flour' },
+  { name: 'Wood-Cold-Pressed Oils', img: 'https://img.clevup.in/378284/ColdPressedBlack-1720010819686-1773488089243.jpeg?width=600&format=webp', desc: 'Kachi Ghani · Unrefined', link: 'https://www.u-turn.in/collections/cold-pressed-oils' },
+  { name: 'Bilona Ghee', img: 'https://img.clevup.in/378284/Ghee-1773482703603.png?width=600&format=webp', desc: 'Pure A2 Cow · Desi Method', link: 'https://www.u-turn.in/collections/ghee' },
+  { name: 'Homemade Pickle', img: 'https://img.clevup.in/378284/PICKLEIGRED-1763141259774.png?width=600&format=webp', desc: 'Traditional · No preservatives', link: 'https://www.u-turn.in/collections/pickles' },
+  { name: 'Natural Jaggery', img: 'https://img.clevup.in/378284/JaggerycubesBack-1720026344172-1774074073818.png?width=600&format=webp', desc: 'No chemicals · No sugar', link: 'https://www.u-turn.in/collections/jaggery' },
+  { name: 'Homemade Snacks', img: 'https://img.clevup.in/378284/RagiChipsPeriPeriFront-1772884317651.png?width=600&format=webp', desc: 'Roasted · Village-made', link: 'https://www.u-turn.in/collections/snacks' },
+  { name: 'State Specific Products', img: '', desc: 'Regional specialities · Authentic', link: 'https://www.u-turn.in' },
+  { name: 'Many More Products', img: '', desc: 'Growing catalogue · New arrivals', link: 'https://www.u-turn.in' },
 ];
 
 const PRODUCT_GRADIENTS = [
@@ -571,19 +571,32 @@ function ProductShowcase() {
 
         {/* Product grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
-          {PRODUCTS.map(({ name, emoji, desc }, idx) => (
+          {PRODUCTS.map(({ name, img, desc, link }, idx) => (
             <FadeSection key={name} delay={idx * 80}>
-              <div className="group bg-white rounded-2xl p-6 border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex items-center gap-5"
+              <a href={link} target="_blank" rel="noreferrer"
+                className="group bg-white rounded-2xl p-5 border shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 flex items-center gap-4 cursor-pointer"
                 style={{ borderColor: `${G}12` }}>
-                <div className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center text-3xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-lg"
-                  style={{ background: PRODUCT_GRADIENTS[idx] }}>
-                  {emoji}
+                <div className="w-[80px] h-[80px] rounded-2xl flex-shrink-0 overflow-hidden shadow-md group-hover:scale-105 transition-transform duration-300"
+                  style={{ background: img ? '#f8f8f8' : PRODUCT_GRADIENTS[idx] }}>
+                  {img ? (
+                    <img
+                      src={img}
+                      alt={name}
+                      className="w-full h-full object-contain"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-3xl">
+                      {idx === 6 ? '🗺️' : '✨'}
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <p className="font-bold text-gray-900 text-base mb-0.5">{name}</p>
+                  <p className="font-bold text-gray-900 text-base mb-0.5 group-hover:text-[#1B4332] transition-colors">{name}</p>
                   <p className="text-sm text-gray-400">{desc}</p>
+                  <p className="text-xs font-semibold mt-1" style={{ color: G }}>Shop Now →</p>
                 </div>
-              </div>
+              </a>
             </FadeSection>
           ))}
         </div>
