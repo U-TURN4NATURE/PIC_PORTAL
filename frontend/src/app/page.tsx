@@ -230,7 +230,7 @@ function Navbar() {
               alt="U-Turn4Nature logo"
               className="h-10 sm:h-12 w-auto object-contain"
             />
-            <div className="hidden xs:block border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
+            <div className="border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
               <span className="block text-xl font-bold leading-[1.1] tracking-tight" style={{ color: G }}>
                 U-Turn
               </span>
