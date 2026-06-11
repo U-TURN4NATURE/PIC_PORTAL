@@ -228,11 +228,15 @@ function Navbar() {
             <img 
               src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" 
               alt="U-Turn4Nature logo" 
-              className="h-12 sm:h-14 w-auto object-contain" 
+              className="h-10 sm:h-12 w-auto object-contain" 
             />
-            <div className="hidden xs:block border-l-2 pl-3 py-1" style={{ borderColor: `${GOLD}40` }}>
-              <span className="block text-[10px] font-black leading-tight tracking-widest uppercase" style={{ color: G }}>Partner in Change</span>
-              <span className="block text-[10px] font-bold leading-tight tracking-wide text-gray-500">PIC Portal</span>
+            <div className="hidden xs:block border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
+              <span className="block text-lg font-black leading-none tracking-tight text-gray-900 mb-0.5">
+                U-Turn<span style={{ color: PINK }}>4</span>Nature
+              </span>
+              <span className="block text-[9px] font-bold leading-none tracking-widest uppercase" style={{ color: G }}>
+                Partner in Change
+              </span>
             </div>
           </Link>
 
@@ -843,8 +847,16 @@ function Footer() {
 
         {/* Brand */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl py-3 px-4 inline-block mb-5 shadow-md">
-            <img src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" alt="U-Turn4Nature logo" className="object-contain h-14 w-auto" loading="lazy" />
+          <div className="bg-white rounded-xl py-3 px-4 inline-flex items-center gap-3 mb-5 shadow-md">
+            <img src="https://img.clevup.in/378284/LOGOUT2AUG25-1754702859985.jpeg?height=200&format=webp" alt="U-Turn4Nature logo" className="object-contain h-12 w-auto" loading="lazy" />
+            <div className="border-l-2 pl-3 py-0.5" style={{ borderColor: `${GOLD}40` }}>
+              <span className="block text-xl font-black leading-none tracking-tight text-gray-900 mb-1">
+                U-Turn<span style={{ color: PINK }}>4</span>Nature
+              </span>
+              <span className="block text-[10px] font-bold leading-none tracking-widest uppercase" style={{ color: G }}>
+                Partner in Change
+              </span>
+            </div>
           </div>
           <p className="text-sm leading-relaxed text-gray-400 mb-4">India's first exclusive pure homemade grocery brand. Creating dignified livelihoods for rural women.</p>
           <p className="text-xs font-semibold">
