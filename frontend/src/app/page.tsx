@@ -80,13 +80,7 @@ const SUCCESS_STORIES = [
     img: '/women_1.png',
     quote: 'I started as a homemaker and now I support my family with my own earnings. U-Turn4Nature changed my life.',
   },
-  {
-    name: 'Savita Kumari',
-    location: 'Nashik, Maharashtra',
-    income: '₹42,000/mo',
-    img: '/women_2.png',
-    quote: 'Being a PIC means I promote the food I believe in. My community trusts me and that makes all the difference.',
-  },
+
   {
     name: 'Priya Sharma',
     location: 'Noida',
