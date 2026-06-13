@@ -87,13 +87,6 @@ const SUCCESS_STORIES = [
     img: '/women_2.png',
     quote: 'Being a PIC means I promote the food I believe in. My community trusts me and that makes all the difference.',
   },
-  {
-    name: 'Priya Sharma',
-    location: 'Jaipur, Rajasthan',
-    income: '₹65,000/mo',
-    img: '/women_3.png',
-    quote: 'Within 8 months I had 600 active customers. The products sell themselves – homemade quality speaks for itself.',
-  },
 ];
 
 const TRUST_BADGES = [
