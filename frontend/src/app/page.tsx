@@ -610,13 +610,13 @@ function ProductShowcase() {
           ))}
         </div>
 
-        {/* Ghar ka bana hi khana — full-width image, no distortion */}
+        {/* Our Promise — full-width image, no distortion */}
         <FadeSection>
           <div className="mt-16 relative max-w-4xl mx-auto">
-            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white" style={{ background: '#f5e642' }}>
+            <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white">
               <Image
-                src="/ghar_ka_khana.jpeg"
-                alt="Ghar ka bana hi khana - Homemade products by U-Turn4Nature"
+                src="/our_promise.jpeg"
+                alt="Our Promise - U-Turn4Nature"
                 width={1200}
                 height={630}
                 className="w-full h-auto object-contain"
