@@ -869,10 +869,11 @@ function FAQSection() {
           <p className="text-gray-500 text-lg">Everything you need to know before you begin.</p>
         </FadeSection>
 
-        <div className="space-y-3">
-          {FAQ.map(({ q, a }, i) => (
-            <FadeSection key={i} delay={i * 70}>
-              <div className="rounded-2xl border overflow-hidden transition-all duration-200"
+        <FadeSection>
+          <div className="space-y-3 max-h-[400px] overflow-y-auto p-1 pr-3" 
+               style={{ scrollbarWidth: 'thin', scrollbarColor: '#d1d5db transparent' }}>
+            {FAQ.map(({ q, a }, i) => (
+              <div key={i} className="rounded-2xl border overflow-hidden transition-all duration-200"
                 style={{ borderColor: open === i ? `${G}40` : '#e5e7eb', boxShadow: open === i ? `0 4px 20px ${G}12` : 'none' }}>
                 <button
                   onClick={() => setOpen(open === i ? null : i)}
@@ -886,13 +887,13 @@ function FAQSection() {
                       : <ChevronDown className="w-4 h-4" style={{ color: G }} />}
                   </div>
                 </button>
-                <div className={`overflow-hidden transition-all duration-300 ${open === i ? 'max-h-48' : 'max-h-0'}`}>
+                <div className={`overflow-hidden transition-all duration-300 ${open === i ? 'max-h-[600px]' : 'max-h-0'}`}>
                   <p className="px-6 pb-5 text-gray-500 text-sm leading-relaxed border-t border-gray-100 pt-4">{a}</p>
                 </div>
               </div>
-            </FadeSection>
-          ))}
-        </div>
+            ))}
+          </div>
+        </FadeSection>
       </div>
     </section>
   );
