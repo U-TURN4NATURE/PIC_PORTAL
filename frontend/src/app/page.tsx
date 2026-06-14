@@ -74,14 +74,6 @@ const INCOME_TIERS = [
 
 const SUCCESS_STORIES = [
   {
-    name: 'Rekha Devi',
-    location: 'Lucknow, UP',
-    income: '₹18,000/mo',
-    img: '/women_1.png',
-    quote: 'I started as a homemaker and now I support my family with my own earnings. U-Turn4Nature changed my life.',
-  },
-
-  {
     name: 'Priya Sharma',
     location: 'Noida',
     income: '₹65,000/mo',
@@ -756,10 +748,10 @@ function SuccessStories() {
           <p className="text-gray-500 max-w-xl mx-auto text-lg">Thousands of women across India are earning monthly with U-Turn4Nature PIC.</p>
         </FadeSection>
 
-        {/* Desktop 3-col */}
-        <div className="hidden md:grid md:grid-cols-3 gap-8">
+        {/* Desktop single-col centered */}
+        <div className="hidden md:flex md:justify-center gap-8">
           {SUCCESS_STORIES.map(({ name, location, income, img, quote }, i) => (
-            <FadeSection key={name} delay={i * 110}>
+            <FadeSection key={name} delay={i * 110} className="w-full max-w-md">
               <div className="bg-white rounded-3xl overflow-hidden shadow-md hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 group">
                 {/* Photo */}
                 <div className="relative h-60 overflow-hidden">

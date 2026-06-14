@@ -22,6 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="icon" href="/logo_1.jpg" type="image/jpeg" />
+        <link rel="shortcut icon" href="/logo_1.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/logo_1.jpg" />
+      </head>
       <body className={`${inter.variable} ${dmSerif.variable} antialiased font-sans`}>
         {children}
         <Toaster position="top-right" richColors />
