@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Loader2, XCircle } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
 // Google OAuth Success Page
@@ -14,7 +14,7 @@ import { Loader2, CheckCircle2, XCircle } from 'lucide-react';
 // We call /auth/me to hydrate the session and store the user.
 // ─────────────────────────────────────────────────
 
-export default function GoogleSuccessPage() {
+function GoogleCallbackInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { setUser } = useAuthStore();
@@ -33,8 +33,6 @@ export default function GoogleSuccessPage() {
       }
 
       try {
-        // Call /auth/me with the token in the Authorization header
-        // This hydrates the user session and sets the HTTP-only cookie for future requests
         const res = await api.get('/auth/me', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -43,7 +41,6 @@ export default function GoogleSuccessPage() {
         setUser(user);
         toast.success(`Welcome, ${user.fullName || user.email}! 🎉`);
 
-        // Smart redirect based on status
         if (user.status === 'ACTIVE') {
           router.replace('/dashboard');
         } else if (user.status === 'APPROVED' && !user.profileCompleted) {
@@ -94,3 +91,20 @@ export default function GoogleSuccessPage() {
     </div>
   );
 }
+
+// ── Suspense wrapper required by Next.js for useSearchParams() ──
+export default function GoogleSuccessPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 text-brand-forest animate-spin mx-auto mb-3" />
+          <p className="text-gray-400 text-sm">Loading...</p>
+        </div>
+      </div>
+    }>
+      <GoogleCallbackInner />
+    </Suspense>
+  );
+}
+
