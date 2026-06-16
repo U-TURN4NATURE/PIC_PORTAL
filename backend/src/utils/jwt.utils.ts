@@ -27,12 +27,17 @@ export const verifyToken = (token: string): JWTPayload => {
 };
 
 /**
- * Get cookie options for HTTP-only JWT cookie
+ * Get cookie options for HTTP-only JWT cookie.
+ * Production: SameSite=None; Secure (required for cross-domain Vercel <-> Railway)
+ * Development: SameSite=Lax; no Secure flag (localhost isn't HTTPS, Secure cookies are silently dropped)
  */
-export const getCookieOptions = () => ({
-  httpOnly: true,
-  secure: true, // Must be true for SameSite=None
-  sameSite: 'none' as const, // Required for cross-domain cookies (Vercel <-> Railway)
-  maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN || '7') * 24 * 60 * 60 * 1000, // days to ms
-  path: '/',
-});
+export const getCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? ('none' as const) : ('lax' as const),
+    maxAge: parseInt(process.env.JWT_COOKIE_EXPIRES_IN || '7') * 24 * 60 * 60 * 1000, // days to ms
+    path: '/',
+  };
+};

@@ -182,6 +182,7 @@ export const completeProfileExperience = async (
       whyJoin: data.whyJoin,
       preferredWorkingArea: data.preferredWorkingArea,
       preferredDistrict: data.preferredDistrict,
+      preferredState: data.preferredState,
       availability: data.availability,
       instagramProfile: data.instagramProfile || null,
       resumeDocument: resumeDocument || null,
