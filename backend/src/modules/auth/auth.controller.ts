@@ -29,11 +29,23 @@ export const verifyOTP = async (req: Request, res: Response, next: NextFunction)
 export const picLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
+    
+    console.log(`🔐 PIC Login attempt for: ${email}`);
+    
+    // Validate input
+    if (!email || !password) {
+      return next(new Error('Email and password are required'));
+    }
+
     const { token, user } = await authService.loginPIC(email, password);
 
+    // Set secure cookie with cross-domain settings
     res.cookie('token', token, getCookieOptions());
-    res.status(200).json(successResponse({ user }, 'Login successful'));
+    
+    console.log(`✅ PIC Login successful for: ${email}`);
+    res.status(200).json(successResponse({ user, token }, 'Login successful'));
   } catch (error) {
+    console.error('❌ PIC Login error:', error instanceof Error ? error.message : error);
     next(error);
   }
 };
@@ -41,11 +53,21 @@ export const picLogin = async (req: Request, res: Response, next: NextFunction):
 export const adminLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
+    
+    console.log(`🔐 Admin Login attempt for: ${email}`);
+
+    if (!email || !password) {
+      return next(new Error('Email and password are required'));
+    }
+
     const { token, user } = await authService.loginAdmin(email, password);
 
     res.cookie('token', token, getCookieOptions());
-    res.status(200).json(successResponse({ user }, 'Admin login successful'));
+    
+    console.log(`✅ Admin Login successful for: ${email}`);
+    res.status(200).json(successResponse({ user, token }, 'Admin login successful'));
   } catch (error) {
+    console.error('❌ Admin Login error:', error instanceof Error ? error.message : error);
     next(error);
   }
 };
@@ -61,7 +83,7 @@ export const resendOTP = async (req: Request, res: Response, next: NextFunction)
 };
 
 export const logout = (_req: Request, res: Response): void => {
-  res.clearCookie('token', { path: '/' });
+  res.clearCookie('token', { path: '/', secure: true, sameSite: 'none' });
   res.status(200).json(successResponse(null, 'Logged out successfully'));
 };
 
