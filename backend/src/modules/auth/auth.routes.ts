@@ -47,6 +47,16 @@ router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), aut
 router.post('/reset-password/:token', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
 
 // ─────────────────────────────────────────────────
+// Google OAuth Routes
+// ─────────────────────────────────────────────────
+
+// Initiate Google OAuth flow
+router.get('/google', authController.googleAuth);
+
+// Google OAuth callback (called by Google after user consents)
+router.get('/google/callback', authController.googleCallback);
+
+// ─────────────────────────────────────────────────
 // Profile Completion Routes (protected — after admin approval)
 // ─────────────────────────────────────────────────
 
@@ -67,3 +77,4 @@ router.post(
 );
 
 export default router;
+

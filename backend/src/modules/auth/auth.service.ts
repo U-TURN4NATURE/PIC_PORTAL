@@ -68,6 +68,9 @@ export const loginPIC = async (email: string, password: string) => {
 
   if (!pic) throw createError('Invalid email or password', 401);
 
+  // Google-only accounts have no password
+  if (!pic.password) throw createError('This account uses Google Sign-In. Please use the "Continue with Google" button.', 400);
+
   const isPasswordValid = await bcrypt.compare(password, pic.password);
   if (!isPasswordValid) throw createError('Invalid email or password', 401);
 
@@ -98,6 +101,40 @@ export const loginPIC = async (email: string, password: string) => {
     },
   };
 };
+
+/**
+ * Google OAuth Login / Registration
+ * Called after Passport has already found/created the PICPartner
+ */
+export const loginWithGoogle = async (pic: { id: string; email: string; status: string; rejectionReason: string | null; fullName: string; phone: string; referralCode: string | null; profileCompleted: boolean; profileImage: string | null }) => {
+  if (pic.status === PICStatus.REJECTED) {
+    throw createError(
+      `Your application has been rejected. ${pic.rejectionReason ? 'Reason: ' + pic.rejectionReason : 'Please contact support.'}`,
+      403
+    );
+  }
+  if (pic.status === PICStatus.SUSPENDED) {
+    throw createError('Your account has been suspended. Please contact admin.', 403);
+  }
+
+  const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
+
+  return {
+    token,
+    user: {
+      id: pic.id,
+      fullName: pic.fullName,
+      email: pic.email,
+      phone: pic.phone,
+      referralCode: pic.referralCode,
+      status: pic.status,
+      profileCompleted: pic.profileCompleted,
+      profileImage: pic.profileImage,
+      role: 'PIC' as const,
+    },
+  };
+};
+
 
 /**
  * Step 2 — Complete KYC & Bank Details (only for APPROVED users)

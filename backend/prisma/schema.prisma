@@ -145,6 +145,10 @@ model PICPartner {
   instagramProfile  String?
   resumeDocument    String?    // file path (optional)
 
+  // Auth Provider
+  authProvider      String     @default("EMAIL")  // EMAIL | GOOGLE
+  googleId          String?    @unique
+
   // System / Application Fields
   referralCode      String?    @unique
   status            PICStatus  @default(PENDING)

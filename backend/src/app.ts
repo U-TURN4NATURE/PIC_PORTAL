@@ -8,6 +8,9 @@ import path from 'path';
 import { globalErrorHandler, notFoundHandler } from './middleware/error.middleware';
 import { generalLimiter } from './middleware/rate-limit.middleware';
 
+// Passport (Google OAuth — must be imported to register strategy)
+import './config/passport';
+
 // Routes
 import authRoutes from './modules/auth/auth.routes';
 import adminRoutes from './modules/admin/admin.routes';
@@ -38,6 +41,9 @@ app.use(
 );
 
 
+
+// 3. Passport middleware (stateless — no sessions)
+app.use(require('passport').initialize());
 
 // 4. Body Parsers & Cookies (For all other routes)
 app.use(express.json({ limit: '10mb' }));

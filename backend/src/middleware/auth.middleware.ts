@@ -3,11 +3,13 @@ import { verifyToken, JWTPayload } from '../utils/jwt.utils';
 import { errorResponse } from '../utils/pagination.utils';
 
 // ─────────────────────────────────────────────────
-// Extend Express Request to include user
+// Extend Express types to include our JWT payload
+// Passport requires Express.User to be augmented; we make it our JWTPayload
 // ─────────────────────────────────────────────────
 
 declare global {
   namespace Express {
+    interface User extends JWTPayload {}
     interface Request {
       user?: JWTPayload;
     }
