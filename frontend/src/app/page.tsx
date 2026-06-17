@@ -223,23 +223,12 @@ const FAQ = [
   },
   {
     q: 'What methods do you use to recommend products to others?',
-    a: 'You can give references through word of mouth, by sharing updates on your WhatsApp status, forwarding our messages in relevant WhatsApp groups, or posting the creatives provided by us on your Facebook and Instagram profiles.',
+    a: 'Full orientation and training will be provided regularly.',
   },
+
   {
-    q: 'Will the company also contact the leads shared by me?',
-    a: 'No, the company will not call your referred leads unless you specifically request our assistance in converting them.',
-  },
-  {
-    q: 'How will the company know that the customer was referred by me?',
-    a: 'Simply share the customer\'s name and phone number with us. The referral will be mapped to your unique ID, ensuring that the customer is recorded as your reference.',
-  },
-  {
-    q: 'If the company helps in converting the lead, will I still receive the payout?',
-    a: 'Yes, as long as the lead has been registered under your ID, you will receive the applicable payout even if the company assists in converting the lead into a customer.',
-  },
-  {
-    q: 'How will I learn about the products and their unique features?',
-    a: 'We will provide you with product information, training materials, and promotional creatives to help you understand the products, their benefits, and their unique selling points.',
+    q: 'How will I learn about the products and their Unique features (USP & UVP)?',
+    a: 'We will provide you with product information, training materials, and promotional creatives to help you understand the products, their benefits, and their USP (Unique Selling Proposition) and UVP (Unique Value Proposition).',
   },
 ];
 
