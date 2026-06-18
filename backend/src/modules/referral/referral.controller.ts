@@ -43,6 +43,14 @@ export const handleUpdateHandledBy = async (req: Request, res: Response): Promis
   res.json({ success: true, data });
 };
 
+export const handleUpdateReferralStatusForPIC = async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { status } = req.body;
+  // Passing undefined for adminNotes since PICs shouldn't overwrite admin notes directly here
+  const data = await updateReferralStatus(id, status as ReferralStatus, undefined);
+  res.json({ success: true, data });
+};
+
 export const handleGetPICReferrals = async (req: Request, res: Response): Promise<void> => {
   const picId = (req as any).user.id;
   const { status, page, limit } = req.query;

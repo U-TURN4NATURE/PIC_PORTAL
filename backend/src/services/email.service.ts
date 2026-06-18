@@ -5,7 +5,7 @@ import { Resend } from 'resend';
 // Free tier: 3,000 emails/month, 100/day
 // ─────────────────────────────────────────────────
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_to_prevent_startup_crash');
 
 const FROM_EMAIL = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'U-Turn4Nature';

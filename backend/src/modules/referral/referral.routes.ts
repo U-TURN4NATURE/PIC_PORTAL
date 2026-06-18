@@ -4,6 +4,7 @@ import {
   handleAddReferral,
   handleBulkAddReferrals,
   handleUpdateHandledBy,
+  handleUpdateReferralStatusForPIC,
   handleGetPICReferrals,
   handleGetPICReferralStats,
 } from './referral.controller';
@@ -21,6 +22,9 @@ router.post('/bulk', handleBulkAddReferrals);
 
 // PATCH /api/pic/referrals/:id/handled-by — PIC updates handledBy
 router.patch('/:id/handled-by', handleUpdateHandledBy);
+
+// PATCH /api/pic/referrals/:id/status — PIC updates referral status
+router.patch('/:id/status', handleUpdateReferralStatusForPIC);
 
 // GET /api/pic/referrals — PIC gets their own referrals
 router.get('/', handleGetPICReferrals);
