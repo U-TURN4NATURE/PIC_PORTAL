@@ -29,4 +29,11 @@ router.get('/shopify/settings', adminController.getShopifySettings);
 router.post('/shopify/settings', adminController.saveShopifySettings);
 router.get('/audit-logs', adminController.getAuditLogs);
 
+// Announcements
+router.get('/announcements', adminController.getAnnouncements);
+router.post('/announcements', adminController.createAnnouncement);
+router.patch('/announcements/:id', adminController.updateAnnouncement);
+router.delete('/announcements/:id', adminController.deleteAnnouncement);
+
 export default router;
+

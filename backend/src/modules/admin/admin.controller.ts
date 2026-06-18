@@ -152,3 +152,65 @@ export const getCommissions = async (req: Request, res: Response, next: NextFunc
     next(error);
   }
 };
+
+// ─────────────────────────────────────────────────
+// ANNOUNCEMENT CONTROLLERS
+// ─────────────────────────────────────────────────
+
+export const getAnnouncements = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const announcements = await adminService.getAnnouncements(false);
+    res.status(200).json(successResponse(announcements));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createAnnouncement = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { title, content, isActive } = req.body;
+    if (!title || !content) {
+      res.status(400).json({ success: false, message: 'Title and content are required' });
+      return;
+    }
+    const announcement = await adminService.createAnnouncement(req.user!.id, { title, content, isActive });
+    res.status(201).json(successResponse(announcement, 'Announcement created successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateAnnouncement = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const announcement = await adminService.updateAnnouncement(req.params.id, req.body);
+    res.status(200).json(successResponse(announcement, 'Announcement updated successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteAnnouncement = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.deleteAnnouncement(req.params.id, req.user!.id);
+    res.status(200).json(successResponse(result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─────────────────────────────────────────────────
+// NOTIFICATION CONTROLLERS
+// ─────────────────────────────────────────────────
+
+export const getPICNotifications = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Admin endpoint: get notifications for a specific PIC
+    const { picId } = req.params;
+    const { page, limit } = req.query;
+    const result = await adminService.getPICNotifications(picId, Number(page) || 1, Number(limit) || 20);
+    res.status(200).json(successResponse(result));
+  } catch (error) {
+    next(error);
+  }
+};
+

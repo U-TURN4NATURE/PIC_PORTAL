@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
+import sharp from 'sharp';
 import * as picService from './pic.service';
 import { successResponse, buildPaginationMeta, errorResponse } from '../../utils/pagination.utils';
 import prisma from '../../config/database';
+import * as adminService from '../admin/admin.service';
 
 export const getDashboardStats = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -120,3 +122,94 @@ export const getPolicyDocument = async (req: Request, res: Response, next: NextF
     next(error);
   }
 };
+
+/**
+ * GET /pic/announcements
+ * Returns only active announcements, visible to all authenticated PICs.
+ */
+export const getAnnouncements = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const announcements = await adminService.getAnnouncements(true); // activeOnly = true
+    res.status(200).json(successResponse(announcements));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /pic/notifications
+ * Returns notifications for the logged-in PIC with unread count.
+ */
+export const getNotifications = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { page, limit } = req.query;
+    const result = await adminService.getPICNotifications(req.user!.id, Number(page) || 1, Number(limit) || 20);
+    res.status(200).json(successResponse(result));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /pic/notifications/mark-read
+ * Marks all notifications as read for the logged-in PIC.
+ */
+export const markNotificationsRead = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.markAllNotificationsRead(req.user!.id);
+    res.status(200).json(successResponse(result));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /pic/profile/avatar
+ * Upload or replace profile image.
+ * Accepts multipart/form-data with field: profileImage
+ */
+export const uploadProfileImage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No image file provided' });
+      return;
+    }
+
+    // In production, Cloudinary returns req.file.path as the secure URL
+    // In development, we get a local file path — build a server-relative URL
+    const isProduction = process.env.NODE_ENV === 'production';
+    let imageUrl: string;
+
+    if (isProduction) {
+      imageUrl = (req.file as any).path; // Cloudinary URL (Cloudinary handles optimization)
+    } else {
+      // Optimize local image using sharp to save storage
+      // Read into buffer first to prevent Windows EBUSY file lock errors when unlinking
+      const fileBuffer = fs.readFileSync(req.file.path);
+      const optimizedFilename = `optimized-${req.file.filename.split('.')[0]}.webp`;
+      const optimizedPath = path.join(req.file.destination, optimizedFilename);
+      
+      await sharp(fileBuffer)
+        .resize(500, 500, { fit: 'cover', withoutEnlargement: true })
+        .webp({ quality: 80 })
+        .toFile(optimizedPath);
+        
+      // Delete the original uploaded file safely
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (err) {
+        console.warn('Failed to delete original temp image:', err);
+      }
+
+      // Serve via /uploads static route
+      const relativePath = optimizedPath.replace(/\\/g, '/').split('uploads/').pop();
+      imageUrl = `/uploads/${relativePath}`;
+    }
+
+    const pic = await picService.uploadProfileImage(req.user!.id, imageUrl);
+    res.status(200).json(successResponse(pic, 'Profile image updated successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+

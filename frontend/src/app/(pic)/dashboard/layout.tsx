@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from 'react';
+
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import Link from 'next/link';
@@ -21,11 +21,16 @@ import {
   XCircle,
   CheckCircle,
   ArrowRight,
+  FileText,
+  Megaphone,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PolicyModal from '@/components/PolicyModal';
+import NotificationBell from '@/components/NotificationBell';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 // ─── Status Screens ───────────────────────────────
 
@@ -177,12 +182,33 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     try {
       await api.post('/auth/logout');
       logout();
-      router.replace('/login'); // replace so back button can't return to dashboard after logout
+      router.replace('/login');
       toast.success('Logged out successfully');
     } catch {
       toast.error('Logout failed');
     }
   };
+
+  // Announcement unread badge — must be declared before any early return
+  const [hasNewAnnouncements, setHasNewAnnouncements] = useState(false);
+
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'PIC') return;
+    const checkNewAnnouncements = async () => {
+      try {
+        const res = await api.get('/pic/announcements');
+        const announcements = res.data.data || [];
+        const lastSeen = localStorage.getItem('pic_announcements_last_seen');
+        if (!lastSeen && announcements.length > 0) {
+          setHasNewAnnouncements(true);
+        } else if (lastSeen && announcements.length > 0) {
+          const latestDate = new Date(announcements[0].createdAt);
+          setHasNewAnnouncements(latestDate > new Date(lastSeen));
+        }
+      } catch { /* silent */ }
+    };
+    checkNewAnnouncements();
+  }, [pathname, isAuthenticated, user]);
 
   // Show spinner ONLY when actively loading with no cached user.
   // If we have a user from persisted state, render immediately.
@@ -212,6 +238,8 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     { name: 'My Orders', href: '/dashboard/orders', icon: ShoppingCart },
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
     { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
+    { name: 'Announcements', href: '/dashboard/announcements', icon: Megaphone },
+    { name: 'Policy', href: '/dashboard/policy', icon: FileText },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
   ];
 
@@ -259,14 +287,21 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = isItemActive(item.href);
+            const showBadge = item.href === '/dashboard/announcements' && hasNewAnnouncements && !isActive;
             return (
               <Link
                 key={item.name}
                 href={item.href}
+                onClick={() => {
+                  if (item.href === '/dashboard/announcements') setHasNewAnnouncements(false);
+                }}
                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive ? 'bg-brand-forest text-white shadow-md shadow-brand-forest/20' : 'text-gray-600 hover:text-brand-forest hover:bg-brand-sage/10'}`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-brand-olive'}`} />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium flex-1">{item.name}</span>
+                {showBadge && (
+                  <span className="w-2 h-2 bg-red-500 rounded-full" />
+                )}
               </Link>
             );
           })}
@@ -288,7 +323,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
         <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-brand-sage/10 to-transparent pointer-events-none" />
 
         {/* Top Header */}
-        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-brand-sage/20 flex items-center justify-between px-6 lg:px-10 shrink-0 z-10 sticky top-0">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-brand-sage/20 flex items-center justify-between px-6 lg:px-10 shrink-0 z-30 sticky top-0">
           <div className="flex items-center">
             <button
               onClick={() => setIsSidebarOpen(true)}
@@ -302,14 +337,22 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button className="relative p-2.5 text-brand-olive hover:text-brand-forest hover:bg-brand-sage/10 rounded-full transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-brand-gold rounded-full border border-white" />
-            </button>
+            <NotificationBell role="PIC" />
             <div className="h-8 w-px bg-brand-sage/30 mx-2" />
             <Link href="/dashboard/profile" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
-              <div className="w-10 h-10 rounded-full bg-brand-forest flex items-center justify-center text-white font-bold shadow-md">
-                {user?.fullName?.[0] || 'P'}
+              <div className="w-10 h-10 rounded-full bg-brand-forest flex items-center justify-center text-white font-bold shadow-md overflow-hidden">
+                {user?.profileImage ? (
+                  <Image 
+                    src={user.profileImage.startsWith('http') ? user.profileImage : `${BACKEND_URL}${user.profileImage}`} 
+                    alt="Profile" 
+                    width={40} 
+                    height={40} 
+                    className="w-full h-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  user?.fullName?.[0] || 'P'
+                )}
               </div>
               <div className="hidden md:block text-left">
                 <p className="text-sm font-semibold text-gray-900">{user?.fullName}</p>

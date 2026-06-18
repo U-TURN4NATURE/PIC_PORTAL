@@ -1,0 +1,151 @@
+"use client";
+
+import { useState, useEffect, useRef } from 'react';
+import api from '@/lib/api';
+import { toast } from 'sonner';
+import { FileText, Download, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
+import { getFileUrl } from '@/lib/api';
+
+export default function PICPolicyPage() {
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const objectRef = useRef<HTMLObjectElement>(null);
+
+  useEffect(() => {
+    const loadPolicy = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        // Fetch the policy PDF as a Blob so we can serve it inline securely
+        const isProduction =
+          typeof window !== 'undefined' &&
+          !window.location.hostname.includes('localhost');
+        const baseUrl = isProduction
+          ? 'https://picportal-production-a624.up.railway.app/api'
+          : 'http://localhost:5000/api';
+
+        const response = await fetch(`${baseUrl}/pic/policy-document`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data?.message || 'Failed to load policy document');
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+      } catch (err: any) {
+        setError(err?.message || 'Could not load the policy document. Please try again.');
+        toast.error('Failed to load policy document');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadPolicy();
+
+    return () => {
+      if (pdfUrl) URL.revokeObjectURL(pdfUrl);
+    };
+  }, []);
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-3xl font-dm-serif text-brand-forest flex items-center gap-3">
+            <div className="w-10 h-10 bg-brand-forest/10 rounded-xl flex items-center justify-center">
+              <FileText className="w-5 h-5 text-brand-forest" />
+            </div>
+            PIC Policy Document
+          </h1>
+          <p className="text-gray-500 mt-1 text-sm">
+            Review the official U-Turn4Nature Partner in Commerce policy
+          </p>
+        </div>
+        {pdfUrl && (
+          <a
+            href={pdfUrl}
+            download="PIC-Policy-Document.pdf"
+            id="download-policy-btn"
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand-forest text-white text-sm font-medium rounded-xl hover:bg-brand-forest/90 transition-colors shadow-sm shadow-brand-forest/20"
+          >
+            <Download className="w-4 h-4" />
+            Download PDF
+          </a>
+        )}
+      </div>
+
+      {/* PDF Viewer */}
+      <div className="bg-white rounded-2xl border border-brand-sage/20 shadow-sm overflow-hidden">
+        {isLoading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4">
+            <Loader2 className="w-10 h-10 text-brand-forest animate-spin" />
+            <p className="text-gray-500 text-sm">Loading policy document...</p>
+          </div>
+        )}
+
+        {error && !isLoading && (
+          <div className="flex flex-col items-center justify-center py-24 gap-4 px-6 text-center">
+            <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center">
+              <AlertCircle className="w-7 h-7 text-red-500" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-800 mb-1">Failed to Load Document</h3>
+              <p className="text-gray-500 text-sm max-w-sm">{error}</p>
+            </div>
+            <button
+              id="retry-policy-btn"
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-brand-forest text-white text-sm font-medium rounded-xl hover:bg-brand-forest/90 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+
+        {pdfUrl && !isLoading && (
+          <>
+            {/* Inline PDF viewer */}
+            <object
+              ref={objectRef}
+              data={pdfUrl}
+              type="application/pdf"
+              id="policy-pdf-viewer"
+              className="w-full"
+              style={{ height: 'calc(100vh - 260px)', minHeight: '600px' }}
+            >
+              {/* Fallback for browsers that don't support inline PDF */}
+              <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+                <FileText className="w-12 h-12 text-gray-300" />
+                <p className="text-gray-600 font-medium">Your browser does not support inline PDF viewing.</p>
+                <a
+                  href={pdfUrl}
+                  download="PIC-Policy-Document.pdf"
+                  className="flex items-center gap-2 px-4 py-2 bg-brand-forest text-white text-sm font-medium rounded-xl"
+                >
+                  <Download className="w-4 h-4" />
+                  Download to View
+                </a>
+              </div>
+            </object>
+          </>
+        )}
+      </div>
+
+      {/* Note */}
+      <div className="flex items-start gap-3 bg-brand-sage/10 border border-brand-sage/30 rounded-xl p-4">
+        <AlertCircle className="w-4 h-4 text-brand-forest shrink-0 mt-0.5" />
+        <p className="text-sm text-brand-forest/80">
+          This policy document is confidential and intended solely for approved PIC Partners of U-Turn4Nature. 
+          Please do not share or distribute this document.
+        </p>
+      </div>
+    </div>
+  );
+}

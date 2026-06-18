@@ -18,6 +18,10 @@ import { parsePagination } from '../../utils/pagination.utils';
  * Get dashboard analytics
  */
 export const getDashboardStats = async () => {
+  const now = new Date();
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+
   const [
     totalPICs,
     activePICs,
@@ -29,6 +33,13 @@ export const getDashboardStats = async () => {
     totalCommission,
     recentPICs,
     monthlyRevenue,
+    // Previous month comparison
+    prevMonthPICs,
+    prevMonthActivePICs,
+    prevMonthPendingPICs,
+    prevMonthOrders,
+    prevMonthRevenue,
+    prevMonthCommission,
   ] = await Promise.all([
     prisma.pICPartner.count(),
     prisma.pICPartner.count({ where: { status: { in: [PICStatus.APPROVED, PICStatus.ACTIVE] } } }),
@@ -54,7 +65,26 @@ export const getDashboardStats = async () => {
       GROUP BY DATE_TRUNC('month', "createdAt")
       ORDER BY DATE_TRUNC('month', "createdAt") ASC
     `,
+    // Previous month PICs
+    prisma.pICPartner.count({ where: { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.pICPartner.count({ where: { status: { in: [PICStatus.APPROVED, PICStatus.ACTIVE] }, approvedAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.pICPartner.count({ where: { status: PICStatus.PENDING, createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.order.count({ where: { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
   ]);
+
+  // Current month counts
+  const thisMonthPICs = await prisma.pICPartner.count({ where: { createdAt: { gte: startOfThisMonth } } });
+  const thisMonthOrders = await prisma.order.count({ where: { createdAt: { gte: startOfThisMonth } } });
+  const thisMonthRevenue = await prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } });
+  const thisMonthCommission = await prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } });
+
+  const calcTrend = (current: number, prev: number) => {
+    if (prev === 0) return current > 0 ? { change: 100, trend: 'up' } : { change: 0, trend: 'flat' };
+    const pct = Math.round(((current - prev) / prev) * 100);
+    return { change: Math.abs(pct), trend: pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat' };
+  };
 
   return {
     stats: {
@@ -67,10 +97,25 @@ export const getDashboardStats = async () => {
       totalRevenue: totalRevenue._sum.orderAmount || 0,
       totalCommissionPaid: totalCommission._sum.commissionAmount || 0,
     },
+    trends: {
+      totalPICs: calcTrend(thisMonthPICs, prevMonthPICs),
+      activePICs: calcTrend(activePICs, prevMonthActivePICs),
+      pendingPICs: calcTrend(pendingPICs, prevMonthPendingPICs),
+      totalOrders: calcTrend(thisMonthOrders, prevMonthOrders),
+      totalRevenue: calcTrend(
+        thisMonthRevenue._sum.orderAmount || 0,
+        prevMonthRevenue._sum.orderAmount || 0
+      ),
+      totalCommission: calcTrend(
+        thisMonthCommission._sum.commissionAmount || 0,
+        prevMonthCommission._sum.commissionAmount || 0
+      ),
+    },
     recentPICs,
     monthlyRevenue,
   };
 };
+
 
 /**
  * Get all PICs with search, filter, and pagination
@@ -496,3 +541,128 @@ export const getCommissionSummary = async () => {
     totalCommission: total._sum.commissionAmount || 0,
   };
 };
+
+// ─────────────────────────────────────────────────
+// ANNOUNCEMENT SERVICES
+// ─────────────────────────────────────────────────
+
+/**
+ * Get all active announcements (for PICs) or all announcements (for admins)
+ */
+export const getAnnouncements = async (activeOnly = false) => {
+  return prisma.announcement.findMany({
+    where: activeOnly ? { isActive: true } : {},
+    orderBy: { createdAt: 'desc' },
+    include: {
+      author: { select: { name: true } },
+    },
+  });
+};
+
+/**
+ * Create an announcement (admin only)
+ */
+export const createAnnouncement = async (
+  adminId: string,
+  data: { title: string; content: string; isActive?: boolean }
+) => {
+  const announcement = await prisma.announcement.create({
+    data: {
+      title: data.title,
+      content: data.content,
+      isActive: data.isActive ?? true,
+      authorId: adminId,
+    },
+    include: {
+      author: { select: { name: true } },
+    },
+  });
+
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: adminId,
+      actorRole: 'ADMIN',
+      action: 'CREATE_ANNOUNCEMENT',
+      targetId: announcement.id,
+      targetType: 'Announcement',
+      metadata: { title: data.title, isActive: announcement.isActive },
+    },
+  }).catch(() => {}); // non-blocking
+
+  return announcement;
+};
+
+/**
+ * Update an announcement (admin only)
+ */
+export const updateAnnouncement = async (
+  id: string,
+  data: { title?: string; content?: string; isActive?: boolean }
+) => {
+  const announcement = await prisma.announcement.findUnique({ where: { id } });
+  if (!announcement) throw createError('Announcement not found', 404);
+  return prisma.announcement.update({
+    where: { id },
+    data,
+    include: { author: { select: { name: true } } },
+  });
+};
+
+/**
+ * Delete an announcement (admin only)
+ */
+export const deleteAnnouncement = async (id: string, adminId?: string) => {
+  const announcement = await prisma.announcement.findUnique({ where: { id } });
+  if (!announcement) throw createError('Announcement not found', 404);
+  await prisma.announcement.delete({ where: { id } });
+
+  if (adminId) {
+    await prisma.auditLog.create({
+      data: {
+        actorId: adminId,
+        actorRole: 'ADMIN',
+        action: 'DELETE_ANNOUNCEMENT',
+        targetId: id,
+        targetType: 'Announcement',
+        metadata: { title: announcement.title },
+      },
+    }).catch(() => {});
+  }
+
+  return { message: 'Announcement deleted successfully' };
+};
+
+// ─────────────────────────────────────────────────
+// NOTIFICATION SERVICES
+// ─────────────────────────────────────────────────
+
+/**
+ * Get notifications for a PIC
+ */
+export const getPICNotifications = async (picId: string, page = 1, limit = 20) => {
+  const { skip } = parsePagination(String(page), String(limit));
+  const [notifications, total, unreadCount] = await Promise.all([
+    prisma.notification.findMany({
+      where: { picId },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.notification.count({ where: { picId } }),
+    prisma.notification.count({ where: { picId, isRead: false } }),
+  ]);
+  return { notifications, total, unreadCount };
+};
+
+/**
+ * Mark all notifications as read for a PIC
+ */
+export const markAllNotificationsRead = async (picId: string) => {
+  await prisma.notification.updateMany({
+    where: { picId, isRead: false },
+    data: { isRead: true },
+  });
+  return { message: 'All notifications marked as read' };
+};
+

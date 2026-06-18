@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as picController from './pic.controller';
 import { protect, restrictToPIC } from '../../middleware/auth.middleware';
+import { profileImageUpload } from '../../middleware/upload.middleware';
 
 const router = Router();
 
@@ -23,9 +24,17 @@ router.post('/payouts', picController.requestPayout);
 
 // Profile
 router.patch('/profile', picController.updateProfile);
+router.post('/profile/avatar', profileImageUpload, picController.uploadProfileImage);
 router.post('/accept-policy', picController.acceptPolicy);
 
 // Policy Document — protected: only ACTIVE PICs can access
 router.get('/policy-document', picController.getPolicyDocument);
+
+// Announcements — read-only for PICs
+router.get('/announcements', picController.getAnnouncements);
+
+// Notifications
+router.get('/notifications', picController.getNotifications);
+router.post('/notifications/mark-read', picController.markNotificationsRead);
 
 export default router;

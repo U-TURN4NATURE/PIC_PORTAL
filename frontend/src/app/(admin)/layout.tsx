@@ -16,7 +16,8 @@ import {
   Menu,
   X,
   Leaf,
-  Flag
+  Flag,
+  Megaphone,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -68,6 +69,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Follow-up Requests', href: '/admin/followups', icon: Flag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
+    { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

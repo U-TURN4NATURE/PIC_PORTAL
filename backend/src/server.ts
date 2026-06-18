@@ -4,6 +4,16 @@ import path from 'path';
 // Load environment variables before anything else
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+// ─────────────────────────────────────────────────
+// Environment Variable Validation (fail fast)
+// ─────────────────────────────────────────────────
+const REQUIRED_ENV = ['DATABASE_URL', 'JWT_SECRET', 'ENCRYPTION_KEY'];
+const missing = REQUIRED_ENV.filter((key) => !process.env[key]);
+if (missing.length > 0) {
+  console.error(`❌ Missing required environment variables: ${missing.join(', ')}`);
+  process.exit(1);
+}
+
 import app from './app';
 import prisma from './config/database';
 import { verifyEmailConnection } from './config/email';

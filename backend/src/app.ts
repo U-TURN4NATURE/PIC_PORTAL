@@ -28,12 +28,28 @@ import adminFollowUpRoutes from './modules/followup/followup.admin.routes';
 const app: Express = express();
 
 // 1. Security Headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 
-// 2. CORS — allow all origins (needed for Vercel + Railway cross-domain)
+// 2. CORS — allow only known origins
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  process.env.FRONTEND_URL,
+  'https://pic-portal.vercel.app',
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: true, // reflect the request origin — allows any domain
+    origin: (origin, callback) => {
+      // Allow server-to-server or same-origin requests (no origin header)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
+      // In development, allow any localhost port
+      if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) return callback(null, true);
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -54,7 +70,7 @@ app.use(cookieParser());
 app.use('/api', generalLimiter);
 
 // 6. Static Files (for uploads if any)
-app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
 // 7. API Routes
 app.use('/api/auth', authRoutes);
@@ -62,7 +78,6 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/pic', picRoutes);
 app.use('/api/pic/wallet', walletRoutes);
 app.use('/api/pic/referrals', picReferralRoutes);
-app.use('/api/pic/referrals', picFollowUpRoutes);
 app.use('/api/pic/followups', picFollowUpRoutes);
 app.use('/api/admin/referrals', adminReferralRoutes);
 app.use('/api/admin/followups', adminFollowUpRoutes);

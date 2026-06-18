@@ -160,3 +160,12 @@ export const acceptPolicy = async (picId: string) => {
   });
   return pic;
 };
+
+export const uploadProfileImage = async (picId: string, imageUrl: string) => {
+  const pic = await prisma.pICPartner.update({
+    where: { id: picId },
+    data: { profileImage: imageUrl },
+    select: { id: true, profileImage: true },
+  });
+  return pic;
+};

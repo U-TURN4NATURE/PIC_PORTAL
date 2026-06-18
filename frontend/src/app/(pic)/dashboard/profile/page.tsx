@@ -1,17 +1,29 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/authStore';
-import { User, Phone, Mail, MapPin, CreditCard, Building2, Link, Loader2, Save, CheckCircle2 } from 'lucide-react';
+import {
+  User, Phone, Mail, MapPin, CreditCard, Building2,
+  Link, Loader2, Save, CheckCircle2, Camera, Upload, X,
+} from 'lucide-react';
+import Image from 'next/image';
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
 export default function ProfilePage() {
-  const { user } = useAuthStore();
+  const { user, initAuth } = useAuthStore();
   const [profile, setProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<any>({});
+
+  // Profile image state
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   useEffect(() => {
     api.get('/auth/me')
@@ -45,6 +57,107 @@ export default function ProfilePage() {
     }
   };
 
+  // ── Profile Image Handlers ──────────────────────
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate type
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.type)) {
+      toast.error('Please select a JPG, PNG, or WEBP image');
+      return;
+    }
+    // Validate size (2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be smaller than 2MB');
+      return;
+    }
+
+    // Client-side compression
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = document.createElement('img');
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 500;
+        let { width, height } = img;
+        
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height *= MAX_DIM / width;
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width *= MAX_DIM / height;
+            height = MAX_DIM;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const compressedFile = new File([blob], file.name.replace(/\.[^/.]+$/, "") + ".webp", {
+              type: 'image/webp',
+              lastModified: Date.now(),
+            });
+            setSelectedFile(compressedFile);
+            setPreviewUrl(URL.createObjectURL(compressedFile));
+          }
+        }, 'image/webp', 0.8);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = async () => {
+    if (!selectedFile) return;
+    try {
+      setIsUploadingImage(true);
+      const formData = new FormData();
+      formData.append('profileImage', selectedFile);
+      const res = await api.post('/pic/profile/avatar', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const newImageUrl = res.data.data?.profileImage;
+      setProfile((prev: any) => ({ ...prev, profileImage: newImageUrl }));
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      toast.success('Profile image updated!');
+      // Refresh auth store so layout avatar updates too
+      initAuth();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleCancelPreview = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const getProfileImageSrc = () => {
+    if (previewUrl) return previewUrl;
+    if (profile?.profileImage) {
+      // If it's already a full URL (Cloudinary), use it directly
+      if (profile.profileImage.startsWith('http')) return profile.profileImage;
+      return `${BACKEND_URL}${profile.profileImage}`;
+    }
+    return null;
+  };
+
+  // ───────────────────────────────────────────────
+
   if (isLoading) {
     return <div className="animate-pulse space-y-4">
       <div className="h-32 bg-white rounded-2xl border border-brand-sage/20" />
@@ -64,6 +177,8 @@ export default function ProfilePage() {
     </div>
   );
 
+  const imageSrc = getProfileImageSrc();
+
   return (
     <div className="space-y-6 max-w-4xl">
       <div>
@@ -73,13 +188,50 @@ export default function ProfilePage() {
 
       {/* Profile Header */}
       <div className="bg-gradient-to-r from-brand-forest to-brand-olive rounded-2xl p-6 text-white flex items-center gap-5">
-        <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center text-4xl font-dm-serif font-bold border-2 border-white/30 shrink-0">
-          {profile?.fullName?.[0]?.toUpperCase()}
+        {/* Avatar with upload overlay */}
+        <div className="relative shrink-0 group">
+          <div className="w-20 h-20 rounded-full overflow-hidden border-2 border-white/30 bg-white/20 flex items-center justify-center">
+            {imageSrc ? (
+              <Image
+                src={imageSrc}
+                alt="Profile"
+                width={80}
+                height={80}
+                className="w-full h-full object-cover"
+                unoptimized
+              />
+            ) : (
+              <span className="text-4xl font-dm-serif font-bold text-white">
+                {profile?.fullName?.[0]?.toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          {/* Camera overlay on hover */}
+          <button
+            id="change-avatar-btn"
+            onClick={() => fileInputRef.current?.click()}
+            className="absolute inset-0 rounded-full bg-black/50 flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            title="Change profile photo"
+          >
+            <Camera className="w-5 h-5 text-white" />
+            <span className="text-[9px] text-white font-medium mt-0.5">Change</span>
+          </button>
+
+          <input
+            ref={fileInputRef}
+            id="profile-image-input"
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            onChange={handleFileSelect}
+            className="hidden"
+          />
         </div>
-        <div>
+
+        <div className="flex-1 min-w-0">
           <h2 className="text-2xl font-dm-serif font-bold">{profile?.fullName}</h2>
           <p className="text-white/70 text-sm mt-0.5">{profile?.email}</p>
-          <div className="flex items-center gap-2 mt-2">
+          <div className="flex items-center gap-2 mt-2 flex-wrap">
             <span className={`text-xs font-semibold px-3 py-1 rounded-full border ${
               profile?.status === 'APPROVED' ? 'bg-green-500/20 text-green-200 border-green-400/30' :
               profile?.status === 'PENDING' ? 'bg-yellow-500/20 text-yellow-200 border-yellow-400/30' :
@@ -92,13 +244,47 @@ export default function ProfilePage() {
             )}
           </div>
         </div>
+
         {profile?.referralCode && (
-          <div className="ml-auto text-right">
+          <div className="ml-auto text-right shrink-0">
             <p className="text-white/60 text-xs">Referral Code</p>
             <p className="text-brand-gold font-dm-serif text-2xl font-bold tracking-widest">{profile.referralCode}</p>
           </div>
         )}
       </div>
+
+      {/* Image preview / upload confirm bar */}
+      {selectedFile && (
+        <div className="bg-white border border-brand-forest/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-brand-forest/20 shrink-0">
+            {previewUrl && (
+              <Image src={previewUrl} alt="Preview" width={48} height={48} className="w-full h-full object-cover" unoptimized />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-900 truncate">{selectedFile.name}</p>
+            <p className="text-xs text-gray-400">{(selectedFile.size / 1024).toFixed(1)} KB · Ready to upload</p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              id="cancel-avatar-btn"
+              onClick={handleCancelPreview}
+              className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+            <button
+              id="upload-avatar-btn"
+              onClick={handleImageUpload}
+              disabled={isUploadingImage}
+              className="flex items-center gap-2 px-4 py-2 bg-brand-forest text-white text-sm font-semibold rounded-xl hover:bg-brand-forest/90 transition-colors disabled:opacity-60"
+            >
+              {isUploadingImage ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              {isUploadingImage ? 'Uploading...' : 'Save Photo'}
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Personal Info (read-only) */}
@@ -113,16 +299,57 @@ export default function ProfilePage() {
           <InfoRow icon={CreditCard} label="Aadhaar" value={profile?.aadhaarNumber ? `XXXX-XXXX-${profile.aadhaarNumber.slice(-4)}` : '—'} />
         </div>
 
-        {/* KYC Status */}
-        <div className="bg-white border border-brand-sage/30 rounded-2xl p-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <MapPin className="w-4 h-4 text-brand-forest" /> Address
-          </h3>
-          <InfoRow icon={MapPin} label="Address" value={profile?.address} />
-          <InfoRow icon={MapPin} label="City" value={profile?.city} />
-          <InfoRow icon={MapPin} label="State" value={profile?.state} />
-          <InfoRow icon={MapPin} label="Pincode" value={profile?.pincode} />
-          <InfoRow icon={Link} label="Instagram" value={profile?.instagramProfile} />
+        {/* Address (Editable) */}
+        <div className="bg-white border border-brand-sage/30 rounded-2xl p-6 shadow-sm flex flex-col">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <MapPin className="w-4 h-4 text-brand-forest" /> Address
+              <span className="text-xs text-gray-400 font-normal ml-1">(Editable)</span>
+            </h3>
+          </div>
+          
+          <div className="space-y-4 flex-1">
+            <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Street Address</label>
+              <input
+                value={form.address || ''}
+                onChange={e => setForm((f: any) => ({ ...f, address: e.target.value }))}
+                placeholder="Enter your full address"
+                className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                <input
+                  value={form.city || ''}
+                  onChange={e => setForm((f: any) => ({ ...f, city: e.target.value }))}
+                  placeholder="City"
+                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
+                <input
+                  value={form.state || ''}
+                  onChange={e => setForm((f: any) => ({ ...f, state: e.target.value }))}
+                  placeholder="State"
+                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+                />
+              </div>
+            </div>
+
+            <div className="w-1/2 pr-2">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Pincode</label>
+              <input
+                value={form.pincode || ''}
+                onChange={e => setForm((f: any) => ({ ...f, pincode: e.target.value }))}
+                placeholder="Pincode"
+                className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

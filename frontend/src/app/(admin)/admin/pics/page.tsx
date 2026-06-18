@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Trash2 } from 'lucide-react';
+import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Trash2, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function AdminPICsPage() {
@@ -66,6 +66,32 @@ export default function AdminPICsPage() {
     }
   };
 
+  const handleExportCSV = () => {
+    if (pics.length === 0) { toast.error('No data to export'); return; }
+    const headers = ['Name', 'Email', 'Phone', 'City', 'State', 'Status', 'Referral Code', 'Total Earnings', 'Orders', 'Joined'];
+    const rows = pics.map((p: any) => [
+      p.fullName,
+      p.email,
+      p.phone,
+      p.city,
+      p.state,
+      p.status,
+      p.referralCode || '',
+      p.wallet?.totalEarnings || 0,
+      p._count?.orders || 0,
+      new Date(p.createdAt).toLocaleDateString('en-IN'),
+    ]);
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `pic-partners-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${pics.length} records`);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -73,6 +99,15 @@ export default function AdminPICsPage() {
           <h1 className="text-3xl font-dm-serif text-brand-forest mb-1">PIC Management</h1>
           <p className="text-gray-500">View and manage Partners in Change applications and accounts.</p>
         </div>
+        <button
+          id="export-pics-csv-btn"
+          onClick={handleExportCSV}
+          disabled={pics.length === 0}
+          className="flex items-center gap-2 px-4 py-2 bg-brand-forest text-white text-sm font-semibold rounded-xl hover:bg-brand-forest/90 transition-colors disabled:opacity-50 shadow-sm shadow-brand-forest/20"
+        >
+          <Download className="w-4 h-4" />
+          Export CSV
+        </button>
       </div>
 
       {/* Filters */}

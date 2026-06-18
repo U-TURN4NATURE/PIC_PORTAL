@@ -89,8 +89,9 @@ model Admin {
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 
-  notifications Notification[]
-  auditLogs     AuditLog[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
+  announcements  Announcement[]
 
   @@index([email])
   @@map("admins")
@@ -242,6 +243,8 @@ model Order {
   @@index([referralCode])
   @@index([status])
   @@index([createdAt])
+  @@index([picId, createdAt])  // composite: dashboard + orders page
+  @@index([picId, status])    // composite: filtered orders by PIC
   @@map("orders")
 }
 
@@ -264,6 +267,7 @@ model Payout {
 
   @@index([picId])
   @@index([status])
+  @@index([picId, status])     // composite: payout list by pic + status
   @@map("payouts")
 }
 
@@ -288,6 +292,7 @@ model Notification {
   @@index([picId])
   @@index([adminId])
   @@index([isRead])
+  @@index([picId, isRead])     // composite: unread count per PIC
   @@map("notifications")
 }
 
@@ -325,6 +330,7 @@ model Referral {
   @@unique([picId, personPhone])
   @@index([picId])
   @@index([status])
+  @@index([picId, status])     // composite: referral filter by pic + status
   @@map("referrals")
 }
 
@@ -401,6 +407,26 @@ model ShopifySettings {
   updatedAt      DateTime @updatedAt
 
   @@map("shopify_settings")
+}
+
+// ─────────────────────────────────────────────────
+// ANNOUNCEMENT MODEL
+// ─────────────────────────────────────────────────
+
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @db.Text
+  isActive  Boolean  @default(true)
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  author    Admin    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([authorId])
+  @@index([isActive])
+  @@map("announcements")
 }
 
 // ─────────────────────────────────────────────────
