@@ -1,6 +1,6 @@
 import prisma from '../../config/database';
 import { createError } from '../../middleware/error.middleware';
-import { PICStatus, PayoutStatus } from '@prisma/client';
+import { PICStatus, PayoutStatus, Prisma } from '@prisma/client';
 import { generateReferralCode } from '../../utils/crypto.utils';
 import { encrypt, decrypt } from '../../utils/crypto.utils';
 import {
@@ -205,7 +205,7 @@ export const getPICById = async (picId: string) => {
 export const getBankApprovals = async () => {
   const pics = await prisma.pICPartner.findMany({
     where: {
-      pendingBankDetails: { not: null },
+      pendingBankDetails: { not: Prisma.JsonNull },
     },
     select: {
       id: true,
@@ -244,7 +244,7 @@ export const approveBankDetails = async (picId: string) => {
       ifscCode: pending.ifscCode ?? pic.ifscCode,
       branchName: pending.branchName ?? pic.branchName,
       upiId: pending.upiId ?? pic.upiId,
-      pendingBankDetails: null, // clear it
+      pendingBankDetails: Prisma.DbNull, // clear it
     },
   });
 
@@ -260,7 +260,7 @@ export const rejectBankDetails = async (picId: string) => {
   const updatedPic = await prisma.pICPartner.update({
     where: { id: picId },
     data: {
-      pendingBankDetails: null, // clear it
+      pendingBankDetails: Prisma.DbNull, // clear it
     },
   });
 
