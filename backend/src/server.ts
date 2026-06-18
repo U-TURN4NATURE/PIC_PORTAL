@@ -43,8 +43,8 @@ const connectWithRetry = async (retries = 5, delay = 3000): Promise<void> => {
 
 const startServer = async () => {
   try {
-    // 1. Connect to Database (with retry for NeonDB wake-up)
-    await connectWithRetry();
+    // 1. Connect to Database (Non-blocking)
+    connectWithRetry().catch(console.error);
 
     // 2. Verify Email Transporter (async, non-blocking)
     verifyEmailConnection();
