@@ -268,23 +268,13 @@ export default function ReferralPage() {
     document.body.removeChild(link);
   };
 
-  const handleAssignToMe = async (referral: Referral) => {
+  const handleUpdateHandledBy = async (referralId: string, newHandledBy: string) => {
     try {
-      await api.patch(`/pic/referrals/${referral.id}/handled-by`, { handledBy: 'PIC' });
-      toast.success('You are now handling this referral.');
+      await api.patch(`/pic/referrals/${referralId}/handled-by`, { handledBy: newHandledBy });
+      toast.success('Follow-up assignment updated');
       fetchReferrals();
     } catch (err) {
-      toast.error('Failed to update referral.');
-    }
-  };
-
-  const handleUpdateStatus = async (referralId: string, newStatus: string) => {
-    try {
-      await api.patch(`/pic/referrals/${referralId}/status`, { status: newStatus });
-      toast.success('Status updated successfully');
-      fetchReferrals();
-    } catch (err) {
-      toast.error('Failed to update status');
+      toast.error('Failed to update follow-up assignment');
     }
   };
 
@@ -541,23 +531,9 @@ export default function ReferralPage() {
                           {ref.personEmail && <div className="flex items-center gap-1 text-gray-400 text-xs mt-0.5"><Mail className="w-3 h-3" />{ref.personEmail}</div>}
                         </td>
                         <td className="px-6 py-4">
-                          {ref.handledBy === 'PIC' ? (
-                            <select
-                              value={ref.status}
-                              onChange={(e) => handleUpdateStatus(ref.id, e.target.value)}
-                              className={`text-xs font-medium px-2.5 py-1.5 rounded-lg border focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-white ${sc.color} border-current`}
-                            >
-                              {(Object.keys(STATUS_CONFIG) as ReferralStatus[]).map(s => (
-                                <option key={s} value={s} className="text-gray-900 bg-white">
-                                  {STATUS_CONFIG[s].label}
-                                </option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${sc.color}`}>
-                              {sc.icon}{sc.label}
-                            </span>
-                          )}
+                          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${sc.color}`}>
+                            {sc.icon}{sc.label}
+                          </span>
                           {ref.adminNotes && <p className="text-xs text-gray-400 mt-1 italic">"{ref.adminNotes}"</p>}
                         </td>
                         <td className="px-6 py-4 text-right font-medium text-gray-700">₹{ref.totalSalesAmount.toFixed(0)}</td>
@@ -569,13 +545,18 @@ export default function ReferralPage() {
                               {latestFollowUp.status === 'OPEN' ? 'Requested' : 'In Progress'}
                             </span>
                           ) : ref.handledBy === 'PIC' ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                              <UserPlus className="w-3 h-3" /> Handled by Me
-                            </span>
+                            <select
+                              value={ref.handledBy}
+                              onChange={(e) => handleUpdateHandledBy(ref.id, e.target.value)}
+                              className="text-xs font-medium px-2.5 py-1.5 rounded-lg border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 bg-blue-50 text-blue-700"
+                            >
+                              <option value="PIC">Handled by Me</option>
+                              <option value="U_TURN_NATURE">Handled by U-Turn</option>
+                            </select>
                           ) : (
                             <div className="flex flex-col gap-2 items-center">
                               <button
-                                onClick={() => handleAssignToMe(ref)}
+                                onClick={() => handleUpdateHandledBy(ref.id, 'PIC')}
                                 className="w-full inline-flex justify-center items-center gap-1 px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg text-xs font-medium transition-colors"
                               >
                                 <UserPlus className="w-3 h-3" /> Follow by Me
