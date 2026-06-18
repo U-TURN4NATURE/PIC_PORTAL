@@ -21,6 +21,9 @@ import adminReferralRoutes from './modules/referral/referral.admin.routes';
 import picFollowUpRoutes from './modules/followup/followup.routes';
 import adminFollowUpRoutes from './modules/followup/followup.admin.routes';
 
+// Swagger API Docs
+import { setupSwagger } from './config/swagger';
+
 // ─────────────────────────────────────────────────
 // Express Application Bootstrap
 // ─────────────────────────────────────────────────
@@ -87,10 +90,13 @@ app.get('/', (_req, res) => {
   res.status(200).json({ 
     success: true, 
     message: 'PIC Portal API is running!', 
-    docs: 'API routes are available under /api',
+    docs: 'http://localhost:5000/api/docs',
     timestamp: new Date()
   });
 });
+
+// 8. API Docs (Swagger UI)
+setupSwagger(app);
 
 // Health Check Endpoint
 app.get('/health', (_req, res) => {

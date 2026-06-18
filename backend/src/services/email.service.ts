@@ -1,10 +1,15 @@
-import transporter from '../config/email';
+import { Resend } from 'resend';
 
 // ─────────────────────────────────────────────────
-// Email Service — All Email Templates
+// Email Service — Powered by Resend
+// Free tier: 3,000 emails/month, 100/day
 // ─────────────────────────────────────────────────
 
-const FROM = `"${process.env.EMAIL_FROM_NAME || 'U-Turn4Nature'}" <${process.env.EMAIL_FROM_ADDRESS || 'noreply@uturn4nature.com'}>`;
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+const FROM_EMAIL = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
+const FROM_NAME = process.env.EMAIL_FROM_NAME || 'U-Turn4Nature';
+const FROM = `${FROM_NAME} <${FROM_EMAIL}>`;
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -47,15 +52,27 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
+// ─── Helper to send via Resend ───────────────────
+async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('⚠️  RESEND_API_KEY not set — email not sent to:', to);
+    return;
+  }
+  const { error } = await resend.emails.send({ from: FROM, to, subject, html });
+  if (error) {
+    console.error('❌ Resend email error:', error);
+    throw new Error(error.message);
+  }
+}
+
 /**
  * Send OTP verification email
  */
 export const sendOTPEmail = async (email: string, name: string, otp: string): Promise<void> => {
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: '🌿 Verify Your Email — U-Turn4Nature PIC Portal',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    '🌿 Verify Your Email — U-Turn4Nature PIC Portal',
+    baseTemplate(`
       <h2>Welcome, ${name}! 🌱</h2>
       <p>Thank you for applying to become a <strong class="gold">PIC Partner</strong> with U-Turn4Nature.</p>
       <p>Please use the OTP below to verify your email address:</p>
@@ -63,19 +80,18 @@ export const sendOTPEmail = async (email: string, name: string, otp: string): Pr
       <p>This OTP is valid for <strong>10 minutes</strong>. Do not share it with anyone.</p>
       <hr class="divider">
       <p>Once you verify your email, your application will be reviewed by our admin team. You will be notified once approved.</p>
-    `),
-  });
+    `)
+  );
 };
 
 /**
  * Send password reset email
  */
 export const sendPasswordResetEmail = async (email: string, name: string, resetUrl: string): Promise<void> => {
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: '🔐 Reset Your Password — U-Turn4Nature PIC Portal',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    '🔐 Reset Your Password — U-Turn4Nature PIC Portal',
+    baseTemplate(`
       <h2>Reset Your Password</h2>
       <p>Hi ${name},</p>
       <p>We received a request to reset your password. Click the button below to proceed:</p>
@@ -86,8 +102,8 @@ export const sendPasswordResetEmail = async (email: string, name: string, resetU
       <div class="info-box">
         <p style="margin:0;">If you didn't request this, please ignore this email. Your password will not change.</p>
       </div>
-    `),
-  });
+    `)
+  );
 };
 
 /**
@@ -95,11 +111,10 @@ export const sendPasswordResetEmail = async (email: string, name: string, resetU
  */
 export const sendApprovalEmail = async (email: string, name: string, referralCode: string): Promise<void> => {
   const referralLink = `${process.env.REFERRAL_BASE_URL || 'https://uturn4nature.com'}/?ref=${referralCode}`;
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: '🎉 Congratulations! Your PIC Application is Approved',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    '🎉 Congratulations! Your PIC Application is Approved',
+    baseTemplate(`
       <h2>You're Now a PIC Partner! 🎊</h2>
       <p>Hi ${name},</p>
       <p>We're thrilled to welcome you to the <strong class="gold">U-Turn4Nature PIC Partner Program</strong>!</p>
@@ -111,27 +126,26 @@ export const sendApprovalEmail = async (email: string, name: string, referralCod
       <div style="text-align:center;">
         <a href="${process.env.FRONTEND_URL}/dashboard" class="btn">Go to Your Dashboard</a>
       </div>
-    `),
-  });
+    `)
+  );
 };
 
 /**
  * Send PIC rejection notification email
  */
 export const sendRejectionEmail = async (email: string, name: string, reason?: string): Promise<void> => {
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: 'Update on Your PIC Application — U-Turn4Nature',
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    'Update on Your PIC Application — U-Turn4Nature',
+    baseTemplate(`
       <h2>Application Status Update</h2>
       <p>Hi ${name},</p>
       <p>Thank you for your interest in the U-Turn4Nature PIC Partner Program.</p>
       <p>After careful review, we're unable to approve your application at this time.</p>
       ${reason ? `<div class="info-box"><p style="margin:0;"><strong>Reason:</strong> ${reason}</p></div>` : ''}
       <p>You may reapply after 30 days or contact our support team for more information.</p>
-    `),
-  });
+    `)
+  );
 };
 
 /**
@@ -144,11 +158,10 @@ export const sendCommissionEmail = async (
   commission: number,
   orderId: string
 ): Promise<void> => {
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: `💰 You earned ₹${commission.toFixed(2)} commission — U-Turn4Nature`,
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    `💰 You earned ₹${commission.toFixed(2)} commission — U-Turn4Nature`,
+    baseTemplate(`
       <h2>New Commission Earned! 💸</h2>
       <p>Hi ${name},</p>
       <p>Great news! A customer used your referral link and made a purchase.</p>
@@ -161,19 +174,18 @@ export const sendCommissionEmail = async (
       <div style="text-align:center;">
         <a href="${process.env.FRONTEND_URL}/dashboard/wallet" class="btn">View Your Wallet</a>
       </div>
-    `),
-  });
+    `)
+  );
 };
 
 /**
  * Send payout processed email
  */
 export const sendPayoutEmail = async (email: string, name: string, amount: number): Promise<void> => {
-  await transporter.sendMail({
-    from: FROM,
-    to: email,
-    subject: `✅ Payout of ₹${amount.toFixed(2)} Processed — U-Turn4Nature`,
-    html: baseTemplate(`
+  await sendEmail(
+    email,
+    `✅ Payout of ₹${amount.toFixed(2)} Processed — U-Turn4Nature`,
+    baseTemplate(`
       <h2>Payout Processed! ✅</h2>
       <p>Hi ${name},</p>
       <p>Your payout request has been processed successfully.</p>
@@ -184,6 +196,6 @@ export const sendPayoutEmail = async (email: string, name: string, amount: numbe
       <div style="text-align:center;">
         <a href="${process.env.FRONTEND_URL}/dashboard/wallet" class="btn">View Wallet History</a>
       </div>
-    `),
-  });
+    `)
+  );
 };

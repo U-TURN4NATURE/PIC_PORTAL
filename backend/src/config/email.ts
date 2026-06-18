@@ -1,33 +1,19 @@
-import nodemailer from 'nodemailer';
-
 // ─────────────────────────────────────────────────
-// Email Transporter Configuration
-// Supports Gmail, SendGrid, Mailgun, and generic SMTP
+// Email Config — now using Resend (see email.service.ts)
+// This file kept for backward compatibility with server.ts import
 // ─────────────────────────────────────────────────
 
-// Support both EMAIL_* and SMTP_* variable naming conventions
-const smtpHost = process.env.SMTP_HOST || process.env.EMAIL_HOST || 'smtp.gmail.com';
-const smtpPort = parseInt(process.env.SMTP_PORT || process.env.EMAIL_PORT || '587');
-const smtpUser = process.env.SMTP_USER || process.env.EMAIL_USER;
-const smtpPass = process.env.SMTP_PASS || process.env.EMAIL_PASS;
-
-const transporter = nodemailer.createTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: process.env.SMTP_SECURE === 'true',
-  auth: {
-    user: smtpUser,
-    pass: smtpPass,
-  },
-});
-
+/**
+ * No-op: Previously verified the Nodemailer SMTP connection.
+ * Email is now sent via Resend API (see services/email.service.ts).
+ * Resend does not require a persistent connection to verify.
+ */
 export const verifyEmailConnection = async (): Promise<void> => {
-  try {
-    await transporter.verify();
-    console.log('✅ Email transporter ready');
-  } catch (error) {
-    console.warn('⚠️  Email transporter not configured:', (error as Error).message);
+  if (process.env.RESEND_API_KEY) {
+    console.log('✅ Resend email provider configured');
+  } else {
+    console.warn('⚠️  RESEND_API_KEY not set — emails will not be sent');
   }
 };
 
-export default transporter;
+export default {};

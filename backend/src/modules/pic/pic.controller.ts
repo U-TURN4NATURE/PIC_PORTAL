@@ -1,7 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import path from 'path';
 import fs from 'fs';
-import sharp from 'sharp';
 import * as picService from './pic.service';
 import { successResponse, buildPaginationMeta, errorResponse } from '../../utils/pagination.utils';
 import prisma from '../../config/database';
@@ -188,12 +187,15 @@ export const uploadProfileImage = async (req: Request, res: Response, next: Next
       const fileBuffer = fs.readFileSync(req.file.path);
       const optimizedFilename = `optimized-${req.file.filename.split('.')[0]}.webp`;
       const optimizedPath = path.join(req.file.destination, optimizedFilename);
-      
+
+      // Dynamically require sharp (dev only) — avoids platform binary mismatch on deploy
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-explicit-any
+      const sharp: any = require('sharp');
       await sharp(fileBuffer)
         .resize(500, 500, { fit: 'cover', withoutEnlargement: true })
         .webp({ quality: 80 })
         .toFile(optimizedPath);
-        
+
       // Delete the original uploaded file safely
       try {
         fs.unlinkSync(req.file.path);

@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import {
   UserPlus, Users, Phone, Mail, Flag, CheckCircle2,
-  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X
+  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X, Search
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
@@ -169,6 +169,10 @@ export default function ReferralPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
 
+  // Search + Filter State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<ReferralStatus | ''>('');
+
   const fetchReferrals = useCallback(async () => {
     setLoading(true);
     try {
@@ -273,6 +277,27 @@ export default function ReferralPage() {
       toast.error('Failed to update referral.');
     }
   };
+
+  // Filtered referrals derived from search + status filter
+  const filteredReferrals = useMemo(() => {
+    const handledByFilter = activeTab === 'my-referrals' ? 'PIC' : 'U_TURN_NATURE';
+    return referrals
+      .filter(r => r.handledBy === handledByFilter)
+      .filter(r => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+          r.personName.toLowerCase().includes(q) ||
+          r.personPhone.includes(q) ||
+          (r.personEmail?.toLowerCase().includes(q) ?? false)
+        );
+      })
+      .filter(r => {
+        if (!statusFilter) return true;
+        return r.status === statusFilter;
+      });
+  }, [referrals, activeTab, searchQuery, statusFilter]);
+
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -421,13 +446,59 @@ export default function ReferralPage() {
       {/* Tabs: Referrals Lists */}
       {(activeTab === 'my-referrals' || activeTab === 'uturn-referrals') && (
         <div className="bg-white border border-brand-sage/30 rounded-2xl shadow-sm overflow-hidden">
+
+          {/* Search + Filter Bar */}
+          <div className="p-4 border-b border-gray-100 flex flex-wrap gap-3 items-center">
+            <div className="relative flex-1 min-w-[200px]">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by name, phone or email..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+              />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value as ReferralStatus | '')}
+              className="px-3 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-white text-gray-700"
+            >
+              <option value="">All Statuses</option>
+              {(Object.keys(STATUS_CONFIG) as ReferralStatus[]).map(s => (
+                <option key={s} value={s}>{STATUS_CONFIG[s].label}</option>
+              ))}
+            </select>
+            {(searchQuery || statusFilter) && (
+              <button
+                onClick={() => { setSearchQuery(''); setStatusFilter(''); }}
+                className="text-xs text-gray-500 hover:text-red-500 transition-colors flex items-center gap-1"
+              >
+                <X className="w-3 h-3" /> Clear
+              </button>
+            )}
+            <span className="text-xs text-gray-400 ml-auto">{filteredReferrals.length} result{filteredReferrals.length !== 1 ? 's' : ''}</span>
+          </div>
+
           {loading ? (
             <div className="p-8 text-center text-gray-400">Loading referrals...</div>
-          ) : referrals.filter(r => r.handledBy === (activeTab === 'my-referrals' ? 'PIC' : 'U_TURN_NATURE')).length === 0 ? (
+          ) : filteredReferrals.length === 0 ? (
             <div className="p-12 text-center">
               <Users className="w-12 h-12 text-gray-200 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">No referrals found</p>
-              <p className="text-gray-400 text-sm mt-1">You don't have any referrals assigned to {activeTab === 'my-referrals' ? 'you' : 'U-Turn Nature'}.</p>
+              <p className="text-gray-500 font-medium">
+                {searchQuery || statusFilter ? 'No referrals match your search' : 'No referrals found'}
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                {searchQuery || statusFilter
+                  ? 'Try clearing your filters to see all referrals.'
+                  : `You don't have any referrals assigned to ${activeTab === 'my-referrals' ? 'you' : 'U-Turn Nature'}.`
+                }
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -443,7 +514,7 @@ export default function ReferralPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {referrals.filter(r => r.handledBy === (activeTab === 'my-referrals' ? 'PIC' : 'U_TURN_NATURE')).map(ref => {
+                  {filteredReferrals.map(ref => {
                     const sc = STATUS_CONFIG[ref.status];
                     const latestFollowUp = ref.followUpRequests?.[0];
                     const hasOpenFollowUp = latestFollowUp?.status === 'OPEN' || latestFollowUp?.status === 'IN_PROGRESS';
