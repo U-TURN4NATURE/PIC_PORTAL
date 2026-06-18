@@ -18,6 +18,7 @@ import {
   Leaf,
   Flag,
   Megaphone,
+  Building2,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -67,6 +68,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'PIC Management', href: '/admin/pics', icon: Users },
     { name: 'Customers', href: '/admin/customers', icon: Users },
     { name: 'Follow-up Requests', href: '/admin/followups', icon: Flag },
+    { name: 'Bank Approvals', href: '/admin/bank-approvals', icon: Building2 },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
     { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },

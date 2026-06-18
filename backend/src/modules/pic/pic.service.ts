@@ -129,11 +129,26 @@ export const requestPayout = async (picId: string, data: { amount: number; payme
 };
 
 export const updateProfile = async (picId: string, data: any) => {
-  const allowedFields = ['phone', 'address', 'state', 'city', 'pincode', 'upiId', 'bankAccountNumber', 'ifscCode', 'instagramProfile'];
+  const allowedFields = ['phone', 'address', 'state', 'city', 'pincode', 'instagramProfile'];
+  const bankFields = ['upiId', 'bankAccountNumber', 'ifscCode', 'bankAccountName', 'bankName', 'branchName'];
+  
   const updateData: any = {};
+  const pendingBankData: any = {};
+  let hasPendingBankData = false;
 
   for (const field of allowedFields) {
     if (data[field] !== undefined) updateData[field] = data[field];
+  }
+
+  for (const field of bankFields) {
+    if (data[field] !== undefined) {
+      pendingBankData[field] = data[field];
+      hasPendingBankData = true;
+    }
+  }
+
+  if (hasPendingBankData) {
+    updateData.pendingBankDetails = pendingBankData;
   }
 
   const pic = await prisma.pICPartner.update({
@@ -143,6 +158,7 @@ export const updateProfile = async (picId: string, data: any) => {
       id: true, fullName: true, email: true, phone: true, profileImage: true,
       address: true, state: true, city: true, pincode: true,
       upiId: true, bankAccountNumber: true, ifscCode: true, instagramProfile: true,
+      pendingBankDetails: true,
     },
   });
 

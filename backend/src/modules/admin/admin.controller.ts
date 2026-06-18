@@ -37,6 +37,33 @@ export const getPICById = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const getBankApprovals = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const approvals = await adminService.getBankApprovals();
+    res.status(200).json(successResponse(approvals));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const approveBankDetails = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.approveBankDetails(req.params.id);
+    res.status(200).json(successResponse(result, 'Bank details approved successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const rejectBankDetails = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.rejectBankDetails(req.params.id);
+    res.status(200).json(successResponse(result, 'Bank details request rejected'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const approvePIC = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await adminService.approvePIC(req.params.id, req.user!.id);

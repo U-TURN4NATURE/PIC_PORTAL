@@ -18,6 +18,13 @@ router.patch('/pics/:id/reject', adminController.rejectPIC);
 router.patch('/pics/:id/suspend', adminController.suspendPIC);
 router.delete('/pics/:id', adminController.deletePIC);
 
+// ─────────────────────────────────────────────────
+// BANK DETAILS APPROVALS
+// ─────────────────────────────────────────────────
+router.get('/bank-approvals', adminController.getBankApprovals);
+router.post('/bank-approvals/:id/approve', adminController.approveBankDetails);
+router.post('/bank-approvals/:id/reject', adminController.rejectBankDetails);
+
 // Orders & Payouts
 router.get('/orders', adminController.getOrders);
 router.get('/payouts', adminController.getPayouts);

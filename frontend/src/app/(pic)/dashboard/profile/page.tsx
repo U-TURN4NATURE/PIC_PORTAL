@@ -25,24 +25,34 @@ export default function ProfilePage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
 
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get('/auth/me');
+      const data = res.data.data;
+      setProfile(data);
+      setForm((prev: any) => ({
+        ...prev,
+        upiId: data.upiId || '',
+        bankAccountNumber: data.bankAccountNumber || '',
+        ifscCode: data.ifscCode || '',
+        bankAccountName: data.bankAccountName || '',
+        bankName: data.bankName || '',
+        branchName: data.branchName || '',
+        instagramProfile: data.instagramProfile || '',
+        address: data.address || '',
+        city: data.city || '',
+        state: data.state || '',
+        pincode: data.pincode || '',
+      }));
+    } catch (err) {
+      toast.error('Failed to load profile');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    api.get('/auth/me')
-      .then(res => {
-        const data = res.data.data;
-        setProfile(data);
-        setForm({
-          upiId: data.upiId || '',
-          bankAccountNumber: data.bankAccountNumber || '',
-          ifscCode: data.ifscCode || '',
-          instagramProfile: data.instagramProfile || '',
-          address: data.address || '',
-          city: data.city || '',
-          state: data.state || '',
-          pincode: data.pincode || '',
-        });
-      })
-      .catch(() => toast.error('Failed to load profile'))
-      .finally(() => setIsLoading(false));
+    fetchProfile();
   }, []);
 
   const handleSave = async () => {
@@ -50,6 +60,7 @@ export default function ProfilePage() {
       setIsSaving(true);
       await api.patch('/pic/profile', form);
       toast.success('Profile updated successfully!');
+      await fetchProfile(); // refresh data
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -355,18 +366,35 @@ export default function ProfilePage() {
 
       {/* Editable: Payment Details */}
       <div className="bg-white border border-brand-sage/30 rounded-2xl shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-brand-sage/20">
+        <div className="p-5 border-b border-brand-sage/20 flex items-center justify-between">
           <h3 className="font-semibold text-gray-900 flex items-center gap-2">
             <Building2 className="w-4 h-4 text-brand-forest" /> Payment Details
             <span className="text-xs text-gray-400 font-normal ml-1">(Editable)</span>
           </h3>
+          {profile?.pendingBankDetails && (
+            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 flex items-center gap-1">
+              <Loader2 className="w-3 h-3 animate-spin" /> Pending Admin Approval
+            </span>
+          )}
         </div>
+
+        {profile?.pendingBankDetails && (
+          <div className="p-4 mx-6 mt-6 bg-yellow-50/50 border border-yellow-200 rounded-xl">
+            <p className="text-sm text-yellow-800">
+              Your requested bank details update is currently being reviewed by an admin. You cannot make further changes until it is approved or rejected.
+            </p>
+          </div>
+        )}
+
         <div className="p-6 grid md:grid-cols-2 gap-5">
           {[
             { field: 'upiId', label: 'UPI ID', placeholder: 'yourname@upi' },
             { field: 'instagramProfile', label: 'Instagram Profile URL', placeholder: 'https://instagram.com/...' },
+            { field: 'bankAccountName', label: 'Bank Account Name', placeholder: 'Name on account' },
+            { field: 'bankName', label: 'Bank Name', placeholder: 'e.g. State Bank of India' },
             { field: 'bankAccountNumber', label: 'Bank Account Number', placeholder: 'Enter account number' },
             { field: 'ifscCode', label: 'IFSC Code', placeholder: 'e.g. SBIN0001234' },
+            { field: 'branchName', label: 'Branch Name', placeholder: 'e.g. New Delhi Branch' },
           ].map(({ field, label, placeholder }) => (
             <div key={field}>
               <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
@@ -374,7 +402,8 @@ export default function ProfilePage() {
                 value={form[field] || ''}
                 onChange={e => setForm((f: any) => ({ ...f, [field]: e.target.value }))}
                 placeholder={placeholder}
-                className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+                disabled={!!profile?.pendingBankDetails}
+                className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm disabled:bg-gray-50 disabled:text-gray-500"
               />
             </div>
           ))}

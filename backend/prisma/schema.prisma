@@ -132,6 +132,7 @@ model PICPartner {
   ifscCode          String?
   branchName        String?
   upiId             String?
+  pendingBankDetails Json?
 
   // Professional Info (Step 3 — collected after approval)
   occupation        String?

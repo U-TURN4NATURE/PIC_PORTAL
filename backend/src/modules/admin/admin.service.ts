@@ -198,6 +198,75 @@ export const getPICById = async (picId: string) => {
   return safePIC;
 };
 
+// ─────────────────────────────────────────────────
+// Admin Service — Bank Details Approvals
+// ─────────────────────────────────────────────────
+
+export const getBankApprovals = async () => {
+  const pics = await prisma.pICPartner.findMany({
+    where: {
+      pendingBankDetails: { not: null },
+    },
+    select: {
+      id: true,
+      fullName: true,
+      email: true,
+      phone: true,
+      status: true,
+      bankAccountName: true,
+      bankName: true,
+      bankAccountNumber: true,
+      ifscCode: true,
+      branchName: true,
+      upiId: true,
+      pendingBankDetails: true,
+      createdAt: true,
+    },
+    orderBy: { updatedAt: 'desc' },
+  });
+  return pics;
+};
+
+export const approveBankDetails = async (picId: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
+  if (!pic) throw createError('PIC not found', 404);
+  if (!pic.pendingBankDetails) throw createError('No pending bank details found', 400);
+
+  const pending = pic.pendingBankDetails as any;
+  
+  // Apply pending updates to main fields and clear pendingBankDetails
+  const updatedPic = await prisma.pICPartner.update({
+    where: { id: picId },
+    data: {
+      bankAccountName: pending.bankAccountName ?? pic.bankAccountName,
+      bankName: pending.bankName ?? pic.bankName,
+      bankAccountNumber: pending.bankAccountNumber ?? pic.bankAccountNumber,
+      ifscCode: pending.ifscCode ?? pic.ifscCode,
+      branchName: pending.branchName ?? pic.branchName,
+      upiId: pending.upiId ?? pic.upiId,
+      pendingBankDetails: null, // clear it
+    },
+  });
+
+  return updatedPic;
+};
+
+export const rejectBankDetails = async (picId: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
+  if (!pic) throw createError('PIC not found', 404);
+  if (!pic.pendingBankDetails) throw createError('No pending bank details found', 400);
+
+  // Clear pendingBankDetails without applying them
+  const updatedPic = await prisma.pICPartner.update({
+    where: { id: picId },
+    data: {
+      pendingBankDetails: null, // clear it
+    },
+  });
+
+  return updatedPic;
+};
+
 /**
  * Approve a PIC — generates referral code + wallet + sends email
  */
