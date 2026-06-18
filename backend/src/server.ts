@@ -50,7 +50,7 @@ const startServer = async () => {
     verifyEmailConnection();
 
     // 3. Start Server
-    const server = app.listen(PORT, () => {
+    const server = app.listen(PORT as number, '0.0.0.0', () => {
       console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
 
