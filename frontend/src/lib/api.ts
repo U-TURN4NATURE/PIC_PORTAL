@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const PRODUCTION_API_URL = 'https://picportal-production-a624.up.railway.app/api';
+const PRODUCTION_API_URL = '/api'; // Proxied via Vercel rewrites → Railway (no CORS issues)
 const LOCAL_API_URL = 'http://localhost:5000/api';
 
 const isProduction = typeof window !== 'undefined' && !window.location.hostname.includes('localhost');
