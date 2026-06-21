@@ -23,7 +23,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { setUser } = useAuthStore();
+  const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
 
   // Show error if redirected back from Google with an error
@@ -46,8 +46,8 @@ function LoginInner() {
       const res = await api.post('/auth/login', data);
 
       if (res.data.success) {
-        const user = res.data.data.user;
-        setUser(user);
+        const { user, token } = res.data.data;
+        setAuth(user, token);
         toast.success('Welcome back!');
 
         // Smart redirect based on status and profile completion

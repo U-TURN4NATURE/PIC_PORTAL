@@ -12,16 +12,35 @@ export const getFileUrl = (filePath: string) => {
   return `${baseUrl}${filePath.startsWith('/') ? '' : '/'}${filePath}`;
 };
 
-// Force the correct Railway URL in production, ignoring any potentially incorrect Vercel env vars
 const api = axios.create({
   baseURL: isProduction ? PRODUCTION_API_URL : LOCAL_API_URL,
-  withCredentials: true, // Crucial for sending HTTP-only cookies
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Interceptor to handle global 401 Unauthorized errors
+// ── Request interceptor: attach JWT token from localStorage as Bearer header ──
+// This fixes mobile login (iOS Safari blocks cross-domain cookies by default)
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    try {
+      const raw = localStorage.getItem('auth-storage');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        const token = parsed?.state?.token;
+        if (token) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+    } catch {
+      // Silently ignore localStorage errors
+    }
+  }
+  return config;
+});
+
+// ── Response interceptor: handle 401 Unauthorized globally ──
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -29,15 +48,12 @@ api.interceptors.response.use(
       if (typeof window !== 'undefined') {
         const currentPath = window.location.pathname;
         const isAdminRoute = currentPath.startsWith('/admin');
-
-        // Don't redirect if already on a login/register page
         const isAuthPage =
           currentPath === '/login' ||
           currentPath === '/admin/login' ||
           currentPath.startsWith('/register');
 
         if (!isAuthPage) {
-          // Redirect admin routes to admin login, PIC routes to PIC login
           window.location.href = isAdminRoute ? '/admin/login' : '/login';
         }
       }
@@ -46,4 +62,5 @@ api.interceptors.response.use(
   }
 );
 
+export const fetcher = (url: string) => api.get(url).then((res) => res.data.data ?? res.data);
 export default api;

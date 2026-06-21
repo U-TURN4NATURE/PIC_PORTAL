@@ -20,7 +20,7 @@ type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const { setUser } = useAuthStore();
+  const { setAuth } = useAuthStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<AdminLoginFormValues>({
@@ -33,9 +33,10 @@ export default function AdminLoginPage() {
       const res = await api.post('/auth/admin/login', data);
       
       if (res.data.success) {
-        setUser(res.data.data.user);
+        const { user, token } = res.data.data;
+        setAuth(user, token);
         toast.success('Admin login successful');
-        router.replace('/admin/dashboard'); // replace so back button doesn't return to login
+        router.replace('/admin/dashboard');
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');
