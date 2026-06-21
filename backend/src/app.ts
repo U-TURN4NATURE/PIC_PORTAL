@@ -39,8 +39,8 @@ app.use(helmet({
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  process.env.FRONTEND_URL,
-  'https://pic-portal.vercel.app',
+  'https://pic.u-turn.in',           // ✅ Production frontend
+  process.env.FRONTEND_URL,           // ✅ From env (Railway/Vercel)
 ].filter(Boolean) as string[];
 
 app.use(
@@ -48,7 +48,10 @@ app.use(
     origin: (origin, callback) => {
       // Allow server-to-server or same-origin requests (no origin header)
       if (!origin) return callback(null, true);
-      if (allowedOrigins.some(o => origin.startsWith(o))) return callback(null, true);
+      // Allow exact matches
+      if (allowedOrigins.some(o => origin === o || origin.startsWith(o))) return callback(null, true);
+      // Allow all Vercel preview deployments for this project
+      if (origin.endsWith('.vercel.app')) return callback(null, true);
       // In development, allow any localhost port
       if (process.env.NODE_ENV === 'development' && origin.includes('localhost')) return callback(null, true);
       callback(new Error(`CORS: Origin ${origin} not allowed`));
