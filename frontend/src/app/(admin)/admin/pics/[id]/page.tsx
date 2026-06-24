@@ -285,6 +285,8 @@ export default function PICDetailPage() {
   const [referralsLoading, setReferralsLoading] = useState(false);
   const [saleModal, setSaleModal] = useState<any | null>(null);
   const [statusUpdating, setStatusUpdating] = useState<string | null>(null);
+  const [policyLogs, setPolicyLogs] = useState<any[]>([]);
+  const [policyLogsLoading, setPolicyLogsLoading] = useState(false);
 
   const fetchPIC = useCallback(async () => {
     try {
@@ -309,7 +311,17 @@ export default function PICDetailPage() {
     finally { setReferralsLoading(false); }
   }, [id]);
 
-  useEffect(() => { if (id) { fetchPIC(); fetchReferrals(); } }, [id, fetchPIC, fetchReferrals]);
+  const fetchPolicyLogs = useCallback(async () => {
+    if (!id) return;
+    setPolicyLogsLoading(true);
+    try {
+      const res = await api.get(`/admin/pics/${id}/policy-logs`);
+      setPolicyLogs(res.data.data || []);
+    } catch { toast.error('Failed to load legal clearance logs'); }
+    finally { setPolicyLogsLoading(false); }
+  }, [id]);
+
+  useEffect(() => { if (id) { fetchPIC(); fetchReferrals(); fetchPolicyLogs(); } }, [id, fetchPIC, fetchReferrals, fetchPolicyLogs]);
 
   const handleUpdateStatus = async (referralId: string, status: string) => {
     setStatusUpdating(referralId);
@@ -584,6 +596,44 @@ export default function PICDetailPage() {
               </table>
             </div>
           </div>
+
+          {/* Legal Clearance Logs */}
+          <div className="bg-white border border-brand-sage/20 shadow-sm rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">Legal Clearance & Policy Acceptance</h2>
+            </div>
+            <div className="p-6">
+              {policyLogsLoading ? (
+                <div className="text-sm text-gray-500">Loading logs...</div>
+              ) : policyLogs.length === 0 ? (
+                <div className="text-sm text-gray-500 border border-dashed border-gray-200 rounded-xl p-6 text-center bg-gray-50">No policy acceptance records found.</div>
+              ) : (
+                <div className="overflow-x-auto border border-gray-100 rounded-xl">
+                  <table className="w-full text-sm text-left">
+                    <thead className="text-xs text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th className="px-4 py-3">Document</th>
+                        <th className="px-4 py-3">Accepted At</th>
+                        <th className="px-4 py-3">IP Address</th>
+                        <th className="px-4 py-3">User Agent</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {policyLogs.map(log => (
+                        <tr key={log.id} className="hover:bg-gray-50/50 transition-colors">
+                          <td className="px-4 py-3 font-medium text-gray-900">{log.document?.title} <span className="text-gray-400 font-normal text-xs">(v{log.document?.version})</span></td>
+                          <td className="px-4 py-3 text-gray-600">{new Date(log.acceptedAt).toLocaleString('en-IN')}</td>
+                          <td className="px-4 py-3 text-gray-600 font-mono text-xs">{log.ipAddress || 'N/A'}</td>
+                          <td className="px-4 py-3 text-gray-500 text-xs max-w-xs truncate" title={log.userAgent}>{log.userAgent || 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+
         </div>
       )}
 

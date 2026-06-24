@@ -10,6 +10,10 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
+  const [uploadingPolicy, setUploadingPolicy] = useState(false);
+  const [resettingPolicy, setResettingPolicy] = useState(false);
+  const [policies, setPolicies] = useState<any[]>([]);
+
   const { register, handleSubmit, reset } = useForm();
 
   useEffect(() => {
@@ -26,6 +30,15 @@ export default function AdminSettingsPage() {
         }
       } catch (error) {
         toast.error('Failed to load Shopify settings');
+      } 
+      
+      try {
+        const policyRes = await api.get('/admin/policies');
+        if (policyRes.data.data) {
+          setPolicies(policyRes.data.data);
+        }
+      } catch (error) {
+        console.error('Failed to load policies', error);
       } finally {
         setIsLoading(false);
       }
@@ -42,6 +55,44 @@ export default function AdminSettingsPage() {
       toast.error(error.response?.data?.message || 'Failed to save settings');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePolicyUpload = async (e: any) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const file = formData.get('document');
+    if (!file || (file as File).size === 0) {
+      return toast.error('Please select a file to upload');
+    }
+    
+    try {
+      setUploadingPolicy(true);
+      await api.post('/admin/policies/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      toast.success('Policy uploaded successfully');
+      // Refresh policies
+      const policyRes = await api.get('/admin/policies');
+      if (policyRes.data.data) setPolicies(policyRes.data.data);
+      e.target.reset();
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to upload policy');
+    } finally {
+      setUploadingPolicy(false);
+    }
+  };
+
+  const handleResetAcceptance = async () => {
+    if (!confirm('Are you sure? This will force all active PICs to re-accept the policies upon their next login.')) return;
+    try {
+      setResettingPolicy(true);
+      const res = await api.post('/admin/policies/reset-acceptance');
+      toast.success(res.data.message || 'Policy acceptance reset successfully');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to reset policy acceptance');
+    } finally {
+      setResettingPolicy(false);
     }
   };
 
@@ -172,6 +223,86 @@ export default function AdminSettingsPage() {
             </button>
           </div>
         </form>
+      </div>
+
+      <div className="bg-white border border-brand-sage/20 rounded-2xl overflow-hidden shadow-sm mt-6">
+        <div className="p-6 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-brand-forest/10 text-brand-forest rounded-xl border border-brand-sage/30">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-gray-900">Legal Compliance & Policies</h2>
+              <p className="text-sm text-gray-500">Upload Policy and Terms & Conditions documents.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleResetAcceptance}
+            disabled={resettingPolicy}
+            className="px-4 py-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-semibold rounded-lg flex items-center transition-colors disabled:opacity-50"
+          >
+            {resettingPolicy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <AlertCircle className="w-4 h-4 mr-2" />}
+            Require Re-Acceptance
+          </button>
+        </div>
+
+        <div className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Upload New Document</h3>
+              <form onSubmit={handlePolicyUpload} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Document Type</label>
+                  <select name="type" required className="w-full border border-gray-300 rounded-lg px-3 py-2">
+                    <option value="PIC_POLICY">PIC Policy</option>
+                    <option value="TERMS_CONDITIONS">Terms & Conditions</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                  <input name="title" required placeholder="e.g. PIC Policy v2.0" className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Version</label>
+                  <input name="version" required defaultValue="1.0" className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">PDF Document</label>
+                  <input type="file" name="document" accept=".pdf" required className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-forest/10 file:text-brand-forest hover:file:bg-brand-forest/20" />
+                </div>
+                <div className="flex items-center gap-2">
+                  <input type="checkbox" name="isRequired" id="isRequired" value="true" defaultChecked className="w-4 h-4 text-brand-forest" />
+                  <label htmlFor="isRequired" className="text-sm font-medium text-gray-700">Is Required?</label>
+                </div>
+                <button type="submit" disabled={uploadingPolicy} className="w-full py-2 bg-brand-forest text-white rounded-lg font-medium flex items-center justify-center">
+                  {uploadingPolicy ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  Upload Document
+                </button>
+              </form>
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900 mb-4">Current Active Policies</h3>
+              {policies.length === 0 ? (
+                <p className="text-sm text-gray-500">No policies uploaded yet.</p>
+              ) : (
+                <ul className="space-y-3">
+                  {policies.map(p => (
+                    <li key={p.id} className="p-4 border border-gray-200 rounded-xl bg-gray-50 flex flex-col gap-1">
+                      <div className="flex items-center justify-between">
+                        <span className="font-semibold text-gray-900">{p.title}</span>
+                        <span className="text-xs bg-brand-forest/10 text-brand-forest px-2 py-1 rounded-md">{p.type}</span>
+                      </div>
+                      <div className="text-sm text-gray-500 flex items-center justify-between mt-2">
+                        <span>Version: {p.version}</span>
+                        <a href={p.fileUrl} target="_blank" rel="noreferrer" className="text-brand-forest hover:underline">View PDF</a>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

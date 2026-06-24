@@ -241,3 +241,63 @@ export const getPICNotifications = async (req: Request, res: Response, next: Nex
   }
 };
 
+// ─────────────────────────────────────────────────
+// POLICIES & LEGAL COMPLIANCE
+// ─────────────────────────────────────────────────
+
+export const getPolicies = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const policies = await adminService.getPolicies();
+    res.status(200).json(successResponse(policies));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const uploadPolicy = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file provided' });
+    }
+    const { title, type, version, isRequired } = req.body;
+    
+    let fileUrl: string;
+    const isProduction = process.env.NODE_ENV === 'production';
+    if (isProduction) {
+      fileUrl = (req.file as any).path; 
+    } else {
+      const relativePath = req.file.path.replace(/\\/g, '/').split('uploads/').pop();
+      fileUrl = `/uploads/${relativePath}`;
+    }
+
+    const policy = await adminService.uploadPolicy({
+      title,
+      type,
+      version: version || '1.0',
+      isRequired: isRequired === 'true' || isRequired === true,
+      fileUrl
+    });
+    
+    res.status(201).json(successResponse(policy, 'Policy uploaded successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const resetPolicyAcceptance = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.resetPolicyAcceptance();
+    res.status(200).json(successResponse(result, 'Policy acceptance reset for all active PICs. They will be prompted to re-accept upon next login.'));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPICPolicyLogs = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const logs = await adminService.getPICPolicyLogs(req.params.id);
+    res.status(200).json(successResponse(logs));
+  } catch (error) {
+    next(error);
+  }
+};

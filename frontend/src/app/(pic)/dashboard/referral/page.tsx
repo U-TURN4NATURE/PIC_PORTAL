@@ -165,7 +165,7 @@ export default function ReferralPage() {
   const [followUpModal, setFollowUpModal] = useState<Referral | null>(null);
 
   // Add Referral Form State
-  const [form, setForm] = useState({ personName: '', personPhone: '', personEmail: '', handledBy: '' });
+  const [form, setForm] = useState({ personName: '', personPhone: '', personEmail: '', handledBy: '', address: '', pincode: '', city: '' });
   const [submitting, setSubmitting] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
 
@@ -176,6 +176,26 @@ export default function ReferralPage() {
   // Search + Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ReferralStatus | ''>('');
+
+  // Auto-fetch city based on pincode
+  useEffect(() => {
+    const fetchCity = async () => {
+      if (form.pincode.length === 6 && /^\d+$/.test(form.pincode)) {
+        try {
+          const res = await fetch(`https://api.postalpincode.in/pincode/${form.pincode}`);
+          const data = await res.json();
+          if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+            setForm(f => ({ ...f, city: data[0].PostOffice[0].District }));
+          } else {
+            setForm(f => ({ ...f, city: '' }));
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+    fetchCity();
+  }, [form.pincode]);
 
   const fetchReferrals = useCallback(async () => {
     setLoading(true);
@@ -212,7 +232,7 @@ export default function ReferralPage() {
     try {
       await api.post('/pic/referrals', form);
       toast.success(`${form.personName} added to your referrals!`);
-      setForm({ personName: '', personPhone: '', personEmail: '', handledBy: '' });
+      setForm({ personName: '', personPhone: '', personEmail: '', handledBy: '', address: '', pincode: '', city: '' });
       fetchReferrals();
       setActiveTab('my-referrals');
     } catch (err: any) {
@@ -407,6 +427,42 @@ export default function ReferralPage() {
                   />
                 </div>
               </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-gray-400 font-normal">(optional)</span></label>
+                <input
+                  type="text"
+                  value={form.address}
+                  onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                  placeholder="e.g. 123 Main St, Apartment 4B"
+                  className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode <span className="text-gray-400 font-normal">(optional)</span></label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={form.pincode}
+                    onChange={e => setForm(f => ({ ...f, pincode: e.target.value.replace(/\D/g, '') }))}
+                    placeholder="e.g. 110017"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    value={form.city}
+                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                    placeholder="Auto-fetched"
+                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-gray-50"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Handled By <span className="text-red-500">*</span></label>
                 <select

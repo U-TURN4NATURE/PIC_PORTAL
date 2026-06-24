@@ -773,3 +773,53 @@ export const markAllNotificationsRead = async (picId: string) => {
   return { message: 'All notifications marked as read' };
 };
 
+// ─────────────────────────────────────────────────
+// POLICIES & LEGAL COMPLIANCE
+// ─────────────────────────────────────────────────
+
+export const getPolicies = async () => {
+  return prisma.policyDocument.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+};
+
+export const uploadPolicy = async (data: { title: string, type: any, version: string, isRequired: boolean, fileUrl: string }) => {
+  // If a policy of this type already exists, update it. Otherwise create it.
+  const existing = await prisma.policyDocument.findUnique({
+    where: { type: data.type }
+  });
+
+  if (existing) {
+    return prisma.policyDocument.update({
+      where: { id: existing.id },
+      data: {
+        title: data.title,
+        version: data.version,
+        isRequired: data.isRequired,
+        fileUrl: data.fileUrl
+      }
+    });
+  }
+
+  return prisma.policyDocument.create({
+    data
+  });
+};
+
+export const resetPolicyAcceptance = async () => {
+  const result = await prisma.pICPartner.updateMany({
+    where: { status: 'ACTIVE' },
+    data: { isPolicyAccepted: false }
+  });
+  return { updatedCount: result.count };
+};
+
+export const getPICPolicyLogs = async (picId: string) => {
+  return prisma.policyAcceptanceLog.findMany({
+    where: { picId },
+    include: {
+      document: true
+    },
+    orderBy: { acceptedAt: 'desc' }
+  });
+};

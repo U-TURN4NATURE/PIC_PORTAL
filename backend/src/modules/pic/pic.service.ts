@@ -172,16 +172,45 @@ export const updateProfile = async (picId: string, data: any) => {
   return pic;
 };
 
-export const acceptPolicy = async (picId: string) => {
-  const pic = await prisma.pICPartner.update({
-    where: { id: picId },
-    data: { isPolicyAccepted: true },
-    select: {
-      id: true,
-      isPolicyAccepted: true,
-    },
+export const acceptPolicy = async (picId: string, ipAddress?: string, userAgent?: string) => {
+  // Find all current active/required policies to log them
+  const activePolicies = await prisma.policyDocument.findMany({
+    where: { isRequired: true }
   });
+
+  const acceptanceLogs = activePolicies.map(doc => ({
+    picId,
+    documentId: doc.id,
+    ipAddress: ipAddress || null,
+    userAgent: userAgent || null,
+  }));
+
+  const pic = await prisma.$transaction(async (tx) => {
+    if (acceptanceLogs.length > 0) {
+      await tx.policyAcceptanceLog.createMany({
+        data: acceptanceLogs
+      });
+    }
+
+    return tx.pICPartner.update({
+      where: { id: picId },
+      data: { isPolicyAccepted: true },
+      select: {
+        id: true,
+        isPolicyAccepted: true,
+      },
+    });
+  });
+
   return pic;
+};
+
+// Also expose a function to get current policies
+export const getActivePolicies = async () => {
+  return prisma.policyDocument.findMany({
+    where: { isRequired: true },
+    orderBy: { createdAt: 'desc' }
+  });
 };
 
 export const uploadProfileImage = async (picId: string, imageUrl: string) => {

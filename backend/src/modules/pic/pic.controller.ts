@@ -73,7 +73,11 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
 
 export const acceptPolicy = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const pic = await picService.acceptPolicy(req.user!.id);
+    // Capture IP and User-Agent for legal proof
+    const ipAddress = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip || '') as string;
+    const userAgent = req.headers['user-agent'] || '';
+
+    const pic = await picService.acceptPolicy(req.user!.id, ipAddress, userAgent);
     res.status(200).json(successResponse(pic, 'Policy accepted successfully'));
   } catch (error) {
     next(error);
@@ -117,6 +121,19 @@ export const getPolicyDocument = async (req: Request, res: Response, next: NextF
 
     const stream = fs.createReadStream(resolvedPath);
     stream.pipe(res);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /pic/policies
+ * Returns all active policies to the PIC.
+ */
+export const getActivePolicies = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const policies = await picService.getActivePolicies();
+    res.status(200).json(successResponse(policies));
   } catch (error) {
     next(error);
   }

@@ -14,7 +14,7 @@ const COMMISSION_RATE = parseFloat(process.env.COMMISSION_RATE || '5.0');
  */
 export const addReferral = async (
   picId: string,
-  data: { personName: string; personPhone: string; personEmail?: string; handledBy?: HandledBy }
+  data: { personName: string; personPhone: string; personEmail?: string; handledBy?: HandledBy; address?: string; pincode?: string; city?: string }
 ) => {
   // Block duplicate phone under same PIC
   const existing = await prisma.referral.findUnique({
@@ -30,6 +30,9 @@ export const addReferral = async (
       personName: data.personName,
       personPhone: data.personPhone,
       personEmail: data.personEmail || null,
+      address: data.address || null,
+      pincode: data.pincode || null,
+      city: data.city || null,
       commissionRate: COMMISSION_RATE,
       handledBy: data.handledBy || 'U_TURN_NATURE',
     },

@@ -29,6 +29,7 @@ router.post('/accept-policy', picController.acceptPolicy);
 
 // Policy Document — protected: only ACTIVE PICs can access
 router.get('/policy-document', picController.getPolicyDocument);
+router.get('/policies', picController.getActivePolicies);
 
 // Announcements — read-only for PICs
 router.get('/announcements', picController.getAnnouncements);

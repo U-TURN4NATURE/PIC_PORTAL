@@ -55,7 +55,7 @@ function LoginInner() {
         if (user.status === 'ACTIVE') {
           router.replace('/dashboard');
         } else if ((user.status === 'APPROVED') && !user.profileCompleted) {
-          router.replace('/complete-profile');
+          router.replace('/dashboard');
         } else {
           // PENDING or other states — go to dashboard (will show status screen)
           router.replace('/dashboard');

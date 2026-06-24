@@ -13,6 +13,7 @@ router.get('/dashboard', adminController.getDashboardStats);
 // PIC Management
 router.get('/pics', adminController.getPICs);
 router.get('/pics/:id', adminController.getPICById);
+router.get('/pics/:id/policy-logs', adminController.getPICPolicyLogs);
 router.patch('/pics/:id/approve', adminController.approvePIC);
 router.patch('/pics/:id/reject', adminController.rejectPIC);
 router.patch('/pics/:id/suspend', adminController.suspendPIC);
@@ -41,6 +42,12 @@ router.get('/announcements', adminController.getAnnouncements);
 router.post('/announcements', adminController.createAnnouncement);
 router.patch('/announcements/:id', adminController.updateAnnouncement);
 router.delete('/announcements/:id', adminController.deleteAnnouncement);
+
+// Policies
+import upload from '../../middleware/upload.middleware';
+router.get('/policies', adminController.getPolicies);
+router.post('/policies/upload', upload.single('document'), adminController.uploadPolicy);
+router.post('/policies/reset-acceptance', adminController.resetPolicyAcceptance);
 
 export default router;
 

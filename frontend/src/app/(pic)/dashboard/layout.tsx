@@ -239,7 +239,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     { name: 'Wallet', href: '/dashboard/wallet', icon: Wallet },
     { name: 'Analytics', href: '/dashboard/analytics', icon: TrendingUp },
     { name: 'Announcements', href: '/dashboard/announcements', icon: Megaphone },
-    { name: 'Policy', href: '/dashboard/policy', icon: FileText },
+    { name: 'Policy & T&C', href: '/dashboard/policy', icon: FileText },
     { name: 'Profile', href: '/dashboard/profile', icon: User },
   ];
 

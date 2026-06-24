@@ -14,6 +14,11 @@ datasource db {
 // ENUMS
 // ─────────────────────────────────────────────────
 
+enum PolicyDocumentType {
+  PIC_POLICY
+  TERMS_CONDITIONS
+}
+
 enum PICStatus {
   PENDING
   APPROVED
@@ -181,6 +186,7 @@ model PICPartner {
   referrals         Referral[]
   followUpRequests  FollowUpRequest[]
   sales             SaleEntry[]
+  policyAcceptances PolicyAcceptanceLog[]
 
   @@index([email])
   @@index([referralCode])
@@ -309,6 +315,11 @@ model Referral {
   personName        String
   personEmail       String?
   personPhone       String
+
+  // Location Details
+  address           String?
+  pincode           String?
+  city              String?
 
   // Status managed by Admin
   status            ReferralStatus @default(PENDING)
@@ -449,6 +460,41 @@ model AuditLog {
 
   @@index([actorId])
   @@index([action])
-  @@index([createdAt])
   @@map("audit_logs")
 }
+
+// ─────────────────────────────────────────────────
+// POLICY MANAGEMENT & LEGAL COMPLIANCE
+// ─────────────────────────────────────────────────
+
+model PolicyDocument {
+  id          String             @id @default(cuid())
+  title       String             // e.g. "PIC Policy", "Terms & Conditions"
+  type        PolicyDocumentType @unique
+  fileUrl     String             // path to uploaded document
+  version     String             @default("1.0")
+  isRequired  Boolean            @default(true)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  acceptances PolicyAcceptanceLog[]
+
+  @@map("policy_documents")
+}
+
+model PolicyAcceptanceLog {
+  id             String         @id @default(cuid())
+  picId          String
+  documentId     String
+  ipAddress      String?
+  userAgent      String?        @db.Text
+  acceptedAt     DateTime       @default(now())
+
+  pic            PICPartner     @relation(fields: [picId], references: [id], onDelete: Cascade)
+  document       PolicyDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([picId])
+  @@index([documentId])
+  @@map("policy_acceptance_logs")
+}
+

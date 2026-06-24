@@ -44,7 +44,7 @@ function GoogleCallbackInner() {
         if (user.status === 'ACTIVE') {
           router.replace('/dashboard');
         } else if (user.status === 'APPROVED' && !user.profileCompleted) {
-          router.replace('/complete-profile');
+          router.replace('/dashboard');
         } else {
           router.replace('/dashboard');
         }

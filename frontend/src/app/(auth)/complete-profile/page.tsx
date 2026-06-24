@@ -15,8 +15,8 @@ import {
 
 // ─── Step 2 Schema ───────────────────────────────
 const step2Schema = z.object({
-  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required').optional().or(z.literal('')),
-  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)').optional().or(z.literal('')),
+  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required'),
+  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)'),
   bankAccountName: z.string().min(2, 'Account holder name required'),
   bankName: z.string().min(2, 'Bank name required'),
   bankAccountNumber: z.string().min(8, 'Valid account number required'),
@@ -207,14 +207,21 @@ export default function CompleteProfilePage() {
     <div className="min-h-screen py-10 px-4 bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-3">
+        <div className="text-center mb-8 relative">
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="absolute top-0 right-0 p-2 text-brand-olive hover:text-brand-forest hover:bg-brand-sage/10 rounded-full transition-colors"
+            title="Skip for now"
+          >
+            <X className="w-6 h-6" />
+          </button>
+          <div className="flex justify-center mb-3 mt-4">
             <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
               <Leaf className="w-7 h-7" />
             </div>
           </div>
           <h1 className="font-dm-serif text-3xl text-brand-forest">Complete Your Profile</h1>
-          <p className="text-brand-olive text-sm mt-2">You&apos;re approved! Complete your KYC to start earning.</p>
+          <p className="text-brand-olive text-sm mt-2">Complete your KYC and accept the PIC Policy to become fully approved and start earning.</p>
         </div>
 
         {/* Progress Steps */}
@@ -249,10 +256,10 @@ export default function CompleteProfilePage() {
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Identity Information</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Aadhaar Number (Optional)" error={form2.formState.errors.aadhaarNumber?.message}>
+                  <Field label="Aadhaar Number" required error={form2.formState.errors.aadhaarNumber?.message}>
                     <input {...form2.register('aadhaarNumber')} placeholder="123456789012" className={inputClass} maxLength={12} />
                   </Field>
-                  <Field label="PAN Number (Optional)" error={form2.formState.errors.panCard?.message}>
+                  <Field label="PAN Number" required error={form2.formState.errors.panCard?.message}>
                     <input {...form2.register('panCard')} placeholder="ABCDE1234F" className={`${inputClass} uppercase`} maxLength={10} />
                   </Field>
                 </div>
@@ -291,19 +298,19 @@ export default function CompleteProfilePage() {
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Bank Information</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Account Holder Name" error={form2.formState.errors.bankAccountName?.message}>
+                  <Field label="Account Holder Name" required error={form2.formState.errors.bankAccountName?.message}>
                     <input {...form2.register('bankAccountName')} placeholder="John Doe" className={inputClass} />
                   </Field>
-                  <Field label="Bank Name" error={form2.formState.errors.bankName?.message}>
+                  <Field label="Bank Name" required error={form2.formState.errors.bankName?.message}>
                     <input {...form2.register('bankName')} placeholder="State Bank of India" className={inputClass} />
                   </Field>
-                  <Field label="Account Number" error={form2.formState.errors.bankAccountNumber?.message}>
+                  <Field label="Account Number" required error={form2.formState.errors.bankAccountNumber?.message}>
                     <input {...form2.register('bankAccountNumber')} placeholder="1234567890" className={inputClass} />
                   </Field>
-                  <Field label="IFSC Code" error={form2.formState.errors.ifscCode?.message}>
+                  <Field label="IFSC Code" required error={form2.formState.errors.ifscCode?.message}>
                     <input {...form2.register('ifscCode')} placeholder="SBIN0001234" className={`${inputClass} uppercase`} />
                   </Field>
-                  <Field label="Branch Name" error={form2.formState.errors.branchName?.message}>
+                  <Field label="Branch Name" required error={form2.formState.errors.branchName?.message}>
                     <input {...form2.register('branchName')} placeholder="Connaught Place" className={inputClass} />
                   </Field>
                   <Field label="UPI ID (Optional)" error={form2.formState.errors.upiId?.message}>
@@ -333,10 +340,10 @@ export default function CompleteProfilePage() {
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Professional Information</h2>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Occupation" error={form3.formState.errors.occupation?.message}>
+                  <Field label="Occupation" required error={form3.formState.errors.occupation?.message}>
                     <input {...form3.register('occupation')} placeholder="Sales Executive, Teacher, etc." className={inputClass} />
                   </Field>
-                  <Field label="Years of Experience" error={form3.formState.errors.yearsOfExperience?.message}>
+                  <Field label="Years of Experience" required error={form3.formState.errors.yearsOfExperience?.message}>
                     <select {...form3.register('yearsOfExperience')} className={inputClass}>
                       <option value="">Select experience</option>
                       <option value="0-1 years">0-1 years</option>
@@ -346,7 +353,7 @@ export default function CompleteProfilePage() {
                       <option value="10+ years">10+ years</option>
                     </select>
                   </Field>
-                  <Field label="Education" error={form3.formState.errors.education?.message}>
+                  <Field label="Education" required error={form3.formState.errors.education?.message}>
                     <select {...form3.register('education')} className={inputClass}>
                       <option value="">Select education</option>
                       <option value="10th Pass">10th Pass</option>
@@ -357,7 +364,7 @@ export default function CompleteProfilePage() {
                       <option value="Other">Other</option>
                     </select>
                   </Field>
-                  <Field label="Availability" error={form3.formState.errors.availability?.message}>
+                  <Field label="Availability" required error={form3.formState.errors.availability?.message}>
                     <select {...form3.register('availability')} className={inputClass}>
                       <option value="">Select availability</option>
                       <option value="Full Time">Full Time</option>
@@ -367,7 +374,7 @@ export default function CompleteProfilePage() {
                     </select>
                   </Field>
                   <div className="md:col-span-2">
-                    <Field label="Key Skills" error={form3.formState.errors.skills?.message}>
+                    <Field label="Key Skills" required error={form3.formState.errors.skills?.message}>
                       <input {...form3.register('skills')} placeholder="Sales, Marketing, Social Media, Communication..." className={inputClass} />
                     </Field>
                   </div>
@@ -383,7 +390,7 @@ export default function CompleteProfilePage() {
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">PIC Details</h2>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
-                  <Field label="Why do you want to become a PIC?" error={form3.formState.errors.whyJoin?.message}>
+                  <Field label="Why do you want to become a PIC?" required error={form3.formState.errors.whyJoin?.message}>
                     <textarea
                       {...form3.register('whyJoin')}
                       rows={3}
@@ -392,13 +399,13 @@ export default function CompleteProfilePage() {
                     />
                   </Field>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Preferred Working Area" error={form3.formState.errors.preferredWorkingArea?.message}>
+                    <Field label="Preferred Working Area" required error={form3.formState.errors.preferredWorkingArea?.message}>
                       <input {...form3.register('preferredWorkingArea')} placeholder="Local area, city, etc." className={inputClass} />
                     </Field>
-                    <Field label="Preferred District" error={form3.formState.errors.preferredDistrict?.message}>
+                    <Field label="Preferred District" required error={form3.formState.errors.preferredDistrict?.message}>
                       <input {...form3.register('preferredDistrict')} placeholder="District name" className={inputClass} />
                     </Field>
-                    <Field label="State" error={form3.formState.errors.preferredState?.message}>
+                    <Field label="State" required error={form3.formState.errors.preferredState?.message}>
                       <select {...form3.register('preferredState')} className={inputClass}>
                         <option value="">Select State</option>
                         {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -455,10 +462,12 @@ export default function CompleteProfilePage() {
 
 const inputClass = "w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all text-sm";
 
-function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+function Field({ label, error, children, required }: { label: string; error?: string; children: React.ReactNode; required?: boolean }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-brand-forest mb-1">{label}</label>
+      <label className="block text-sm font-medium text-brand-forest mb-1">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
       {children}
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>
