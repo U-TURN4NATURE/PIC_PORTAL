@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
+import { toast } from 'sonner';
+import { FileText, Loader2, AlertCircle } from 'lucide-react';
+
 
 export default function PICPolicyPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
