@@ -97,3 +97,6 @@ export const profileImageUpload = multer({
   limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
 }).single('profileImage');
 
+const upload = multer({ storage });
+export default upload;
+
