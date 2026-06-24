@@ -30,6 +30,9 @@ import { setupSwagger } from './config/swagger';
 
 const app: Express = express();
 
+// Trust proxy (required for rate-limiting behind Vercel/Railway/Render)
+app.set('trust proxy', 1);
+
 // 1. Security Headers
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" },
