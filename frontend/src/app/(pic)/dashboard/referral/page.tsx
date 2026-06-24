@@ -5,7 +5,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import {
   UserPlus, Users, Phone, Mail, Flag, CheckCircle2,
-  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X, Search
+  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X, Search, Pencil, Check
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
@@ -169,6 +169,10 @@ export default function ReferralPage() {
   const [submitting, setSubmitting] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
 
+  // Inline email edit state
+  const [editEmailId, setEditEmailId] = useState<string | null>(null);
+  const [editEmailValue, setEditEmailValue] = useState('');
+
   // Search + Filter State
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ReferralStatus | ''>('');
@@ -275,6 +279,18 @@ export default function ReferralPage() {
       fetchReferrals();
     } catch (err) {
       toast.error('Failed to update follow-up assignment');
+    }
+  };
+
+  const handleUpdateEmail = async (referralId: string) => {
+    try {
+      await api.patch(`/pic/referrals/${referralId}/email`, { personEmail: editEmailValue.trim() || null });
+      toast.success('Email updated successfully!');
+      setEditEmailId(null);
+      setEditEmailValue('');
+      fetchReferrals();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || 'Failed to update email');
     }
   };
 
@@ -528,7 +544,56 @@ export default function ReferralPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-1 text-gray-600"><Phone className="w-3 h-3" />{ref.personPhone}</div>
-                          {ref.personEmail && <div className="flex items-center gap-1 text-gray-400 text-xs mt-0.5"><Mail className="w-3 h-3" />{ref.personEmail}</div>}
+                          {/* Inline email edit */}
+                          {editEmailId === ref.id ? (
+                            <div className="flex items-center gap-1 mt-1">
+                              <input
+                                type="email"
+                                autoFocus
+                                value={editEmailValue}
+                                onChange={e => setEditEmailValue(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleUpdateEmail(ref.id);
+                                  if (e.key === 'Escape') { setEditEmailId(null); setEditEmailValue(''); }
+                                }}
+                                placeholder="email@example.com"
+                                className="text-xs border border-brand-forest/30 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-brand-forest/30 w-36"
+                              />
+                              <button
+                                onClick={() => handleUpdateEmail(ref.id)}
+                                className="p-1 bg-brand-forest text-white rounded-md hover:bg-brand-olive transition-colors"
+                                title="Save"
+                              >
+                                <Check className="w-3 h-3" />
+                              </button>
+                              <button
+                                onClick={() => { setEditEmailId(null); setEditEmailValue(''); }}
+                                className="p-1 text-gray-400 hover:text-red-500 rounded-md transition-colors"
+                                title="Cancel"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              className="flex items-center gap-1 mt-0.5 group cursor-pointer"
+                              onClick={() => { setEditEmailId(ref.id); setEditEmailValue(ref.personEmail || ''); }}
+                              title="Click to edit email"
+                            >
+                              {ref.personEmail ? (
+                                <>
+                                  <Mail className="w-3 h-3 text-gray-400" />
+                                  <span className="text-gray-400 text-xs">{ref.personEmail}</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Mail className="w-3 h-3 text-gray-300" />
+                                  <span className="text-gray-300 text-xs italic">Add email</span>
+                                </>
+                              )}
+                              <Pencil className="w-2.5 h-2.5 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity ml-0.5" />
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${sc.color}`}>

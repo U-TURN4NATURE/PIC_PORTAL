@@ -71,6 +71,26 @@ export const updateReferralHandledBy = async (
 };
 
 /**
+ * PIC updates the email of a referral (can be done later, email is optional)
+ */
+export const updateReferralEmail = async (
+  picId: string,
+  referralId: string,
+  personEmail: string | null
+) => {
+  // Ensure this referral belongs to this PIC
+  const referral = await prisma.referral.findFirst({
+    where: { id: referralId, picId },
+  });
+  if (!referral) throw createError('Referral not found', 404);
+
+  return prisma.referral.update({
+    where: { id: referralId },
+    data: { personEmail: personEmail || null },
+  });
+};
+
+/**
  * PIC fetches their own referrals with optional status filter
  */
 export const getPICReferrals = async (

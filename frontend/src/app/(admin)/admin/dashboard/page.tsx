@@ -27,10 +27,7 @@ import {
 } from 'recharts';
 
 export default function AdminDashboardPage() {
-  const { data: statsData, isLoading, error } = useApi<AdminDashboardStats>(
-    () => api.get('/admin/dashboard').then((r) => r.data.data),
-    []
-  );
+  const { data: statsData, isLoading, error } = useApi<AdminDashboardStats>('/admin/dashboard');
 
   if (error) {
     toast.error(`Failed to load dashboard: ${error}`);

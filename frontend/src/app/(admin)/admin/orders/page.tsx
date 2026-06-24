@@ -6,28 +6,18 @@ import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import { ShoppingCart } from 'lucide-react';
 
+import useSWR from 'swr';
+import { fetcher } from '@/lib/api';
+
 export default function AdminOrdersPage() {
-  const [orders, setOrders] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [meta, setMeta] = useState<any>(null);
   const [page, setPage] = useState(1);
 
-  const fetchOrders = async () => {
-    try {
-      setIsLoading(true);
-      const res = await api.get(`/admin/orders?page=${page}&limit=10`);
-      setOrders(res.data.data);
-      setMeta(res.data.meta);
-    } catch (error) {
-      toast.error('Failed to fetch orders');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data, isLoading, mutate: fetchOrders } = useSWR(`/admin/orders?page=${page}&limit=10`, fetcher, {
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    fetchOrders();
-  }, [page]);
+  const orders: any[] = data?.data || [];
+  const meta = data?.meta || null;
 
   return (
     <div className="space-y-6">

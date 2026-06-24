@@ -3,6 +3,7 @@ import {
   addReferral,
   addBulkReferrals,
   updateReferralHandledBy,
+  updateReferralEmail,
   getPICReferrals,
   getPICReferralStats,
   getAdminReferralsByPIC,
@@ -41,6 +42,18 @@ export const handleUpdateHandledBy = async (req: Request, res: Response): Promis
   const { handledBy } = req.body;
   const data = await updateReferralHandledBy(id, handledBy as HandledBy);
   res.json({ success: true, data });
+};
+
+export const handleUpdateReferralEmail = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const picId = (req as any).user.id;
+    const { id } = req.params;
+    const { personEmail } = req.body;
+    const data = await updateReferralEmail(picId, id, personEmail || null);
+    res.json({ success: true, data });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const handleUpdateReferralStatusForPIC = async (req: Request, res: Response): Promise<void> => {

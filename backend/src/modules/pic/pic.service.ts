@@ -27,7 +27,14 @@ export const getDashboardStats = async (picId: string) => {
     }),
   ]);
 
-  if (!wallet) throw createError('Wallet not found', 404);
+  if (!wallet) {
+    // APPROVED users may not have a wallet yet — return zeroed stats
+    return {
+      wallet: { totalEarnings: 0, pendingEarnings: 0, paidEarnings: 0, availableBalance: 0 },
+      totalOrders,
+      recentOrders,
+    };
+  }
 
   return {
     wallet,
@@ -131,7 +138,7 @@ export const requestPayout = async (picId: string, data: { amount: number; payme
 export const updateProfile = async (picId: string, data: any) => {
   const allowedFields = ['phone', 'address', 'state', 'city', 'pincode', 'instagramProfile'];
   const bankFields = ['upiId', 'bankAccountNumber', 'ifscCode', 'bankAccountName', 'bankName', 'branchName'];
-  
+
   const updateData: any = {};
   const pendingBankData: any = {};
   let hasPendingBankData = false;

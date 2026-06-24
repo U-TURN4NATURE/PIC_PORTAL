@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Inter, DM_Serif_Display } from 'next/font/google';
+import { Inter, DM_Serif_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'sonner';
 
@@ -8,6 +8,10 @@ const dmSerif = DM_Serif_Display({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-dm-serif',
+});
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  variable: '--font-plus-jakarta',
 });
 
 export const metadata: Metadata = {
@@ -27,7 +31,7 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/logo_1.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/logo_1.jpg" />
       </head>
-      <body className={`${inter.variable} ${dmSerif.variable} antialiased font-sans`}>
+      <body className={`${inter.variable} ${dmSerif.variable} ${plusJakartaSans.variable} antialiased font-sans`}>
         {children}
         <Toaster position="top-right" richColors />
       </body>

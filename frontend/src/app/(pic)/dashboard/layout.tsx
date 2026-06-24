@@ -107,35 +107,35 @@ function RejectedScreen({ user }: { user: any }) {
   );
 }
 
-function IncompleteProfileScreen({ user }: { user: any }) {
+function IncompleteProfileBanner({ user }: { user: any }) {
   const router = useRouter();
+  const [dismissed, setDismissed] = useState(false);
+  if (dismissed) return null;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white flex items-center justify-center p-4">
-      <div className="max-w-md w-full text-center">
-        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle className="w-10 h-10 text-green-600" />
-        </div>
-        <h1 className="font-dm-serif text-3xl text-brand-forest mb-3">You&apos;re Approved! 🎉</h1>
-        <p className="text-gray-600 mb-2">Congratulations, {user?.fullName?.split(' ')[0]}!</p>
-        <p className="text-gray-600 mb-8 leading-relaxed">
-          Your PIC application has been approved. Please complete your KYC and profile details
-          to activate your account and start earning.
+    <div className="mx-6 lg:mx-10 mt-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm">
+      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+        <CheckCircle className="w-5 h-5 text-green-600" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-green-800">🎉 Congratulations {user?.fullName?.split(' ')[0]}! Your application is approved.</p>
+        <p className="text-xs text-green-700 mt-0.5">
+          Complete your KYC &amp; profile to activate your referral code and start earning.
+          <span className="text-gray-500"> (Optional — you can do this later)</span>
         </p>
+      </div>
+      <div className="flex items-center gap-2 shrink-0">
         <button
           onClick={() => router.push('/complete-profile')}
-          className="w-full bg-brand-forest text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-forest/90 transition-all shadow-lg shadow-brand-forest/20 mb-4"
+          className="px-4 py-2 bg-brand-forest text-white text-xs font-semibold rounded-xl hover:bg-brand-forest/90 transition-colors flex items-center gap-1"
         >
-          Complete My Profile <ArrowRight className="w-5 h-5" />
+          Complete Profile <ArrowRight className="w-3.5 h-3.5" />
         </button>
         <button
-          onClick={async () => {
-            await api.post('/auth/logout');
-            useAuthStore.getState().logout();
-            window.location.href = '/login';
-          }}
-          className="text-sm text-red-500 hover:text-red-700 transition-colors"
+          onClick={() => setDismissed(true)}
+          className="p-1.5 text-green-500 hover:text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+          title="Dismiss"
         >
-          Sign out
+          <X className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -145,9 +145,8 @@ function IncompleteProfileScreen({ user }: { user: any }) {
 function StatusStep({ done, active, label }: { done?: boolean; active?: boolean; label: string }) {
   return (
     <div className="flex items-center gap-3">
-      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-        done ? 'bg-green-500' : active ? 'bg-yellow-400 animate-pulse' : 'bg-gray-200'
-      }`}>
+      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${done ? 'bg-green-500' : active ? 'bg-yellow-400 animate-pulse' : 'bg-gray-200'
+        }`}>
         {done && <CheckCircle className="w-4 h-4 text-white" />}
         {active && <Clock className="w-3 h-3 text-white" />}
       </div>
@@ -225,10 +224,11 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  // Status-based screens (no sidebar for non-active users)
+  // Status-based screens (no sidebar for blocked users)
   if (user.status === 'PENDING') return <PendingScreen user={user} />;
   if (user.status === 'REJECTED') return <RejectedScreen user={user} />;
-  if (user.status === 'APPROVED' && !user.profileCompleted) return <IncompleteProfileScreen user={user} />;
+  // APPROVED users with incomplete profile get full dashboard + optional banner
+  const showIncompleteProfileBanner = user.status === 'APPROVED' && !user.profileCompleted;
 
   // ─── Full Dashboard (ACTIVE users only) ─────────
   const showPolicyModal = user.profileCompleted && user.status === 'ACTIVE' && user.isPolicyAccepted === false;
@@ -251,10 +251,10 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-gray-900 flex">
       {showPolicyModal && (
-        <PolicyModal 
+        <PolicyModal
           onAccept={() => {
             initAuth(); // Refetches user data to update isPolicyAccepted
-          }} 
+          }}
         />
       )}
 
@@ -270,13 +270,13 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
       <aside className={`fixed lg:sticky top-0 left-0 h-screen w-64 bg-white border-r border-brand-sage/30 shadow-[4px_0_24px_rgba(45,80,22,0.02)] z-50 transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="h-20 flex items-center justify-between px-6 border-b border-brand-sage/20 bg-gradient-to-r from-brand-forest/5 to-transparent">
           <div className="flex items-center gap-2.5">
-              <div className="bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
-                <Image src="/logo_1.jpg" alt="U-Turn4Nature" width={40} height={40} className="object-contain w-9 h-9 rounded-full" />
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-brand-forest leading-tight">U-Turn4Nature</span>
-                <span className="block text-[9px] text-pink-500 font-semibold leading-tight">PIC Portal</span>
-              </div>
+            <div className="bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+              <Image src="/logo_1.jpg" alt="U-Turn4Nature" width={40} height={40} className="object-contain w-9 h-9 rounded-full" />
+            </div>
+            <div>
+              <span className="block text-xs font-bold text-brand-forest leading-tight">U-Turn4Nature</span>
+              <span className="block text-[9px] text-pink-500 font-semibold leading-tight">PIC Portal</span>
+            </div>
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="lg:hidden text-brand-forest/50">
             <X className="w-5 h-5" />
@@ -342,11 +342,11 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
             <Link href="/dashboard/profile" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
               <div className="w-10 h-10 rounded-full bg-brand-forest flex items-center justify-center text-white font-bold shadow-md overflow-hidden">
                 {user?.profileImage ? (
-                  <Image 
-                    src={user.profileImage.startsWith('http') ? user.profileImage : `${BACKEND_URL}${user.profileImage}`} 
-                    alt="Profile" 
-                    width={40} 
-                    height={40} 
+                  <Image
+                    src={user.profileImage.startsWith('http') ? user.profileImage : `${BACKEND_URL}${user.profileImage}`}
+                    alt="Profile"
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                     unoptimized
                   />
@@ -361,6 +361,9 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </header>
+
+        {/* Incomplete Profile Banner — optional reminder for APPROVED users */}
+        {showIncompleteProfileBanner && <IncompleteProfileBanner user={user} />}
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6 lg:p-10 relative z-10">

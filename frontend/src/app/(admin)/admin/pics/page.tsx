@@ -7,40 +7,31 @@ import { toast } from 'sonner';
 import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Trash2, Download } from 'lucide-react';
 import Link from 'next/link';
 
+import useSWR from 'swr';
+import { fetcher } from '@/lib/api';
+
 export default function AdminPICsPage() {
-  const [pics, setPics] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
-  const [meta, setMeta] = useState<any>(null);
   const [page, setPage] = useState(1);
 
-  const fetchPICs = async () => {
-    try {
-      setIsLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-      });
-      if (searchTerm) params.append('search', searchTerm);
-      if (statusFilter) params.append('status', statusFilter);
-
-      const res = await api.get(`/admin/pics?${params.toString()}`);
-      setPics(res.data.data);
-      setMeta(res.data.meta);
-    } catch (error) {
-      toast.error('Failed to fetch PIC partners');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Debounce search term to avoid spamming the API
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   useEffect(() => {
-    const delayDebounceFn = setTimeout(() => {
-      fetchPICs();
-    }, 500);
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, statusFilter, page]);
+    const timer = setTimeout(() => setDebouncedSearch(searchTerm), 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  const params = new URLSearchParams({ page: page.toString(), limit: '10' });
+  if (debouncedSearch) params.append('search', debouncedSearch);
+  if (statusFilter) params.append('status', statusFilter);
+
+  const { data, isLoading, mutate: fetchPICs } = useSWR(`/admin/pics?${params.toString()}`, fetcher, {
+    keepPreviousData: true,
+  });
+
+  const pics: any[] = data?.data || [];
+  const meta = data?.meta || null;
 
   const handleStatusAction = async (id: string, action: 'approve' | 'reject' | 'suspend') => {
     try {

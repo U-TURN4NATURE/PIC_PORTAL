@@ -37,7 +37,7 @@ export default function PICPolicyPage() {
 
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
+        setPdfUrl(url + '#toolbar=0');
       } catch (err: any) {
         setError(err?.message || 'Could not load the policy document. Please try again.');
         toast.error('Failed to load policy document');
@@ -68,17 +68,6 @@ export default function PICPolicyPage() {
             Review the official U-Turn4Nature Partner in Commerce policy
           </p>
         </div>
-        {pdfUrl && (
-          <a
-            href={pdfUrl}
-            download="PIC-Policy-Document.pdf"
-            id="download-policy-btn"
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand-forest text-white text-sm font-medium rounded-xl hover:bg-brand-forest/90 transition-colors shadow-sm shadow-brand-forest/20"
-          >
-            <Download className="w-4 h-4" />
-            Download PDF
-          </a>
-        )}
       </div>
 
       {/* PDF Viewer */}
@@ -124,14 +113,7 @@ export default function PICPolicyPage() {
               <div className="flex flex-col items-center justify-center py-16 gap-4 text-center">
                 <FileText className="w-12 h-12 text-gray-300" />
                 <p className="text-gray-600 font-medium">Your browser does not support inline PDF viewing.</p>
-                <a
-                  href={pdfUrl}
-                  download="PIC-Policy-Document.pdf"
-                  className="flex items-center gap-2 px-4 py-2 bg-brand-forest text-white text-sm font-medium rounded-xl"
-                >
-                  <Download className="w-4 h-4" />
-                  Download to View
-                </a>
+                <p className="text-gray-400 text-sm">Please use a modern browser (Chrome, Edge, Firefox) to view the policy document.</p>
               </div>
             </object>
           </>

@@ -12,10 +12,7 @@ const LAST_SEEN_KEY = 'pic_announcements_last_seen';
 export default function PICAnnouncementsPage() {
   const [search, setSearch] = useState('');
 
-  const { data, isLoading, refetch } = useApi<Announcement[]>(
-    () => api.get('/pic/announcements').then((r) => r.data.data || []),
-    []
-  );
+  const { data, isLoading, refetch } = useApi<Announcement[]>('/pic/announcements');
   const announcements = data ?? [];
 
   // Mark as "seen" when user opens this page
@@ -47,7 +44,7 @@ export default function PICAnnouncementsPage() {
           <p className="text-gray-500 mt-1 text-sm">Official updates from U-Turn4Nature</p>
         </div>
         <button
-          onClick={refetch}
+          onClick={() => refetch()}
           id="refresh-announcements-btn"
           className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-brand-forest border border-brand-sage/40 rounded-xl hover:bg-brand-sage/10 transition-colors"
         >

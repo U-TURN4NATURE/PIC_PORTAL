@@ -219,7 +219,9 @@ const inputClass = "w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 bg
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-brand-forest mb-1">{label}</label>
+      <label className="block text-sm font-medium text-brand-forest mb-1">
+        {label} <span className="text-red-500">*</span>
+      </label>
       {children}
       {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
     </div>

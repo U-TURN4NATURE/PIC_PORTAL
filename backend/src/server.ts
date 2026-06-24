@@ -54,6 +54,17 @@ const startServer = async () => {
       console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
     });
 
+    // 4. Database Keep-Alive (Prevent NeonDB scale-to-zero sleep)
+    // Runs every 4 minutes (240000 ms) to keep the connection active
+    setInterval(async () => {
+      try {
+        await prisma.$queryRaw`SELECT 1`;
+        // Keep-alive successful (silent)
+      } catch (e) {
+        console.warn('⚠️  DB Keep-alive ping failed:', e instanceof Error ? e.message : e);
+      }
+    }, 240000);
+
     // Handle NeonDB idle connection drops — log but don't crash
     prisma.$on('error' as never, (e: any) => {
       console.warn('⚠️  Prisma connection event:', e?.message || e);

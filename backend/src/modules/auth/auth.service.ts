@@ -161,8 +161,9 @@ export const completeProfileKYC = async (
   if (pic.status !== PICStatus.APPROVED && pic.status !== PICStatus.ACTIVE) {
     throw createError('Only approved users can complete their profile', 403);
   }
-  if (!files.aadhaarDocument) throw createError('Aadhaar document is required', 400);
-  if (!files.panDocument) throw createError('PAN document is required', 400);
+  // Aadhaar and PAN documents are optional based on the new flow
+  // if (!files.aadhaarDocument) throw createError('Aadhaar document is required', 400);
+  // if (!files.panDocument) throw createError('PAN document is required', 400);
 
   await prisma.pICPartner.update({
     where: { id: picId },

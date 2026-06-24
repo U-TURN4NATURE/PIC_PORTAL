@@ -26,8 +26,12 @@ export default function PICDashboardPage() {
       try {
         const statsRes = await api.get('/pic/dashboard');
         setStats(statsRes.data.data);
-      } catch {
-        toast.error('Failed to load dashboard data');
+      } catch (err: any) {
+        // Gracefully handle errors (e.g. no wallet yet for newly approved users)
+        if (err?.response?.status !== 404) {
+          toast.error('Failed to load dashboard data');
+        }
+        setStats({ wallet: {}, totalOrders: 0, recentOrders: [] });
       } finally {
         setIsLoading(false);
       }
@@ -136,9 +140,8 @@ export default function PICDashboardPage() {
                     <td className="px-6 py-4 font-medium">{formatCurrency(order.orderAmount)}</td>
                     <td className="px-6 py-4 font-bold text-brand-forest">+{formatCurrency(order.commissionAmount)}</td>
                     <td className="px-6 py-4">
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
-                        order.status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
-                      }`}>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${order.status === 'PAID' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-yellow-50 text-yellow-700 border-yellow-200'
+                        }`}>
                         {order.status}
                       </span>
                     </td>

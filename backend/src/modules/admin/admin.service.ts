@@ -14,47 +14,47 @@ import { parsePagination } from '../../utils/pagination.utils';
 // Admin Service — Business Logic
 // ─────────────────────────────────────────────────
 
+// Simple in-memory cache for dashboard stats (TTL: 5 minutes)
+let dashboardCache: { data: any; timestamp: number } = { data: null, timestamp: 0 };
+const CACHE_TTL = 5 * 60 * 1000;
+
 /**
  * Get dashboard analytics
  */
 export const getDashboardStats = async () => {
   const now = new Date();
+
+  // Return cached data if valid
+  if (dashboardCache.data && (now.getTime() - dashboardCache.timestamp < CACHE_TTL)) {
+    return dashboardCache.data;
+  }
+
   const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
 
-  const [
-    totalPICs,
-    activePICs,
-    pendingPICs,
-    rejectedPICs,
-    totalOrders,
-    paidOrders,
-    totalRevenue,
-    totalCommission,
-    recentPICs,
-    monthlyRevenue,
-    // Previous month comparison
-    prevMonthPICs,
-    prevMonthActivePICs,
-    prevMonthPendingPICs,
-    prevMonthOrders,
-    prevMonthRevenue,
-    prevMonthCommission,
-  ] = await Promise.all([
+  // Batch 1: Global PIC Counts
+  const [totalPICs, activePICs, pendingPICs, rejectedPICs, recentPICs] = await Promise.all([
     prisma.pICPartner.count(),
     prisma.pICPartner.count({ where: { status: { in: [PICStatus.APPROVED, PICStatus.ACTIVE] } } }),
     prisma.pICPartner.count({ where: { status: PICStatus.PENDING } }),
     prisma.pICPartner.count({ where: { status: PICStatus.REJECTED } }),
-    prisma.order.count(),
-    prisma.order.count({ where: { status: 'PAID' } }),
-    prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID' } }),
-    prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID' } }),
     prisma.pICPartner.findMany({
       take: 5,
       orderBy: { createdAt: 'desc' },
       select: { id: true, fullName: true, email: true, status: true, createdAt: true },
     }),
-    // Monthly revenue for the last 6 months
+  ]);
+
+  // Batch 2: Global Orders & Revenue
+  const [totalOrders, paidOrders, totalRevenue, totalCommission] = await Promise.all([
+    prisma.order.count(),
+    prisma.order.count({ where: { status: 'PAID' } }),
+    prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID' } }),
+    prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID' } }),
+  ]);
+
+  // Batch 3: Monthly Chart & Prev Month PICs
+  const [monthlyRevenue, prevMonthPICs, prevMonthActivePICs, prevMonthPendingPICs] = await Promise.all([
     prisma.$queryRaw<{ month: string; revenue: number; commission: number }[]>`
       SELECT 
         TO_CHAR(DATE_TRUNC('month', "createdAt"), 'Mon YYYY') AS month,
@@ -65,20 +65,24 @@ export const getDashboardStats = async () => {
       GROUP BY DATE_TRUNC('month', "createdAt")
       ORDER BY DATE_TRUNC('month', "createdAt") ASC
     `,
-    // Previous month PICs
     prisma.pICPartner.count({ where: { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
     prisma.pICPartner.count({ where: { status: { in: [PICStatus.APPROVED, PICStatus.ACTIVE] }, approvedAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
     prisma.pICPartner.count({ where: { status: PICStatus.PENDING, createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+  ]);
+
+  // Batch 4: Prev Month Orders & Current Month Stats
+  const [
+    prevMonthOrders, prevMonthRevenue, prevMonthCommission,
+    thisMonthPICs, thisMonthOrders, thisMonthRevenue, thisMonthCommission
+  ] = await Promise.all([
     prisma.order.count({ where: { createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
     prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
     prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfLastMonth, lt: startOfThisMonth } } }),
+    prisma.pICPartner.count({ where: { createdAt: { gte: startOfThisMonth } } }),
+    prisma.order.count({ where: { createdAt: { gte: startOfThisMonth } } }),
+    prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } }),
+    prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } }),
   ]);
-
-  // Current month counts
-  const thisMonthPICs = await prisma.pICPartner.count({ where: { createdAt: { gte: startOfThisMonth } } });
-  const thisMonthOrders = await prisma.order.count({ where: { createdAt: { gte: startOfThisMonth } } });
-  const thisMonthRevenue = await prisma.order.aggregate({ _sum: { orderAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } });
-  const thisMonthCommission = await prisma.order.aggregate({ _sum: { commissionAmount: true }, where: { status: 'PAID', createdAt: { gte: startOfThisMonth } } });
 
   const calcTrend = (current: number, prev: number) => {
     if (prev === 0) return current > 0 ? { change: 100, trend: 'up' } : { change: 0, trend: 'flat' };
@@ -86,7 +90,7 @@ export const getDashboardStats = async () => {
     return { change: Math.abs(pct), trend: pct > 0 ? 'up' : pct < 0 ? 'down' : 'flat' };
   };
 
-  return {
+  const responseData = {
     stats: {
       totalPICs,
       activePICs,
@@ -114,8 +118,24 @@ export const getDashboardStats = async () => {
     recentPICs,
     monthlyRevenue,
   };
+
+  // Update Cache
+  dashboardCache = { data: responseData, timestamp: now.getTime() };
+
+  return responseData;
 };
 
+
+const CACHE_TTL_SHORT = 15 * 1000; // 15 seconds
+
+const cacheGet = (key: string) => {
+  const item = (global as any)[key];
+  if (item && Date.now() - item.timestamp < CACHE_TTL_SHORT) return item.data;
+  return null;
+};
+const cacheSet = (key: string, data: any) => {
+  (global as any)[key] = { data, timestamp: Date.now() };
+};
 
 /**
  * Get all PICs with search, filter, and pagination
@@ -126,6 +146,10 @@ export const getAllPICs = async (
   page = 1,
   limit = 10
 ) => {
+  const cacheKey = `admin_pics_${search}_${status}_${page}_${limit}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
   const { skip } = parsePagination(String(page), String(limit));
 
   const where = {
@@ -164,7 +188,9 @@ export const getAllPICs = async (
     prisma.pICPartner.count({ where }),
   ]);
 
-  return { pics, total };
+  const result = { pics, total };
+  cacheSet(cacheKey, result);
+  return result;
 };
 
 /**
@@ -425,6 +451,10 @@ export const getAllOrders = async (
   page = 1,
   limit = 10
 ) => {
+  const cacheKey = `admin_orders_${picId}_${status}_${startDate}_${endDate}_${page}_${limit}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
   const { skip } = parsePagination(String(page), String(limit));
 
   const where: Record<string, unknown> = {
@@ -453,13 +483,19 @@ export const getAllOrders = async (
     prisma.order.count({ where }),
   ]);
 
-  return { orders, total };
+  const result = { orders, total };
+  cacheSet(cacheKey, result);
+  return result;
 };
 
 /**
  * Get all payouts
  */
 export const getAllPayouts = async (status?: PayoutStatus, page = 1, limit = 10) => {
+  const cacheKey = `admin_payouts_${status}_${page}_${limit}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
   const { skip } = parsePagination(String(page), String(limit));
   const where = status ? { status } : {};
 
@@ -478,7 +514,9 @@ export const getAllPayouts = async (status?: PayoutStatus, page = 1, limit = 10)
     prisma.payout.count({ where }),
   ]);
 
-  return { payouts, total };
+  const result = { payouts, total };
+  cacheSet(cacheKey, result);
+  return result;
 };
 
 /**

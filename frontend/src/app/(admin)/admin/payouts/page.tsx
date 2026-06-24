@@ -6,35 +6,22 @@ import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Wallet, CheckCircle, Clock } from 'lucide-react';
 
+import useSWR from 'swr';
+import { fetcher } from '@/lib/api';
+
 export default function AdminPayoutsPage() {
-  const [payouts, setPayouts] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [meta, setMeta] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('');
 
-  const fetchPayouts = async () => {
-    try {
-      setIsLoading(true);
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '10',
-      });
-      if (statusFilter) params.append('status', statusFilter);
+  const params = new URLSearchParams({ page: page.toString(), limit: '10' });
+  if (statusFilter) params.append('status', statusFilter);
 
-      const res = await api.get(`/admin/payouts?${params.toString()}`);
-      setPayouts(res.data.data);
-      setMeta(res.data.meta);
-    } catch (error) {
-      toast.error('Failed to fetch payouts');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data, isLoading, mutate: fetchPayouts } = useSWR(`/admin/payouts?${params.toString()}`, fetcher, {
+    keepPreviousData: true,
+  });
 
-  useEffect(() => {
-    fetchPayouts();
-  }, [page, statusFilter]);
+  const payouts: any[] = data?.data || [];
+  const meta = data?.meta || null;
 
   const handleMarkPaid = async (id: string) => {
     const transactionRef = window.prompt('Enter transaction reference/ID (optional):');
