@@ -166,6 +166,7 @@ export default function ReferralPage() {
 
   // Add Referral Form State
   const [form, setForm] = useState({ personName: '', personPhone: '', personEmail: '', handledBy: '', address: '', pincode: '', city: '' });
+  const [cityOptions, setCityOptions] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [bulkUploading, setBulkUploading] = useState(false);
 
@@ -185,13 +186,19 @@ export default function ReferralPage() {
           const res = await fetch(`https://api.postalpincode.in/pincode/${form.pincode}`);
           const data = await res.json();
           if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
-            setForm(f => ({ ...f, city: data[0].PostOffice[0].District }));
+            const districts = Array.from(new Set(data[0].PostOffice.map((po: any) => po.District))) as string[];
+            setCityOptions(districts);
+            // Auto-select first option
+            setForm(f => ({ ...f, city: districts[0] || '' }));
           } else {
+            setCityOptions([]);
             setForm(f => ({ ...f, city: '' }));
           }
         } catch (e) {
           console.error(e);
         }
+      } else {
+        setCityOptions([]);
       }
     };
     fetchCity();
@@ -453,13 +460,28 @@ export default function ReferralPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
-                  <input
-                    type="text"
-                    value={form.city}
-                    onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                    placeholder="Auto-fetched"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-gray-50"
-                  />
+                  {cityOptions.length > 0 ? (
+                    <div className="relative">
+                      <select
+                        value={form.city}
+                        onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                        className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-white appearance-none"
+                      >
+                        {cityOptions.map((opt, i) => (
+                          <option key={i} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    </div>
+                  ) : (
+                    <input
+                      type="text"
+                      value={form.city}
+                      onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
+                      placeholder="Auto-fetched or Type manually"
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-gray-50"
+                    />
+                  )}
                 </div>
               </div>
 
