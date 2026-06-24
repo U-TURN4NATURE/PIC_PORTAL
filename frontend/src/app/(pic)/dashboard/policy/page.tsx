@@ -20,16 +20,33 @@ export default function PICPolicyPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
+
   useEffect(() => {
     const loadPolicies = async () => {
       setIsLoading(true);
       setError(null);
       try {
         const res = await api.get('/pic/policies');
-        const data = res.data.data; // assuming successResponse
-        setPolicies(data);
-        if (data && data.length > 0) {
-          setActivePolicy(data[0]);
+        const data = res.data.data || []; 
+        
+        // Add static default policy if no PIC_POLICY exists
+        const hasPicPolicy = data.some((p: PolicyDocument) => p.type === 'PIC_POLICY');
+        const policiesList = hasPicPolicy ? data : [
+          {
+            id: 'STATIC_PIC_POLICY',
+            title: 'PIC Policy',
+            type: 'PIC_POLICY',
+            fileUrl: '/pic/policy-document',
+            version: '1.0',
+            isRequired: true
+          },
+          ...data
+        ];
+        
+        setPolicies(policiesList);
+        if (policiesList.length > 0) {
+          setActivePolicy(policiesList[0]);
         }
       } catch (err: any) {
         const msg = err?.response?.data?.message || err?.message || 'Could not load the policies. Please try again.';
@@ -42,6 +59,43 @@ export default function PICPolicyPage() {
 
     loadPolicies();
   }, []);
+
+  // Fetch blob if active policy requires auth
+  useEffect(() => {
+    if (!activePolicy) return;
+    
+    // Revoke previous blob url
+    return () => {
+      if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
+    };
+  }, [activePolicy]);
+
+  useEffect(() => {
+    const loadPdfBlob = async () => {
+      if (!activePolicy) return;
+      
+      const isProtected = activePolicy.fileUrl.startsWith('/pic') || activePolicy.fileUrl.startsWith('/api');
+      if (!isProtected) {
+        setPdfBlobUrl(activePolicy.fileUrl);
+        return;
+      }
+      
+      setIsLoading(true);
+      try {
+        const response = await api.get(activePolicy.fileUrl, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        setPdfBlobUrl(url);
+      } catch (err) {
+        console.error('Failed to load protected PDF', err);
+        setError('Failed to load the policy document content.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadPdfBlob();
+  }, [activePolicy]);
 
   return (
     <div className="space-y-6">
@@ -113,9 +167,9 @@ export default function PICPolicyPage() {
           </div>
         )}
 
-        {!isLoading && activePolicy && (
+        {!isLoading && activePolicy && pdfBlobUrl && (
           <iframe
-            src={`${activePolicy.fileUrl}#toolbar=0&navpanes=0`}
+            src={`${pdfBlobUrl}#toolbar=0&navpanes=0`}
             className="w-full"
             style={{ height: 'calc(100vh - 300px)', minHeight: '600px' }}
             title={activePolicy.title}

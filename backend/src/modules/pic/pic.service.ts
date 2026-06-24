@@ -173,17 +173,18 @@ export const updateProfile = async (picId: string, data: any) => {
 };
 
 export const acceptPolicy = async (picId: string, ipAddress?: string, userAgent?: string) => {
-  // Find all current active/required policies to log them
   const activePolicies = await prisma.policyDocument.findMany({
     where: { isRequired: true }
   });
 
-  const acceptanceLogs = activePolicies.map(doc => ({
-    picId,
-    documentId: doc.id,
-    ipAddress: ipAddress || null,
-    userAgent: userAgent || null,
-  }));
+  const acceptanceLogs = activePolicies
+    .filter(doc => doc.id !== 'STATIC_PIC_POLICY') // Prevent FK constraint failure on static policy
+    .map(doc => ({
+      picId,
+      documentId: doc.id,
+      ipAddress: ipAddress || null,
+      userAgent: userAgent || null,
+    }));
 
   const pic = await prisma.$transaction(async (tx) => {
     if (acceptanceLogs.length > 0) {

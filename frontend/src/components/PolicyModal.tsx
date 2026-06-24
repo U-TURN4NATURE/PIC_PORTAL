@@ -26,16 +26,32 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
   const [loadState, setLoadState] = useState<LoadState>('loading');
   const [policies, setPolicies] = useState<PolicyDocument[]>([]);
   const [activePolicy, setActivePolicy] = useState<PolicyDocument | null>(null);
+  const [pdfBlobUrl, setPdfBlobUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPolicies = async () => {
       try {
         setLoadState('loading');
         const res = await api.get('/pic/policies');
-        const data = res.data.data;
-        setPolicies(data);
-        if (data && data.length > 0) {
-          setActivePolicy(data[0]);
+        const data = res.data.data || [];
+        
+        // Add static default policy if no PIC_POLICY exists
+        const hasPicPolicy = data.some((p: PolicyDocument) => p.type === 'PIC_POLICY');
+        const policiesList = hasPicPolicy ? data : [
+          {
+            id: 'STATIC_PIC_POLICY',
+            title: 'PIC Policy',
+            type: 'PIC_POLICY',
+            fileUrl: '/pic/policy-document',
+            version: '1.0',
+            isRequired: true
+          },
+          ...data
+        ];
+        
+        setPolicies(policiesList);
+        if (policiesList.length > 0) {
+          setActivePolicy(policiesList[0]);
         }
         setLoadState('ready');
       } catch (err: any) {
@@ -46,6 +62,42 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
 
     fetchPolicies();
   }, []);
+
+  // Fetch blob if active policy requires auth
+  useEffect(() => {
+    if (!activePolicy) return;
+    
+    // Revoke previous blob url
+    return () => {
+      if (pdfBlobUrl) URL.revokeObjectURL(pdfBlobUrl);
+    };
+  }, [activePolicy]);
+
+  useEffect(() => {
+    const loadPdfBlob = async () => {
+      if (!activePolicy) return;
+      
+      const isProtected = activePolicy.fileUrl.startsWith('/pic') || activePolicy.fileUrl.startsWith('/api');
+      if (!isProtected) {
+        setPdfBlobUrl(activePolicy.fileUrl);
+        return;
+      }
+      
+      setLoadState('loading');
+      try {
+        const response = await api.get(activePolicy.fileUrl, { responseType: 'blob' });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = URL.createObjectURL(blob);
+        setPdfBlobUrl(url);
+        setLoadState('ready');
+      } catch (err) {
+        console.error('Failed to load protected PDF', err);
+        setLoadState('error');
+      }
+    };
+    
+    loadPdfBlob();
+  }, [activePolicy]);
 
   const handleAccept = async () => {
     try {
@@ -129,9 +181,9 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
             )}
 
             {/* PDF loaded */}
-            {loadState === 'ready' && activePolicy && (
+            {loadState === 'ready' && activePolicy && pdfBlobUrl && (
               <iframe
-                src={`${activePolicy.fileUrl}#toolbar=0&navpanes=0`}
+                src={`${pdfBlobUrl}#toolbar=0&navpanes=0`}
                 className="w-full h-full min-h-[400px]"
                 title={activePolicy.title}
               />
