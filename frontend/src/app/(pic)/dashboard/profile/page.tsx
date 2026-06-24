@@ -39,6 +39,8 @@ export default function ProfilePage() {
         bankName: data.bankName || '',
         branchName: data.branchName || '',
         instagramProfile: data.instagramProfile || '',
+        facebookProfile: data.facebookProfile || '',
+        linkedinProfile: data.linkedinProfile || '',
         address: data.address || '',
         city: data.city || '',
         state: data.state || '',
@@ -258,7 +260,7 @@ export default function ProfilePage() {
 
         {profile?.referralCode && (
           <div className="ml-auto text-right shrink-0">
-            <p className="text-white/60 text-xs">Referral Code</p>
+            <p className="text-white/60 text-xs">ID</p>
             <p className="text-brand-gold font-dm-serif text-2xl font-bold tracking-widest">{profile.referralCode}</p>
           </div>
         )}
@@ -389,7 +391,6 @@ export default function ProfilePage() {
         <div className="p-6 grid md:grid-cols-2 gap-5">
           {[
             { field: 'upiId', label: 'UPI ID', placeholder: 'yourname@upi' },
-            { field: 'instagramProfile', label: 'Instagram Profile URL', placeholder: 'https://instagram.com/...' },
             { field: 'bankAccountName', label: 'Bank Account Name', placeholder: 'Name on account' },
             { field: 'bankName', label: 'Bank Name', placeholder: 'e.g. State Bank of India' },
             { field: 'bankAccountNumber', label: 'Bank Account Number', placeholder: 'Enter account number' },
@@ -404,6 +405,29 @@ export default function ProfilePage() {
                 placeholder={placeholder}
                 disabled={!!profile?.pendingBankDetails}
                 className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm disabled:bg-gray-50 disabled:text-gray-500"
+              />
+            </div>
+          ))}
+        </div>
+        <div className="p-6 grid md:grid-cols-2 gap-5 border-t border-brand-sage/20">
+          <div className="md:col-span-2">
+             <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+               <Link className="w-4 h-4 text-brand-forest" /> Social Media Details
+               <span className="text-xs text-gray-400 font-normal ml-1">(Editable)</span>
+             </h3>
+          </div>
+          {[
+            { field: 'instagramProfile', label: 'Instagram Profile URL', placeholder: 'https://instagram.com/...' },
+            { field: 'facebookProfile', label: 'Facebook Profile URL', placeholder: 'https://facebook.com/...' },
+            { field: 'linkedinProfile', label: 'LinkedIn Profile URL', placeholder: 'https://linkedin.com/in/...' },
+          ].map(({ field, label, placeholder }) => (
+            <div key={field}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+              <input
+                value={form[field] || ''}
+                onChange={e => setForm((f: any) => ({ ...f, [field]: e.target.value }))}
+                placeholder={placeholder}
+                className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
               />
             </div>
           ))}

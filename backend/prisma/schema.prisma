@@ -150,6 +150,8 @@ model PICPartner {
   preferredDistrict String?
   availability      String?
   instagramProfile  String?
+  facebookProfile   String?
+  linkedinProfile   String?
   resumeDocument    String?    // file path (optional)
 
   // Auth Provider
