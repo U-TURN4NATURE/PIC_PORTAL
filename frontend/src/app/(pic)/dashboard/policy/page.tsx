@@ -2,9 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import api from '@/lib/api';
-import { toast } from 'sonner';
-import { FileText, Download, AlertCircle, Loader2, ExternalLink } from 'lucide-react';
-import { getFileUrl } from '@/lib/api';
 
 export default function PICPolicyPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
@@ -17,29 +14,18 @@ export default function PICPolicyPage() {
       setIsLoading(true);
       setError(null);
       try {
-        // Fetch the policy PDF as a Blob so we can serve it inline securely
-        const isProduction =
-          typeof window !== 'undefined' &&
-          !window.location.hostname.includes('localhost');
-        const baseUrl = isProduction
-          ? 'https://picportal-production-a624.up.railway.app/api'
-          : 'http://localhost:5000/api';
-
-        const response = await fetch(`${baseUrl}/pic/policy-document`, {
-          method: 'GET',
-          credentials: 'include',
+        // Use the api instance (axios) so the JWT Authorization header is sent automatically
+        // Raw fetch() doesn't attach the Bearer token and fails in production (cross-domain cookies blocked)
+        const response = await api.get('/pic/policy-document', {
+          responseType: 'blob',
         });
 
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data?.message || 'Failed to load policy document');
-        }
-
-        const blob = await response.blob();
+        const blob = new Blob([response.data], { type: 'application/pdf' });
         const url = URL.createObjectURL(blob);
         setPdfUrl(url + '#toolbar=0');
       } catch (err: any) {
-        setError(err?.message || 'Could not load the policy document. Please try again.');
+        const msg = err?.response?.data?.message || err?.message || 'Could not load the policy document. Please try again.';
+        setError(msg);
         toast.error('Failed to load policy document');
       } finally {
         setIsLoading(false);

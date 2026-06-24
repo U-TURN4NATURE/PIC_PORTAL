@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Wallet, CheckCircle, Clock } from 'lucide-react';
 
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api';
+import { paginatedFetcher } from '@/lib/api';
 
 export default function AdminPayoutsPage() {
   const [page, setPage] = useState(1);
@@ -16,7 +16,7 @@ export default function AdminPayoutsPage() {
   const params = new URLSearchParams({ page: page.toString(), limit: '10' });
   if (statusFilter) params.append('status', statusFilter);
 
-  const { data, isLoading, mutate: fetchPayouts } = useSWR(`/admin/payouts?${params.toString()}`, fetcher, {
+  const { data, isLoading, mutate: fetchPayouts } = useSWR(`/admin/payouts?${params.toString()}`, paginatedFetcher, {
     keepPreviousData: true,
   });
 

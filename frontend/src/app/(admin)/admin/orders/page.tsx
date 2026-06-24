@@ -7,12 +7,12 @@ import { toast } from 'sonner';
 import { ShoppingCart } from 'lucide-react';
 
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api';
+import { paginatedFetcher } from '@/lib/api';
 
 export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
 
-  const { data, isLoading, mutate: fetchOrders } = useSWR(`/admin/orders?page=${page}&limit=10`, fetcher, {
+  const { data, isLoading, mutate: fetchOrders } = useSWR(`/admin/orders?page=${page}&limit=10`, paginatedFetcher, {
     keepPreviousData: true,
   });
 

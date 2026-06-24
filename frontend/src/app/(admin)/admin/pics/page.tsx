@@ -8,7 +8,7 @@ import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Trash2, Download 
 import Link from 'next/link';
 
 import useSWR from 'swr';
-import { fetcher } from '@/lib/api';
+import { paginatedFetcher } from '@/lib/api';
 
 export default function AdminPICsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,7 +26,7 @@ export default function AdminPICsPage() {
   if (debouncedSearch) params.append('search', debouncedSearch);
   if (statusFilter) params.append('status', statusFilter);
 
-  const { data, isLoading, mutate: fetchPICs } = useSWR(`/admin/pics?${params.toString()}`, fetcher, {
+  const { data, isLoading, mutate: fetchPICs } = useSWR(`/admin/pics?${params.toString()}`, paginatedFetcher, {
     keepPreviousData: true,
   });
 
