@@ -301,3 +301,12 @@ export const getPICPolicyLogs = async (req: Request, res: Response, next: NextFu
     next(error);
   }
 };
+
+export const getAllPolicyLogs = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const logs = await adminService.getAllPolicyLogs();
+    res.status(200).json(successResponse(logs));
+  } catch (error) {
+    next(error);
+  }
+};

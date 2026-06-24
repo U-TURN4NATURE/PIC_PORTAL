@@ -823,3 +823,15 @@ export const getPICPolicyLogs = async (picId: string) => {
     orderBy: { acceptedAt: 'desc' }
   });
 };
+
+export const getAllPolicyLogs = async () => {
+  return prisma.policyAcceptanceLog.findMany({
+    include: {
+      document: true,
+      pic: {
+        select: { fullName: true, email: true, phone: true }
+      }
+    },
+    orderBy: { acceptedAt: 'desc' }
+  });
+};

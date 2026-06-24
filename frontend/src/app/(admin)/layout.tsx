@@ -72,6 +72,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
     { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+    { name: 'Legal & Policies', href: '/admin/policies', icon: ShieldCheckIcon },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 

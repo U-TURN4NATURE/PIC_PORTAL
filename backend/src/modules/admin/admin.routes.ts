@@ -46,6 +46,7 @@ router.delete('/announcements/:id', adminController.deleteAnnouncement);
 // Policies
 import upload from '../../middleware/upload.middleware';
 router.get('/policies', adminController.getPolicies);
+router.get('/policies/logs', adminController.getAllPolicyLogs);
 router.post('/policies/upload', upload.single('document'), adminController.uploadPolicy);
 router.post('/policies/reset-acceptance', adminController.resetPolicyAcceptance);
 
