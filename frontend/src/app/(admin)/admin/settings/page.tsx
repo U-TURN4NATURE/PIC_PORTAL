@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Store, Loader2, Save, Key, Link as LinkIcon, ShieldCheck } from 'lucide-react';
+import { Store, Loader2, Save, Key, Link as LinkIcon, ShieldCheck, AlertCircle } from 'lucide-react';
 
 export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true);
