@@ -24,8 +24,8 @@ const registerSchema = z.object({
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
   pincode: z.string().regex(/^\d{6}$/, 'Enter a valid 6-digit pincode'),
-  policyAccepted: z.literal(true, {
-    errorMap: () => ({ message: "You must read and accept the policy document" }),
+  policyAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must read and accept the policy document",
   }),
 });
 

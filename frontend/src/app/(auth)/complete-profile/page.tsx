@@ -23,8 +23,8 @@ const step2Schema = z.object({
   ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Invalid IFSC (e.g. SBIN0001234)'),
   branchName: z.string().min(2, 'Branch name required'),
   upiId: z.string().optional().or(z.literal('')),
-  policyAccepted: z.literal(true, {
-    errorMap: () => ({ message: "You must read and accept the Policy Document" }),
+  policyAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must read and accept the Policy Document",
   }),
 });
 
@@ -167,7 +167,7 @@ export default function CompleteProfilePage() {
     try {
       setIsLoading(true);
       const formData = new FormData();
-      Object.entries(data).forEach(([k, v]) => v && formData.append(k, v));
+      Object.entries(data).forEach(([k, v]) => v && formData.append(k, String(v)));
       if (aadhaarFile.file) formData.append('aadhaarDocument', aadhaarFile.file);
       if (panFile.file) formData.append('panDocument', panFile.file);
 
@@ -189,7 +189,7 @@ export default function CompleteProfilePage() {
     try {
       setIsLoading(true);
       const formData = new FormData();
-      Object.entries(data).forEach(([k, v]) => v && formData.append(k, v));
+      Object.entries(data).forEach(([k, v]) => v && formData.append(k, String(v)));
       if (resumeFile.file) formData.append('resumeDocument', resumeFile.file);
 
       await api.post('/auth/complete-profile/experience', formData, {
