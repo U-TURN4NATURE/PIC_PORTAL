@@ -28,6 +28,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import { useState, useEffect, useCallback } from 'react';
 import PolicyModal from '@/components/PolicyModal';
+import KycModal from '@/components/KycModal';
 import NotificationBell from '@/components/NotificationBell';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -119,7 +120,7 @@ function IncompleteProfileBanner({ user }: { user: any }) {
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-green-800">🎉 Congratulations {user?.fullName?.split(' ')[0]}! Your application is approved.</p>
         <p className="text-xs text-green-700 mt-0.5">
-          Complete your KYC &amp; profile to activate your referral code and start earning.
+          Complete your KYC, profile, and read the policy document to activate your referral code and start earning.
           <span className="text-gray-500"> (Optional — you can do this later)</span>
         </p>
       </div>
@@ -232,6 +233,11 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
 
   // ─── Full Dashboard (ACTIVE users only) ─────────
   const showPolicyModal = user.profileCompleted && user.status === 'ACTIVE' && user.isPolicyAccepted === false;
+  
+  // Show KYC modal if user is APPROVED/ACTIVE and is missing either PAN or Aadhaar
+  // Only show it if PolicyModal is NOT showing so they don't overlap
+  const showKycModal = !showPolicyModal && (!user.panCard || !user.aadhaarNumber);
+
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Referrals', href: '/dashboard/referral', icon: User },
@@ -254,6 +260,14 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
         <PolicyModal
           onAccept={() => {
             initAuth(); // Refetches user data to update isPolicyAccepted
+          }}
+        />
+      )}
+      
+      {showKycModal && (
+        <KycModal
+          onSuccess={() => {
+            initAuth(); // Refetches user data to get updated KYC info
           }}
         />
       )}

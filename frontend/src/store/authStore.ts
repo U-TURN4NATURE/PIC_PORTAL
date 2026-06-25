@@ -14,6 +14,8 @@ interface User {
   referralCode?: string;
   rejectionReason?: string;
   isPolicyAccepted?: boolean;
+  panCard?: string;
+  aadhaarNumber?: string;
 }
 
 interface AuthState {

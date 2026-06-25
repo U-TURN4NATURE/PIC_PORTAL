@@ -23,6 +23,9 @@ const step2Schema = z.object({
   ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Invalid IFSC (e.g. SBIN0001234)'),
   branchName: z.string().min(2, 'Branch name required'),
   upiId: z.string().optional().or(z.literal('')),
+  policyAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must read and accept the Policy Document" }),
+  }),
 });
 
 // ─── Step 3 Schema ───────────────────────────────
@@ -210,10 +213,10 @@ export default function CompleteProfilePage() {
         <div className="text-center mb-8 relative">
           <button
             onClick={() => router.push('/dashboard')}
-            className="absolute top-0 right-0 p-2 text-brand-olive hover:text-brand-forest hover:bg-brand-sage/10 rounded-full transition-colors"
-            title="Skip for now"
+            className="absolute top-0 right-0 px-4 py-2 text-sm font-semibold text-brand-forest bg-brand-sage/20 hover:bg-brand-sage/40 rounded-full transition-colors flex items-center gap-1"
+            title="Skip to Homepage"
           >
-            <X className="w-6 h-6" />
+            Skip to Homepage <ChevronRight className="w-4 h-4" />
           </button>
           <div className="flex justify-center mb-3 mt-4">
             <div className="bg-brand-forest text-white p-3 rounded-full shadow-lg">
@@ -221,7 +224,13 @@ export default function CompleteProfilePage() {
             </div>
           </div>
           <h1 className="font-dm-serif text-3xl text-brand-forest">Complete Your Profile</h1>
-          <p className="text-brand-olive text-sm mt-2">Complete your KYC and accept the PIC Policy to become fully approved and start earning.</p>
+          <p className="text-brand-olive text-sm mt-2">
+            Complete your KYC and accept the PIC Policy to become fully approved and start earning.
+            <br />
+            <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest font-semibold hover:underline mt-1 inline-block">
+              Please read our Policy Document
+            </a>
+          </p>
         </div>
 
         {/* Progress Steps */}
@@ -319,14 +328,46 @@ export default function CompleteProfilePage() {
                 </div>
               </section>
 
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-brand-forest text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-forest/90 transition-all disabled:opacity-70 shadow-lg shadow-brand-forest/20"
-              >
-                {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
-                {isLoading ? 'Saving...' : 'Save & Continue to Step 3'}
-              </button>
+              <div className="flex items-start gap-3 py-2">
+                <div className="flex items-center h-5">
+                  <input
+                    id="policyAccepted"
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-gray-300 text-brand-forest focus:ring-brand-forest/50 bg-white"
+                    {...form2.register('policyAccepted')}
+                  />
+                </div>
+                <div className="text-sm">
+                  <label htmlFor="policyAccepted" className="font-medium text-gray-700">
+                    I have read and agree to the{' '}
+                    <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest hover:underline font-semibold">
+                      Policy Document
+                    </a>
+                    . <span className="text-red-500">*</span>
+                  </label>
+                  {form2.formState.errors.policyAccepted && (
+                    <p className="text-red-500 text-xs mt-1">{form2.formState.errors.policyAccepted.message}</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard')}
+                  className="px-6 py-3 rounded-xl border border-brand-forest/30 text-brand-forest font-medium hover:bg-brand-sage/10 transition-colors"
+                >
+                  ← Back
+                </button>
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="flex-1 bg-brand-forest text-white py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 hover:bg-brand-forest/90 transition-all disabled:opacity-70 shadow-lg shadow-brand-forest/20"
+                >
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ChevronRight className="w-5 h-5" />}
+                  {isLoading ? 'Saving...' : 'Save & Continue to Step 3'}
+                </button>
+              </div>
             </form>
           )}
 
@@ -435,13 +476,20 @@ export default function CompleteProfilePage() {
                 />
               </section>
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
                   type="button"
                   onClick={() => setCurrentStep(2)}
                   className="px-6 py-3 rounded-xl border border-brand-forest/30 text-brand-forest font-medium hover:bg-brand-sage/10 transition-colors"
                 >
                   ← Back
+                </button>
+                <button
+                  type="button"
+                  onClick={() => router.push('/dashboard')}
+                  className="px-6 py-3 rounded-xl border border-brand-forest/30 text-brand-forest font-medium hover:bg-brand-sage/10 transition-colors hidden sm:block"
+                >
+                  Skip to Homepage
                 </button>
                 <button
                   type="submit"

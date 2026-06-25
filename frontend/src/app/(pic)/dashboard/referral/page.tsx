@@ -231,8 +231,8 @@ export default function ReferralPage() {
 
   const handleAddReferral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.personName.trim() || !form.personPhone.trim()) {
-      toast.error('Name and phone number are required');
+    if (!form.personName.trim() || !form.personPhone.trim() || !form.address.trim() || !form.city.trim() || !form.pincode.trim()) {
+      toast.error('Name, phone number, address, city, and pincode are required');
       return;
     }
     setSubmitting(true);
@@ -436,19 +436,20 @@ export default function ReferralPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-gray-400 font-normal">(optional)</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={form.address}
                   onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
                   placeholder="e.g. 123 Main St, Apartment 4B"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                  required
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode <span className="text-gray-400 font-normal">(optional)</span></label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pincode <span className="text-red-500">*</span></label>
                   <input
                     type="text"
                     maxLength={6}
@@ -456,16 +457,18 @@ export default function ReferralPage() {
                     onChange={e => setForm(f => ({ ...f, pincode: e.target.value.replace(/\D/g, '') }))}
                     placeholder="e.g. 110017"
                     className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                    required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City <span className="text-red-500">*</span></label>
                   {cityOptions.length > 0 ? (
                     <div className="relative">
                       <select
                         value={form.city}
                         onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-white appearance-none"
+                        required
                       >
                         {cityOptions.map((opt, i) => (
                           <option key={i} value={opt}>{opt}</option>
@@ -480,6 +483,7 @@ export default function ReferralPage() {
                       onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                       placeholder="Auto-fetched or Type manually"
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 bg-gray-50"
+                      required
                     />
                   )}
                 </div>

@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -24,6 +24,9 @@ const registerSchema = z.object({
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
   pincode: z.string().regex(/^\d{6}$/, 'Enter a valid 6-digit pincode'),
+  policyAccepted: z.literal(true, {
+    errorMap: () => ({ message: "You must read and accept the policy document" }),
+  }),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -53,7 +56,8 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       setIsLoading(true);
-      await api.post('/auth/register', data);
+      const { policyAccepted, ...submitData } = data;
+      await api.post('/auth/register', submitData);
       setIsSuccess(true);
     } catch (error: any) {
       const apiError = error.response?.data;
@@ -110,8 +114,18 @@ export default function RegisterPage() {
 
       <div className="w-full max-w-2xl glass-card rounded-2xl p-6 md:p-8 relative z-10 border border-white/50 shadow-xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
+        <div className="text-center mb-8 relative">
+          <button
+            onClick={() => router.back()}
+            className="absolute top-0 left-0 p-2 text-brand-olive hover:text-brand-forest hover:bg-brand-sage/10 rounded-full transition-colors flex items-center gap-1 text-sm font-medium"
+            title="Go Back"
+            type="button"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+          
+          <div className="flex justify-center mb-4 mt-2">
             <Image src="/logo_2.jpg" alt="U-Turn4Nature Logo" width={200} height={70} className="object-contain mix-blend-multiply" />
           </div>
           <h1 className="font-dm-serif text-2xl text-brand-forest mt-2">Join Us</h1>
@@ -170,6 +184,31 @@ export default function RegisterPage() {
                 </Field>
               </div>
             </div>
+          </div>
+
+          {/* Policy Document Acceptance */}
+          <div className="bg-brand-sage/10 rounded-xl p-4 border border-brand-sage/30 mt-6">
+            <label className="flex items-start gap-3 cursor-pointer">
+              <div className="mt-0.5">
+                <input
+                  type="checkbox"
+                  {...register('policyAccepted')}
+                  className="w-4 h-4 rounded border-brand-sage text-brand-forest focus:ring-brand-forest/50"
+                />
+              </div>
+              <div className="flex-1">
+                <span className="text-sm text-gray-700">
+                  I have read and agree to the{' '}
+                  <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest font-semibold hover:underline">
+                    Policy Document
+                  </a>{' '}
+                  of U-Turn4Nature. <span className="text-red-500">*</span>
+                </span>
+                {errors.policyAccepted && (
+                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.policyAccepted.message}</p>
+                )}
+              </div>
+            </label>
           </div>
 
           <button

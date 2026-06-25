@@ -342,6 +342,8 @@ export const getMe = async (userId: string, role: string) => {
       approvedAt: true,
       profileCompletedAt: true,
       wallet: true,
+      aadhaarNumber: true,
+      panCard: true,
     },
   });
 
