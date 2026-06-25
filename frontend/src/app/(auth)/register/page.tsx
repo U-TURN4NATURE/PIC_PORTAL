@@ -24,9 +24,6 @@ const registerSchema = z.object({
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
   pincode: z.string().regex(/^\d{6}$/, 'Enter a valid 6-digit pincode'),
-  policyAccepted: z.boolean().refine((val) => val === true, {
-    message: "You must read and accept the policy document",
-  }),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -56,8 +53,7 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       setIsLoading(true);
-      const { policyAccepted, ...submitData } = data;
-      await api.post('/auth/register', submitData);
+      await api.post('/auth/register', data);
       setIsSuccess(true);
     } catch (error: any) {
       const apiError = error.response?.data;
@@ -184,31 +180,6 @@ export default function RegisterPage() {
                 </Field>
               </div>
             </div>
-          </div>
-
-          {/* Policy Document Acceptance */}
-          <div className="bg-brand-sage/10 rounded-xl p-4 border border-brand-sage/30 mt-6">
-            <label className="flex items-start gap-3 cursor-pointer">
-              <div className="mt-0.5">
-                <input
-                  type="checkbox"
-                  {...register('policyAccepted')}
-                  className="w-4 h-4 rounded border-brand-sage text-brand-forest focus:ring-brand-forest/50"
-                />
-              </div>
-              <div className="flex-1">
-                <span className="text-sm text-gray-700">
-                  I have read and agree to the{' '}
-                  <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest font-semibold hover:underline">
-                    Policy Document
-                  </a>{' '}
-                  of U-Turn4Nature. <span className="text-red-500">*</span>
-                </span>
-                {errors.policyAccepted && (
-                  <p className="text-red-500 text-xs mt-1 font-medium">{errors.policyAccepted.message}</p>
-                )}
-              </div>
-            </label>
           </div>
 
           <button
