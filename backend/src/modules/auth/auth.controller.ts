@@ -39,8 +39,14 @@ export const picLogin = async (req: Request, res: Response, next: NextFunction):
       return next(new Error('Email and password are required'));
     }
 
-    // Step 1: validate credentials and send WhatsApp OTP
-    const result = await authService.sendLoginOTP(email, password);
+    // Step 1: validate credentials and send WhatsApp OTP (or bypass)
+    const result = await authService.sendLoginOTP(email, password) as any;
+
+    if (result.bypass) {
+      res.cookie('token', result.token, getCookieOptions());
+      console.log(`✅ PIC Login bypassed OTP for: ${email}`);
+      return res.status(200).json(successResponse({ user: result.user, token: result.token }, 'Login successful'));
+    }
 
     console.log(`✅ WhatsApp OTP sent to: ${result.phone}`);
     res.status(200).json({ success: true, message: result.message, data: { phone: result.phone } });

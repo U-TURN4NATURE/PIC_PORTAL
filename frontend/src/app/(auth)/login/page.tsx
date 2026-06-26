@@ -70,6 +70,15 @@ function LoginInner() {
       const res = await api.post('/auth/login', data);
 
       if (res.data.success) {
+        // If backend bypassed OTP and returned token directly
+        if (res.data.data?.token) {
+          const { user, token } = res.data.data;
+          setAuth(user, token);
+          toast.success('Welcome back! 🎉');
+          router.replace('/dashboard');
+          return;
+        }
+
         setUserEmail(data.email);
         // Backend returns masked phone like "7701XXXXXX05"
         setMaskedPhone(res.data.data?.phone || '');

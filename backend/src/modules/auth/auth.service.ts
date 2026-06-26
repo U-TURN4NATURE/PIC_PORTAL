@@ -110,23 +110,40 @@ export const sendLoginOTP = async (email: string, password: string) => {
     throw createError('Your account has been suspended. Please contact admin.', 403);
   }
 
-  // Generate OTP
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // Temporarily Bypass OTP logic for production issue
+  // const otp = generateOTP();
+  // const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  await prisma.pICPartner.update({
-    where: { email },
-    data: { otpCode: otp, otpExpiresAt: otpExpiry },
-  });
+  // await prisma.pICPartner.update({
+  //   where: { email },
+  //   data: { otpCode: otp, otpExpiresAt: otpExpiry },
+  // });
 
-  // Send via WhatsApp
-  sendWhatsAppOTP(pic.phone, otp).catch((err) =>
-    console.error('❌ WhatsApp Login OTP send failed:', err)
-  );
+  // // Send via WhatsApp
+  // sendWhatsAppOTP(pic.phone, otp).catch((err) =>
+  //   console.error('❌ WhatsApp Login OTP send failed:', err)
+  // );
+
+  // return {
+  //   message: `OTP sent to your WhatsApp (${pic.phone.slice(0, 4)}XXXXXX${pic.phone.slice(-2)}). Please verify to login.`,
+  //   phone: pic.phone,
+  // };
+
+  const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
 
   return {
-    message: `OTP sent to your WhatsApp (${pic.phone.slice(0, 4)}XXXXXX${pic.phone.slice(-2)}). Please verify to login.`,
-    phone: pic.phone,
+    bypass: true,
+    token,
+    user: {
+      id: pic.id,
+      fullName: pic.fullName,
+      email: pic.email,
+      phone: pic.phone,
+      referralCode: pic.referralCode,
+      status: pic.status,
+      profileCompleted: pic.profileCompleted,
+      profileImage: pic.profileImage,
+    },
   };
 };
 
