@@ -47,7 +47,7 @@ export const sendWhatsAppOTP = async (phone: string, otp: string): Promise<void>
     phone: formattedPhone,
     text: BHASH_TEMPLATE,
     priority: 'wa',
-    stype: 'auth',
+    stype: 'normal',
     Params: otp,
   });
 
