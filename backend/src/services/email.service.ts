@@ -1,15 +1,24 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
 // ─────────────────────────────────────────────────
-// Email Service — Powered by Resend
-// Free tier: 3,000 emails/month, 100/day
+// Email Service — Powered by Nodemailer
+// Uses standard SMTP (e.g., Gmail, Hostinger, AWS SES)
 // ─────────────────────────────────────────────────
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_to_prevent_startup_crash');
-
-const FROM_EMAIL = process.env.EMAIL_FROM_ADDRESS || 'onboarding@resend.dev';
+const FROM_EMAIL = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER || 'hello@example.com';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'U-Turn4Nature';
-const FROM = `${FROM_NAME} <${FROM_EMAIL}>`;
+const FROM = `"${FROM_NAME}" <${FROM_EMAIL}>`;
+
+// Configure the SMTP transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.SMTP_PORT || '465'),
+  secure: process.env.SMTP_PORT === '465' || !process.env.SMTP_PORT, // true for 465, false for 587
+  auth: {
+    user: process.env.SMTP_USER || process.env.EMAIL_FROM_ADDRESS,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 const baseTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -52,15 +61,24 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
-// ─── Helper to send via Resend ───────────────────
+// ─── Helper to send via Nodemailer ───────────────────
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('⚠️  RESEND_API_KEY not set — email not sent to:', to);
+  const pass = process.env.SMTP_PASS;
+  if (!pass) {
+    console.warn('⚠️  SMTP_PASS not set — email not sent to:', to);
     return;
   }
-  const { error } = await resend.emails.send({ from: FROM, to, subject, html });
-  if (error) {
-    console.error('❌ Resend email error:', error);
+  
+  try {
+    await transporter.sendMail({
+      from: FROM,
+      to,
+      subject,
+      html,
+    });
+    console.log(`✅ Email sent successfully to ${to}`);
+  } catch (error: any) {
+    console.error('❌ Nodemailer email error:', error);
     throw new Error(error.message);
   }
 }
