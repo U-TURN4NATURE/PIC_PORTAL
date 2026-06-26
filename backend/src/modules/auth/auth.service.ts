@@ -75,6 +75,11 @@ export const registerPIC = async (data: RegisterInput) => {
     console.error('❌ WhatsApp OTP send failed during registration:', err)
   );
 
+  // Send OTP via Email (fire-and-forget)
+  sendOTPEmail(data.email, data.fullName, otp).catch((err) =>
+    console.error('❌ Email OTP send failed during registration:', err)
+  );
+
   return {
     ...pic,
     message: 'Registration successful! Please verify your WhatsApp number with the OTP sent.',
