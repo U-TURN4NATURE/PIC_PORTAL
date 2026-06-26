@@ -45,7 +45,8 @@ export const picLogin = async (req: Request, res: Response, next: NextFunction):
     if (result.bypass) {
       res.cookie('token', result.token, getCookieOptions());
       console.log(`✅ PIC Login bypassed OTP for: ${email}`);
-      return res.status(200).json(successResponse({ user: result.user, token: result.token }, 'Login successful'));
+      void res.status(200).json(successResponse({ user: result.user, token: result.token }, 'Login successful'));
+      return;
     }
 
     console.log(`✅ WhatsApp OTP sent to: ${result.phone}`);
