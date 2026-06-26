@@ -143,6 +143,7 @@ export const sendLoginOTP = async (email: string, password: string) => {
       status: pic.status,
       profileCompleted: pic.profileCompleted,
       profileImage: pic.profileImage,
+      role: 'PIC' as const,
     },
   };
 };
