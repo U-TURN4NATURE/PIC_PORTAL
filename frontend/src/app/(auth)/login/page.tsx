@@ -193,7 +193,7 @@ function LoginInner() {
               <div>
                 <p className="text-sm font-medium text-green-800">OTP sent via WhatsApp 📱</p>
                 <p className="text-xs text-green-700 mt-1">
-                  A 6-digit OTP has been sent to your registered WhatsApp number.
+                  A 6-digit OTP has been sent to <strong>{maskedPhone ? `+91 ${maskedPhone}` : 'your registered WhatsApp number'}</strong>.
                   Valid for <strong>10 minutes</strong>.
                 </p>
               </div>
