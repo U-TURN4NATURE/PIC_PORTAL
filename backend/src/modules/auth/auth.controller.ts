@@ -32,23 +32,41 @@ export const verifyOTP = async (req: Request, res: Response, next: NextFunction)
 export const picLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const { email, password } = req.body;
-    
-    console.log(`🔐 PIC Login attempt for: ${email}`);
-    
-    // Validate input
+
+    console.log(`🔐 PIC Login Step 1 - sending WhatsApp OTP for: ${email}`);
+
     if (!email || !password) {
       return next(new Error('Email and password are required'));
     }
 
-    const { token, user } = await authService.loginPIC(email, password);
+    // Step 1: validate credentials and send WhatsApp OTP
+    const result = await authService.sendLoginOTP(email, password);
 
-    // Set secure cookie with cross-domain settings
-    res.cookie('token', token, getCookieOptions());
-    
-    console.log(`✅ PIC Login successful for: ${email}`);
-    res.status(200).json(successResponse({ user, token }, 'Login successful'));
+    console.log(`✅ WhatsApp OTP sent to: ${result.phone}`);
+    res.status(200).json({ success: true, message: result.message, data: { phone: result.phone } });
   } catch (error) {
     console.error('❌ PIC Login error:', error instanceof Error ? error.message : error);
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/verify-login-otp
+ * Step 2 of 2FA Login — verify WhatsApp OTP and issue JWT token
+ */
+export const verifyLoginOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return next(new Error('Email and OTP are required'));
+    }
+
+    const { token, user } = await authService.verifyLoginOTP(email, otp);
+
+    res.cookie('token', token, getCookieOptions());
+    console.log(`✅ PIC Login 2FA verified for: ${email}`);
+    res.status(200).json(successResponse({ user, token }, 'Login successful'));
+  } catch (error) {
     next(error);
   }
 };
@@ -102,6 +120,23 @@ export const forgotPassword = async (req: Request, res: Response, next: NextFunc
 export const resetPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const result = await authService.resetPassword(req.params.token, req.body.password);
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/reset-password-otp
+ * Reset password using WhatsApp OTP (no token link required)
+ */
+export const resetPasswordWithOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, otp, password } = req.body;
+    if (!email || !otp || !password) {
+      return next(new Error('Email, OTP and new password are required'));
+    }
+    const result = await authService.resetPasswordWithOTP(email, otp, password);
     res.status(200).json(successResponse(null, result.message));
   } catch (error) {
     next(error);

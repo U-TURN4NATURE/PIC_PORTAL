@@ -28,8 +28,11 @@ router.post('/verify-otp', authLimiter, validate(verifyOTPSchema), authControlle
 // Resend OTP (legacy)
 router.post('/resend-otp', authLimiter, authController.resendOTP);
 
-// PIC Login
+// PIC Login — Step 1: validate credentials + send WhatsApp OTP
 router.post('/login', authLimiter, validate(picLoginSchema), authController.picLogin);
+
+// PIC Login — Step 2: verify WhatsApp OTP and get JWT token
+router.post('/verify-login-otp', authLimiter, validate(verifyOTPSchema), authController.verifyLoginOTP);
 
 // Admin Login
 router.post('/admin/login', authLimiter, validate(adminLoginSchema), authController.adminLogin);
@@ -40,10 +43,13 @@ router.post('/logout', protect, authController.logout);
 // Get current user
 router.get('/me', protect, authController.getMe);
 
-// Forgot Password
+// Forgot Password — sends OTP via WhatsApp + email reset link
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), authController.forgotPassword);
 
-// Reset Password
+// Reset Password via OTP (WhatsApp) — preferred method
+router.post('/reset-password-otp', authLimiter, authController.resetPasswordWithOTP);
+
+// Reset Password via Token (email link — backup)
 router.post('/reset-password/:token', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
 
 // ─────────────────────────────────────────────────
