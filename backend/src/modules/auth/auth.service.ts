@@ -418,7 +418,9 @@ export const forgotPassword = async (email: string) => {
     data: { resetToken, resetTokenExpiry: resetExpiry },
   });
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
-  await sendPasswordResetEmail(email, pic.fullName, resetUrl);
+  
+  // Send email in the background without awaiting so it doesn't block the API response
+  sendPasswordResetEmail(email, pic.fullName, resetUrl).catch(console.error);
 
   return {
     message: 'OTP sent to your WhatsApp number. Enter the OTP to reset your password.',
