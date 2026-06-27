@@ -79,7 +79,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
         console.error('❌ Resend API error:', error);
         throw new Error(error.message);
       }
-      console.log(\`✅ Email sent via Resend successfully to \${to}\`);
+      console.log(`✅ Email sent via Resend successfully to ${to}`);
       return;
     } catch (error: any) {
       console.error('❌ Resend API threw an exception:', error);
@@ -101,7 +101,7 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
       subject,
       html,
     });
-    console.log(\`✅ Email sent via SMTP successfully to \${to}\`);
+    console.log(`✅ Email sent via SMTP successfully to ${to}`);
   } catch (error: any) {
     console.error('❌ Nodemailer email error:', error);
     throw new Error(error.message);
