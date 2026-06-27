@@ -1,15 +1,18 @@
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 // ─────────────────────────────────────────────────
-// Email Service — Powered by Nodemailer
-// Uses standard SMTP (e.g., Gmail, Hostinger, AWS SES)
+// Email Service — Powered by Resend (Production) / Nodemailer (Local)
 // ─────────────────────────────────────────────────
 
 const FROM_EMAIL = process.env.EMAIL_FROM_ADDRESS || process.env.SMTP_USER || 'hello@example.com';
 const FROM_NAME = process.env.EMAIL_FROM_NAME || 'U-Turn4Nature';
 const FROM = `"${FROM_NAME}" <${FROM_EMAIL}>`;
 
-// Configure the SMTP transporter
+// Initialize Resend if API key is present
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
+// Configure the SMTP transporter (Fallback)
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.gmail.com',
   port: parseInt(process.env.SMTP_PORT || '465'),
@@ -61,11 +64,33 @@ const baseTemplate = (content: string) => `
 </html>
 `;
 
-// ─── Helper to send via Nodemailer ───────────────────
+// ─── Helper to send via Resend or Nodemailer ───────────────────
 async function sendEmail(to: string, subject: string, html: string): Promise<void> {
+  // Use Resend in production if configured (Bypasses SMTP port blocking)
+  if (resend) {
+    try {
+      const { error } = await resend.emails.send({
+        from: FROM,
+        to,
+        subject,
+        html,
+      });
+      if (error) {
+        console.error('❌ Resend API error:', error);
+        throw new Error(error.message);
+      }
+      console.log(\`✅ Email sent via Resend successfully to \${to}\`);
+      return;
+    } catch (error: any) {
+      console.error('❌ Resend API threw an exception:', error);
+      throw new Error(error.message);
+    }
+  }
+
+  // Fallback to Nodemailer for local development
   const pass = process.env.SMTP_PASS;
   if (!pass) {
-    console.warn('⚠️  SMTP_PASS not set — email not sent to:', to);
+    console.warn('⚠️  SMTP_PASS or RESEND_API_KEY not set — email not sent to:', to);
     return;
   }
   
@@ -76,12 +101,13 @@ async function sendEmail(to: string, subject: string, html: string): Promise<voi
       subject,
       html,
     });
-    console.log(`✅ Email sent successfully to ${to}`);
+    console.log(\`✅ Email sent via SMTP successfully to \${to}\`);
   } catch (error: any) {
     console.error('❌ Nodemailer email error:', error);
     throw new Error(error.message);
   }
 }
+
 
 /**
  * Send OTP verification email
