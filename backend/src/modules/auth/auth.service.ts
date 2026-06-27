@@ -115,41 +115,29 @@ export const sendLoginOTP = async (email: string, password: string) => {
     throw createError('Your account has been suspended. Please contact admin.', 403);
   }
 
-  // Temporarily Bypass OTP logic for production issue
-  // const otp = generateOTP();
-  // const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  // ── OTP logic restored ──
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-  // await prisma.pICPartner.update({
-  //   where: { email },
-  //   data: { otpCode: otp, otpExpiresAt: otpExpiry },
-  // });
+  await prisma.pICPartner.update({
+    where: { email },
+    data: { otpCode: otp, otpExpiresAt: otpExpiry },
+  });
 
-  // // Send via WhatsApp
-  // sendWhatsAppOTP(pic.phone, otp).catch((err) =>
-  //   console.error('❌ WhatsApp Login OTP send failed:', err)
-  // );
+  // Send via WhatsApp
+  sendWhatsAppOTP(pic.phone, otp).catch((err) =>
+    console.error('❌ WhatsApp Login OTP send failed:', err)
+  );
 
-  // return {
-  //   message: `OTP sent to your WhatsApp (${pic.phone.slice(0, 4)}XXXXXX${pic.phone.slice(-2)}). Please verify to login.`,
-  //   phone: pic.phone,
-  // };
-
-  const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
+  // Send via Email as well (since WhatsApp credits might be low)
+  sendOTPEmail(email, pic.fullName, otp).catch((err) =>
+    console.error('❌ Email Login OTP send failed:', err)
+  );
 
   return {
-    bypass: true,
-    token,
-    user: {
-      id: pic.id,
-      fullName: pic.fullName,
-      email: pic.email,
-      phone: pic.phone,
-      referralCode: pic.referralCode,
-      status: pic.status,
-      profileCompleted: pic.profileCompleted,
-      profileImage: pic.profileImage,
-      role: 'PIC' as const,
-    },
+    message: `OTP sent to your Email and WhatsApp (${pic.phone.slice(0, 4)}XXXXXX${pic.phone.slice(-2)}). Please verify to login.`,
+    phone: pic.phone,
+    email: pic.email,
   };
 };
 
@@ -420,7 +408,7 @@ export const forgotPassword = async (email: string) => {
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
   
   // Send email in the background without awaiting so it doesn't block the API response
-  sendPasswordResetEmail(email, pic.fullName, resetUrl).catch(console.error);
+  sendPasswordResetEmail(email, pic.fullName, resetUrl, otp).catch(console.error);
 
   return {
     message: 'OTP sent to your WhatsApp number. Enter the OTP to reset your password.',

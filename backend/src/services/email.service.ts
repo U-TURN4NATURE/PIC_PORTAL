@@ -107,7 +107,7 @@ export const sendOTPEmail = async (email: string, name: string, otp: string): Pr
 /**
  * Send password reset email
  */
-export const sendPasswordResetEmail = async (email: string, name: string, resetUrl: string): Promise<void> => {
+export const sendPasswordResetEmail = async (email: string, name: string, resetUrl: string, otp: string): Promise<void> => {
   await sendEmail(
     email,
     '🔐 Reset Your Password — U-Turn4Nature PIC Portal',
@@ -118,7 +118,10 @@ export const sendPasswordResetEmail = async (email: string, name: string, resetU
       <div style="text-align:center;">
         <a href="${resetUrl}" class="btn">Reset Password</a>
       </div>
-      <p>This link expires in <strong>1 hour</strong>.</p>
+      <br />
+      <p>Alternatively, if you need an OTP, use this code:</p>
+      <div class="otp-box">${otp}</div>
+      <p>This link and OTP expire in <strong>1 hour</strong>.</p>
       <div class="info-box">
         <p style="margin:0;">If you didn't request this, please ignore this email. Your password will not change.</p>
       </div>
