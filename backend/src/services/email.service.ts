@@ -54,7 +54,7 @@ const baseTemplate = (content: string) => `
     <div class="body">${content}</div>
     <div class="footer">
       <p>© ${new Date().getFullYear()} U-Turn4Nature. All rights reserved.</p>
-      <p><a href="https://uturn4nature.com">uturn4nature.com</a></p>
+      <p><a href="https://u-turn.in">u-turn.in</a></p>
     </div>
   </div>
 </body>
@@ -128,7 +128,7 @@ export const sendPasswordResetEmail = async (email: string, name: string, resetU
  * Send PIC approval notification email
  */
 export const sendApprovalEmail = async (email: string, name: string, referralCode: string): Promise<void> => {
-  const referralLink = `${process.env.REFERRAL_BASE_URL || 'https://uturn4nature.com'}/?ref=${referralCode}`;
+  const referralLink = `${process.env.REFERRAL_BASE_URL || 'https://u-turn.in'}/?ref=${referralCode}`;
   await sendEmail(
     email,
     '🎉 Congratulations! Your PIC Application is Approved',
