@@ -1,4 +1,5 @@
 import prisma from '../../config/database';
+import bcrypt from 'bcryptjs';
 import { createError } from '../../middleware/error.middleware';
 import { PICStatus, PayoutStatus, Prisma } from '@prisma/client';
 import { generateReferralCode } from '../../utils/crypto.utils';
@@ -834,4 +835,29 @@ export const getAllPolicyLogs = async () => {
     },
     orderBy: { acceptedAt: 'desc' }
   });
+};
+
+export const resetPICPassword = async (picId: string, newPassword: string, adminId: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
+  if (!pic) {
+    throw createError(404, 'PIC not found');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  await prisma.pICPartner.update({
+    where: { id: picId },
+    data: { password: hashedPassword }
+  });
+
+  // Log the action
+  await prisma.auditLog.create({
+    data: {
+      userId: adminId,
+      action: 'RESET_PIC_PASSWORD',
+      details: `Admin reset password for PIC: ${pic.email}`
+    }
+  });
+
+  return { message: 'Password reset successfully' };
 };

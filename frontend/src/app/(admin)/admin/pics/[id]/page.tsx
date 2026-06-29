@@ -11,7 +11,7 @@ import {
   CheckCircle, XCircle, Ban, Trash2, Wallet, ShoppingCart,
   TrendingUp, Clock, Copy, ExternalLink, FileText, Download,
   CreditCard, Building, Briefcase, Eye, Users, Flag, IndianRupee,
-  RefreshCw, X,
+  RefreshCw, X, Key,
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
@@ -279,6 +279,8 @@ export default function PICDetailPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [docModal, setDocModal] = useState<{ url: string; label: string } | null>(null);
   const [activeTab, setActiveTab] = useState<'overview' | 'referrals'>('overview');
+  const [resetPasswordModal, setResetPasswordModal] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
 
   // Referrals state
   const [referrals, setReferrals] = useState<any[]>([]);
@@ -362,6 +364,24 @@ export default function PICDetailPage() {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (newPassword.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    try {
+      setActionLoading('resetPassword');
+      await api.post(`/admin/pics/${id}/reset-password`, { newPassword });
+      toast.success('Password reset successfully');
+      setResetPasswordModal(false);
+      setNewPassword('');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to reset password');
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
   const copy = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
     toast.success(`${label} copied!`);
@@ -385,6 +405,39 @@ export default function PICDetailPage() {
         />
       )}
 
+      {resetPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+          <div className="bg-white border border-brand-sage/20 shadow-xl rounded-2xl w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-brand-forest font-semibold text-lg">Reset Password</h3>
+              <button onClick={() => setResetPasswordModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><XCircle className="w-5 h-5 text-gray-400" /></button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <input
+                  type="text"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter new password (min. 6 characters)"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setResetPasswordModal(false)} className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
+                <button 
+                  onClick={handleResetPassword} 
+                  disabled={actionLoading === 'resetPassword' || newPassword.length < 6} 
+                  className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+                >
+                  {actionLoading === 'resetPassword' ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Reset Password'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -406,6 +459,7 @@ export default function PICDetailPage() {
           {(pic.status === 'APPROVED' || pic.status === 'ACTIVE') && (
             <ActionBtn onClick={() => handleAction('suspend')} loading={actionLoading === 'suspend'} label="Suspend" loadLabel="Suspending…" icon={<Ban className="w-4 h-4" />} cls="bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20" />
           )}
+          <ActionBtn onClick={() => setResetPasswordModal(true)} loading={actionLoading === 'resetPassword'} label="Reset Password" loadLabel="Resetting…" icon={<Key className="w-4 h-4" />} cls="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
           <ActionBtn onClick={handleDelete} loading={actionLoading === 'delete'} label="Delete" loadLabel="Deleting…" icon={<Trash2 className="w-4 h-4" />} cls="bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20" />
         </div>
       </div>

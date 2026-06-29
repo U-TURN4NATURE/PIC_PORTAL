@@ -17,6 +17,7 @@ router.get('/pics/:id/policy-logs', adminController.getPICPolicyLogs);
 router.patch('/pics/:id/approve', adminController.approvePIC);
 router.patch('/pics/:id/reject', adminController.rejectPIC);
 router.patch('/pics/:id/suspend', adminController.suspendPIC);
+router.post('/pics/:id/reset-password', adminController.resetPICPassword);
 router.delete('/pics/:id', adminController.deletePIC);
 
 // ─────────────────────────────────────────────────
