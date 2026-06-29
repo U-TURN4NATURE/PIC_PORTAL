@@ -320,6 +320,23 @@ export default function ProfilePage() {
               <span className="text-xs text-gray-400 font-normal ml-1">(Editable)</span>
             </h3>
           </div>
+
+          {/* Show current saved address if exists */}
+          {(profile?.address || profile?.city || profile?.state) && (
+            <div className="mb-4 p-3 bg-brand-sage/10 border border-brand-sage/30 rounded-xl">
+              <p className="text-xs font-semibold text-brand-forest mb-1">📍 Current Saved Address</p>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                {[profile.address, profile.city, profile.state, profile.pincode].filter(Boolean).join(', ')}
+              </p>
+            </div>
+          )}
+
+          {/* No address saved yet */}
+          {!profile?.address && !profile?.city && (
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-xs text-amber-700">⚠️ No address saved yet. Please fill in your address below.</p>
+            </div>
+          )}
           
           <div className="space-y-4 flex-1">
             <div>
@@ -388,6 +405,64 @@ export default function ProfilePage() {
           </div>
         )}
 
+        {/* Show current saved bank details if they exist */}
+        {!profile?.pendingBankDetails && (profile?.bankAccountName || profile?.bankAccountNumber) && (
+          <div className="px-6 pt-5">
+            <div className="p-4 bg-brand-sage/10 border border-brand-sage/30 rounded-xl">
+              <p className="text-xs font-semibold text-brand-forest mb-3">🏦 Current Saved Bank Details</p>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-2">
+                {profile?.bankAccountName && (
+                  <div>
+                    <p className="text-xs text-gray-400">Account Holder</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile.bankAccountName}</p>
+                  </div>
+                )}
+                {profile?.bankName && (
+                  <div>
+                    <p className="text-xs text-gray-400">Bank Name</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile.bankName}</p>
+                  </div>
+                )}
+                {profile?.bankAccountNumber && (
+                  <div>
+                    <p className="text-xs text-gray-400">Account Number</p>
+                    <p className="text-sm font-semibold text-gray-800">
+                      {'•'.repeat(Math.max(0, profile.bankAccountNumber.length - 4))}{profile.bankAccountNumber.slice(-4)}
+                    </p>
+                  </div>
+                )}
+                {profile?.ifscCode && (
+                  <div>
+                    <p className="text-xs text-gray-400">IFSC Code</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile.ifscCode}</p>
+                  </div>
+                )}
+                {profile?.branchName && (
+                  <div>
+                    <p className="text-xs text-gray-400">Branch</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile.branchName}</p>
+                  </div>
+                )}
+                {profile?.upiId && (
+                  <div>
+                    <p className="text-xs text-gray-400">UPI ID</p>
+                    <p className="text-sm font-semibold text-gray-800">{profile.upiId}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* No bank details saved yet */}
+        {!profile?.pendingBankDetails && !profile?.bankAccountName && !profile?.bankAccountNumber && (
+          <div className="px-6 pt-5">
+            <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <p className="text-xs text-amber-700">⚠️ No bank details saved yet. Please fill in your bank information below.</p>
+            </div>
+          </div>
+        )}
+
         <div className="p-6 grid md:grid-cols-2 gap-5">
           {[
             { field: 'upiId', label: 'UPI ID', placeholder: 'yourname@upi' },
@@ -409,28 +484,77 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
-        <div className="p-6 grid md:grid-cols-2 gap-5 border-t border-brand-sage/20">
-          <div className="md:col-span-2">
-             <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-               <Link className="w-4 h-4 text-brand-forest" /> Social Media Details
-               <span className="text-xs text-gray-400 font-normal ml-1">(Editable)</span>
-             </h3>
+        <div className="p-6 border-t border-brand-sage/20">
+          <div className="md:col-span-2 mb-4">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <Link className="w-4 h-4 text-brand-forest" /> Social Media Profiles
+              <span className="text-xs text-gray-400 font-normal ml-1">(Optional — Editable)</span>
+            </h3>
           </div>
-          {[
-            { field: 'instagramProfile', label: 'Instagram Profile URL', placeholder: 'https://instagram.com/...' },
-            { field: 'facebookProfile', label: 'Facebook Profile URL', placeholder: 'https://facebook.com/...' },
-            { field: 'linkedinProfile', label: 'LinkedIn Profile URL', placeholder: 'https://linkedin.com/in/...' },
-          ].map(({ field, label, placeholder }) => (
-            <div key={field}>
-              <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-              <input
-                value={form[field] || ''}
-                onChange={e => setForm((f: any) => ({ ...f, [field]: e.target.value }))}
-                placeholder={placeholder}
-                className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
-              />
+
+          {/* Show existing saved social profiles */}
+          {(profile?.instagramProfile || profile?.facebookProfile || profile?.linkedinProfile) && (
+            <div className="mb-5 p-4 bg-brand-sage/10 border border-brand-sage/30 rounded-xl">
+              <p className="text-xs font-semibold text-brand-forest mb-3">🔗 Current Saved Profiles</p>
+              <div className="flex flex-wrap gap-2">
+                {profile?.instagramProfile && (
+                  <a
+                    href={profile.instagramProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-pink-500 to-purple-600 text-white text-xs font-semibold rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    📸 Instagram
+                  </a>
+                )}
+                {profile?.facebookProfile && (
+                  <a
+                    href={profile.facebookProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    👤 Facebook
+                  </a>
+                )}
+                {profile?.linkedinProfile && (
+                  <a
+                    href={profile.linkedinProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-700 text-white text-xs font-semibold rounded-full hover:opacity-90 transition-opacity"
+                  >
+                    💼 LinkedIn
+                  </a>
+                )}
+              </div>
             </div>
-          ))}
+          )}
+
+          {/* No social profiles yet */}
+          {!profile?.instagramProfile && !profile?.facebookProfile && !profile?.linkedinProfile && (
+            <div className="mb-5 p-3 bg-gray-50 border border-gray-200 rounded-xl">
+              <p className="text-xs text-gray-500">No social profiles saved yet. Add them below (all optional).</p>
+            </div>
+          )}
+
+          <div className="grid md:grid-cols-2 gap-5">
+            {[
+              { field: 'instagramProfile', label: '📸 Instagram Profile URL', placeholder: 'https://instagram.com/...' },
+              { field: 'facebookProfile', label: '👤 Facebook Profile URL', placeholder: 'https://facebook.com/...' },
+              { field: 'linkedinProfile', label: '💼 LinkedIn Profile URL', placeholder: 'https://linkedin.com/in/...' },
+            ].map(({ field, label, placeholder }) => (
+              <div key={field}>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+                <input
+                  value={form[field] || ''}
+                  onChange={e => setForm((f: any) => ({ ...f, [field]: e.target.value }))}
+                  placeholder={placeholder}
+                  className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
+                />
+              </div>
+            ))}
+          </div>
         </div>
         <div className="px-6 pb-6">
           <button

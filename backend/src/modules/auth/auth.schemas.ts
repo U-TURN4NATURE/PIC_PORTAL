@@ -88,10 +88,9 @@ export const completeProfileExperienceSchema = z.object({
     skills: z.string().min(2, 'Please list your skills'),
     education: z.string().min(2, 'Education is required'),
     whyJoin: z.string().min(20, 'Please provide at least 20 characters explaining why you want to join'),
-    preferredWorkingArea: z.string().min(2, 'Preferred working area is required'),
-    preferredDistrict: z.string().min(2, 'District is required'),
-    preferredState: z.string().min(2, 'State is required'),
     availability: z.string().min(1, 'Availability is required'),
     instagramProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
+    facebookProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
+    linkedinProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
   }),
 });

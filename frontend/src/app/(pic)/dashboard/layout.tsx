@@ -234,9 +234,10 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   // ─── Full Dashboard (ACTIVE users only) ─────────
   const showPolicyModal = user.profileCompleted && user.status === 'ACTIVE' && user.isPolicyAccepted === false;
   
-  // Show KYC modal if user is APPROVED/ACTIVE and is missing either PAN or Aadhaar
+  // Show KYC modal ONLY for ACTIVE users who are missing PAN or Aadhaar
+  // APPROVED users (incomplete profile) should fill KYC through complete-profile page
   // Only show it if PolicyModal is NOT showing so they don't overlap
-  const showKycModal = !showPolicyModal && (!user.panCard || !user.aadhaarNumber);
+  const showKycModal = !showPolicyModal && user.status === 'ACTIVE' && (!user.panCard || !user.aadhaarNumber);
 
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },

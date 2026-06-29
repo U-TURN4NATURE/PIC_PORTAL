@@ -279,16 +279,18 @@ export const completeProfileKYC = async (
   await prisma.pICPartner.update({
     where: { id: picId },
     data: {
-      aadhaarNumber: data.aadhaarNumber,
-      panCard: data.panCard,
+      // Only update aadhaarNumber if a new value is provided (preserve existing)
+      ...(data.aadhaarNumber ? { aadhaarNumber: data.aadhaarNumber } : {}),
+      // Only update panCard if a new value is provided (preserve existing)
+      ...(data.panCard ? { panCard: data.panCard } : {}),
       bankAccountName: data.bankAccountName,
       bankName: data.bankName,
       bankAccountNumber: data.bankAccountNumber,
       ifscCode: data.ifscCode,
       branchName: data.branchName,
       upiId: data.upiId || null,
-      aadhaarDocument: files.aadhaarDocument,
-      panDocument: files.panDocument,
+      ...(files.aadhaarDocument ? { aadhaarDocument: files.aadhaarDocument } : {}),
+      ...(files.panDocument ? { panDocument: files.panDocument } : {}),
     },
   });
 
@@ -307,11 +309,10 @@ export const completeProfileExperience = async (
     skills: string;
     education: string;
     whyJoin: string;
-    preferredWorkingArea: string;
-    preferredDistrict: string;
-    preferredState: string;
     availability: string;
     instagramProfile?: string;
+    facebookProfile?: string;
+    linkedinProfile?: string;
   },
   resumeDocument?: string
 ) => {
@@ -329,10 +330,10 @@ export const completeProfileExperience = async (
       skills: data.skills,
       education: data.education,
       whyJoin: data.whyJoin,
-      preferredWorkingArea: data.preferredWorkingArea,
-      preferredDistrict: data.preferredDistrict,
       availability: data.availability,
       instagramProfile: data.instagramProfile || null,
+      facebookProfile: data.facebookProfile || null,
+      linkedinProfile: data.linkedinProfile || null,
       resumeDocument: resumeDocument || null,
       experience: data.yearsOfExperience,
       profileCompleted: true,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -10,13 +10,13 @@ import { useAuthStore } from '@/store/authStore';
 import { toast } from 'sonner';
 import {
   Loader2, CheckCircle2, Leaf, Upload, X, FileText,
-  CreditCard, Building, User, Briefcase, MapPin, ChevronRight
+  CreditCard, Building, User, Briefcase, ChevronRight, Link2
 } from 'lucide-react';
 
-// ─── Step 2 Schema ───────────────────────────────
+// ─── Step 2 Schema (KYC fields optional if already filled) ──
 const step2Schema = z.object({
-  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required'),
-  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)'),
+  aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required').or(z.literal('')),
+  panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)').or(z.literal('')),
   bankAccountName: z.string().min(2, 'Account holder name required'),
   bankName: z.string().min(2, 'Bank name required'),
   bankAccountNumber: z.string().min(8, 'Valid account number required'),
@@ -35,23 +35,16 @@ const step3Schema = z.object({
   skills: z.string().min(2, 'List your key skills'),
   education: z.string().min(2, 'Education required'),
   whyJoin: z.string().min(20, 'At least 20 characters required'),
-  preferredWorkingArea: z.string().min(2, 'Required'),
-  preferredDistrict: z.string().min(2, 'District required'),
-  preferredState: z.string().min(2, 'State required'),
   availability: z.string().min(1, 'Required'),
   instagramProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
+  facebookProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
+  linkedinProfile: z.string().url('Invalid URL').optional().or(z.literal('')),
 });
 
 type Step2Values = z.infer<typeof step2Schema>;
 type Step3Values = z.infer<typeof step3Schema>;
 
-const INDIAN_STATES = [
-  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
-  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
-  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
-  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
-  'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh',
-];
+
 
 interface FileState {
   file: File | null;
@@ -156,12 +149,22 @@ export default function CompleteProfilePage() {
   const [isLoading, setIsLoading] = useState(false);
   const [step2Done, setStep2Done] = useState(false);
 
+  // Check if KYC (PAN + Aadhaar) already filled from registration/profile
+  const kycAlreadyFilled = !!(user?.panCard && user?.aadhaarNumber);
+
   const [aadhaarFile, setAadhaarFile] = useState<FileState>({ file: null, preview: null, name: '' });
   const [panFile, setPanFile] = useState<FileState>({ file: null, preview: null, name: '' });
   const [resumeFile, setResumeFile] = useState<FileState>({ file: null, preview: null, name: '' });
 
   const form2 = useForm<Step2Values>({ resolver: zodResolver(step2Schema), mode: 'onTouched' });
   const form3 = useForm<Step3Values>({ resolver: zodResolver(step3Schema), mode: 'onTouched' });
+
+  // Pre-fill PAN and Aadhaar if user already has them
+  useEffect(() => {
+    if (user?.aadhaarNumber) form2.setValue('aadhaarNumber', user.aadhaarNumber);
+    if (user?.panCard) form2.setValue('panCard', user.panCard);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.aadhaarNumber, user?.panCard]);
 
   const onSubmitStep2 = async (data: Step2Values) => {
     try {
@@ -262,16 +265,26 @@ export default function CompleteProfilePage() {
               <section>
                 <div className="flex items-center gap-2 mb-4">
                   <CreditCard className="w-4 h-4 text-brand-forest" />
-                  <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Identity Information</h2>
+                  <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Identity Information (KYC)</h2>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Aadhaar Number" required error={form2.formState.errors.aadhaarNumber?.message}>
-                    <input {...form2.register('aadhaarNumber')} placeholder="123456789012" className={inputClass} maxLength={12} />
-                  </Field>
-                  <Field label="PAN Number" required error={form2.formState.errors.panCard?.message}>
-                    <input {...form2.register('panCard')} placeholder="ABCDE1234F" className={`${inputClass} uppercase`} maxLength={10} />
-                  </Field>
-                </div>
+                {kycAlreadyFilled ? (
+                  <div className="flex items-center gap-3 p-4 bg-green-50 border border-green-200 rounded-xl">
+                    <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-green-800">KYC Already Submitted ✓</p>
+                      <p className="text-xs text-green-700 mt-0.5">Your Aadhaar and PAN details are already on file. No need to re-enter.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Aadhaar Number" required error={form2.formState.errors.aadhaarNumber?.message}>
+                      <input {...form2.register('aadhaarNumber')} placeholder="123456789012" className={inputClass} maxLength={12} />
+                    </Field>
+                    <Field label="PAN Number" required error={form2.formState.errors.panCard?.message}>
+                      <input {...form2.register('panCard')} placeholder="ABCDE1234F" className={`${inputClass} uppercase`} maxLength={10} />
+                    </Field>
+                  </div>
+                )}
               </section>
 
               {/* Document Uploads */}
@@ -427,7 +440,7 @@ export default function CompleteProfilePage() {
               {/* PIC Related */}
               <section>
                 <div className="flex items-center gap-2 mb-4">
-                  <MapPin className="w-4 h-4 text-brand-forest" />
+                  <Briefcase className="w-4 h-4 text-brand-forest" />
                   <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">PIC Details</h2>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
@@ -439,23 +452,38 @@ export default function CompleteProfilePage() {
                       className={`${inputClass} resize-none`}
                     />
                   </Field>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <Field label="Preferred Working Area" required error={form3.formState.errors.preferredWorkingArea?.message}>
-                      <input {...form3.register('preferredWorkingArea')} placeholder="Local area, city, etc." className={inputClass} />
-                    </Field>
-                    <Field label="Preferred District" required error={form3.formState.errors.preferredDistrict?.message}>
-                      <input {...form3.register('preferredDistrict')} placeholder="District name" className={inputClass} />
-                    </Field>
-                    <Field label="State" required error={form3.formState.errors.preferredState?.message}>
-                      <select {...form3.register('preferredState')} className={inputClass}>
-                        <option value="">Select State</option>
-                        {INDIAN_STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-                      </select>
-                    </Field>
-                    <Field label="Instagram Profile (Optional)" error={form3.formState.errors.instagramProfile?.message}>
-                      <input {...form3.register('instagramProfile')} placeholder="https://instagram.com/yourprofile" className={inputClass} />
-                    </Field>
-                  </div>
+                </div>
+              </section>
+
+              <hr className="border-brand-sage/30" />
+
+              {/* Social Media */}
+              <section>
+                <div className="flex items-center gap-2 mb-1">
+                  <Link2 className="w-4 h-4 text-brand-forest" />
+                  <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Social Media</h2>
+                  <span className="text-xs text-gray-400 font-normal">(All Optional)</span>
+                </div>
+                <p className="text-xs text-gray-400 mb-4">Add your social profiles so we can feature your work and network.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Field label="Instagram Profile" error={form3.formState.errors.instagramProfile?.message}>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-pink-400 text-xs font-bold">📸</span>
+                      <input {...form3.register('instagramProfile')} placeholder="https://instagram.com/yourprofile" className={`${inputClass} pl-8`} />
+                    </div>
+                  </Field>
+                  <Field label="Facebook Profile" error={form3.formState.errors.facebookProfile?.message}>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-500 text-xs font-bold">👤</span>
+                      <input {...form3.register('facebookProfile')} placeholder="https://facebook.com/yourprofile" className={`${inputClass} pl-8`} />
+                    </div>
+                  </Field>
+                  <Field label="LinkedIn Profile" error={form3.formState.errors.linkedinProfile?.message}>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-blue-700 text-xs font-bold">💼</span>
+                      <input {...form3.register('linkedinProfile')} placeholder="https://linkedin.com/in/yourprofile" className={`${inputClass} pl-8`} />
+                    </div>
+                  </Field>
                 </div>
               </section>
 
