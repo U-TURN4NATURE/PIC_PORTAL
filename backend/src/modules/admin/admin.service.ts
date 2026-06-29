@@ -840,7 +840,7 @@ export const getAllPolicyLogs = async () => {
 export const resetPICPassword = async (picId: string, newPassword: string, adminId: string) => {
   const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
   if (!pic) {
-    throw createError(404, 'PIC not found');
+    throw createError('PIC not found', 404);
   }
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
@@ -853,9 +853,12 @@ export const resetPICPassword = async (picId: string, newPassword: string, admin
   // Log the action
   await prisma.auditLog.create({
     data: {
-      userId: adminId,
+      actorId: adminId,
+      actorRole: 'ADMIN',
       action: 'RESET_PIC_PASSWORD',
-      details: `Admin reset password for PIC: ${pic.email}`
+      targetId: picId,
+      targetType: 'PICPartner',
+      metadata: { details: `Admin reset password for PIC: ${pic.email}` }
     }
   });
 
