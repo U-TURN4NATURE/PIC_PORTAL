@@ -423,6 +423,36 @@ export const suspendPIC = async (picId: string, adminId: string, reason?: string
 };
 
 /**
+ * Unsuspend a PIC — restores to ACTIVE
+ */
+export const unsuspendPIC = async (picId: string, adminId: string, reason?: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
+  if (!pic) throw createError('PIC not found', 404);
+  if (pic.status !== PICStatus.SUSPENDED) throw createError('PIC is not suspended', 400);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.pICPartner.update({ where: { id: picId }, data: { status: PICStatus.ACTIVE } });
+    await tx.notification.create({
+      data: {
+        picId,
+        type: 'GENERAL',
+        title: 'Account Reinstated',
+        message: reason || 'Your account suspension has been lifted. You can now access the PIC dashboard again.',
+      },
+    });
+    await tx.auditLog.create({
+      data: {
+        actorId: adminId, actorRole: 'ADMIN',
+        action: 'UNSUSPEND_PIC', targetId: picId, targetType: 'PICPartner',
+        metadata: { reason },
+      },
+    });
+  });
+
+  return { message: 'PIC unsuspended successfully' };
+};
+
+/**
  * Delete a PIC
  */
 export const deletePIC = async (picId: string, adminId: string) => {

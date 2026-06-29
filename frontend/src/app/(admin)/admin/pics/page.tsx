@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
 import { toast } from 'sonner';
-import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Trash2, Download } from 'lucide-react';
+import { Search, MoreVertical, Eye, CheckCircle, XCircle, Ban, Unlock, Trash2, Download } from 'lucide-react';
 import Link from 'next/link';
 
 import useSWR from 'swr';
@@ -33,10 +33,10 @@ export default function AdminPICsPage() {
   const pics: any[] = data?.data || [];
   const meta = data?.meta || null;
 
-  const handleStatusAction = async (id: string, action: 'approve' | 'reject' | 'suspend') => {
+  const handleStatusAction = async (id: string, action: 'approve' | 'reject' | 'suspend' | 'unsuspend') => {
     try {
-      const reason = action !== 'approve' ? window.prompt(`Enter reason for ${action}ing this PIC:`) : '';
-      if (action !== 'approve' && reason === null) return;
+      const reason = action !== 'approve' && action !== 'unsuspend' ? window.prompt(`Enter reason for ${action}ing this PIC:`) : '';
+      if (action !== 'approve' && action !== 'unsuspend' && reason === null) return;
 
       await api.patch(`/admin/pics/${id}/${action}`, { reason });
       toast.success(`PIC ${action}d successfully`);
@@ -219,6 +219,12 @@ export default function AdminPICsPage() {
                         {pic.status === 'APPROVED' && (
                           <button onClick={() => handleStatusAction(pic.id, 'suspend')} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Suspend">
                             <Ban className="w-4 h-4" />
+                          </button>
+                        )}
+
+                        {pic.status === 'SUSPENDED' && (
+                          <button onClick={() => handleStatusAction(pic.id, 'unsuspend')} className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors" title="Unsuspend">
+                            <Unlock className="w-4 h-4" />
                           </button>
                         )}
 

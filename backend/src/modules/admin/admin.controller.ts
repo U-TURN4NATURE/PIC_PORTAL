@@ -91,6 +91,15 @@ export const suspendPIC = async (req: Request, res: Response, next: NextFunction
   }
 };
 
+export const unsuspendPIC = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const result = await adminService.unsuspendPIC(req.params.id, req.user!.id, req.body.reason);
+    res.status(200).json(successResponse(result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const deletePIC = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await adminService.deletePIC(req.params.id, req.user!.id);

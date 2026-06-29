@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 import {
   ArrowLeft, User, Mail, Phone, MapPin, Calendar, Tag,
-  CheckCircle, XCircle, Ban, Trash2, Wallet, ShoppingCart,
+  CheckCircle, XCircle, Ban, Unlock, Trash2, Wallet, ShoppingCart,
   TrendingUp, Clock, Copy, ExternalLink, FileText, Download,
   CreditCard, Building, Briefcase, Eye, Users, Flag, IndianRupee,
   RefreshCw, X, Key,
@@ -336,9 +336,9 @@ export default function PICDetailPage() {
     } finally { setStatusUpdating(null); }
   };
 
-  const handleAction = async (action: 'approve' | 'reject' | 'suspend') => {
-    const reason = action !== 'approve' ? window.prompt(`Enter reason for ${action}:`) : '';
-    if (action !== 'approve' && reason === null) return;
+  const handleAction = async (action: 'approve' | 'reject' | 'suspend' | 'unsuspend') => {
+    const reason = action !== 'approve' && action !== 'unsuspend' ? window.prompt(`Enter reason for ${action}:`) : '';
+    if (action !== 'approve' && action !== 'unsuspend' && reason === null) return;
     try {
       setActionLoading(action);
       await api.patch(`/admin/pics/${id}/${action}`, { reason });
@@ -458,6 +458,9 @@ export default function PICDetailPage() {
           )}
           {(pic.status === 'APPROVED' || pic.status === 'ACTIVE') && (
             <ActionBtn onClick={() => handleAction('suspend')} loading={actionLoading === 'suspend'} label="Suspend" loadLabel="Suspending…" icon={<Ban className="w-4 h-4" />} cls="bg-orange-500/10 text-orange-400 border-orange-500/20 hover:bg-orange-500/20" />
+          )}
+          {pic.status === 'SUSPENDED' && (
+            <ActionBtn onClick={() => handleAction('unsuspend')} loading={actionLoading === 'unsuspend'} label="Unsuspend" loadLabel="Unsuspending…" icon={<Unlock className="w-4 h-4" />} cls="bg-green-500/10 text-green-400 border-green-500/20 hover:bg-green-500/20" />
           )}
           <ActionBtn onClick={() => setResetPasswordModal(true)} loading={actionLoading === 'resetPassword'} label="Reset Password" loadLabel="Resetting…" icon={<Key className="w-4 h-4" />} cls="bg-blue-500/10 text-blue-500 border-blue-500/20 hover:bg-blue-500/20" />
           <ActionBtn onClick={handleDelete} loading={actionLoading === 'delete'} label="Delete" loadLabel="Deleting…" icon={<Trash2 className="w-4 h-4" />} cls="bg-red-500/10 text-red-400 border-red-500/20 hover:bg-red-500/20" />
