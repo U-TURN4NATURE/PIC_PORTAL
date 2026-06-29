@@ -122,7 +122,7 @@ export const sendLoginOTP = async (email: string, password: string) => {
     data: { otpCode: null, otpExpiresAt: null },
   });
 
-  const token = generateToken(pic.id, 'PIC');
+  const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
 
   return {
     bypass: true,
