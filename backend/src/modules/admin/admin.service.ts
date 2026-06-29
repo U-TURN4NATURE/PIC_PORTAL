@@ -435,7 +435,7 @@ export const unsuspendPIC = async (picId: string, adminId: string, reason?: stri
     await tx.notification.create({
       data: {
         picId,
-        type: 'GENERAL',
+        type: 'SYSTEM',
         title: 'Account Reinstated',
         message: reason || 'Your account suspension has been lifted. You can now access the PIC dashboard again.',
       },
