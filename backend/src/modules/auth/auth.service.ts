@@ -208,6 +208,9 @@ export const loginPIC = async (email: string, password: string) => {
       status: pic.status,
       profileCompleted: pic.profileCompleted,
       profileImage: pic.profileImage,
+      panCard: pic.panCard,
+      aadhaarNumber: pic.aadhaarNumber,
+      isPolicyAccepted: pic.isPolicyAccepted,
       role: 'PIC' as const,
     },
   };
@@ -217,7 +220,7 @@ export const loginPIC = async (email: string, password: string) => {
  * Google OAuth Login / Registration
  * Called after Passport has already found/created the PICPartner
  */
-export const loginWithGoogle = async (pic: { id: string; email: string; status: string; rejectionReason: string | null; fullName: string; phone: string; referralCode: string | null; profileCompleted: boolean; profileImage: string | null }) => {
+export const loginWithGoogle = async (pic: { id: string; email: string; status: string; rejectionReason: string | null; fullName: string; phone: string; referralCode: string | null; profileCompleted: boolean; profileImage: string | null; panCard: string | null; aadhaarNumber: string | null; isPolicyAccepted: boolean }) => {
   if (pic.status === PICStatus.REJECTED) {
     throw createError(
       `Your application has been rejected. ${pic.rejectionReason ? 'Reason: ' + pic.rejectionReason : 'Please contact support.'}`,
@@ -241,6 +244,9 @@ export const loginWithGoogle = async (pic: { id: string; email: string; status: 
       status: pic.status,
       profileCompleted: pic.profileCompleted,
       profileImage: pic.profileImage,
+      panCard: pic.panCard,
+      aadhaarNumber: pic.aadhaarNumber,
+      isPolicyAccepted: pic.isPolicyAccepted,
       role: 'PIC' as const,
     },
   };

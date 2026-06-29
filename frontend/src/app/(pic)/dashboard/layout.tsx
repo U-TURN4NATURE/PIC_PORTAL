@@ -164,10 +164,13 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(true);
 
   // Initialize auth from server on mount (fixes session validation bug)
   useEffect(() => {
-    initAuth();
+    initAuth().finally(() => {
+      setIsSyncing(false);
+    });
   }, []);
 
   useEffect(() => {
@@ -237,7 +240,8 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   // Show KYC modal ONLY for ACTIVE users who are missing PAN or Aadhaar
   // APPROVED users (incomplete profile) should fill KYC through complete-profile page
   // Only show it if PolicyModal is NOT showing so they don't overlap
-  const showKycModal = !showPolicyModal && user.status === 'ACTIVE' && (!user.panCard || !user.aadhaarNumber);
+  // Wait until isSyncing is false to prevent flashing the modal for users who have data but local storage is outdated
+  const showKycModal = !isSyncing && !showPolicyModal && user.status === 'ACTIVE' && (!user.panCard || !user.aadhaarNumber);
 
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
