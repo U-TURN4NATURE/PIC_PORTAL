@@ -115,29 +115,25 @@ export const sendLoginOTP = async (email: string, password: string) => {
     throw createError('Your account has been suspended. Please contact admin.', 403);
   }
 
-  // ── OTP logic restored ──
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
-
+  // ── OTP BYPASSED: Direct Login ──
+  // Clear any existing OTP
   await prisma.pICPartner.update({
     where: { email },
-    data: { otpCode: otp, otpExpiresAt: otpExpiry },
+    data: { otpCode: null, otpExpiresAt: null },
   });
 
-  // Send via WhatsApp
-  sendWhatsAppOTP(pic.phone, otp).catch((err) =>
-    console.error('❌ WhatsApp Login OTP send failed:', err)
-  );
-
-  // Send via Email as well (since WhatsApp credits might be low)
-  sendOTPEmail(email, pic.fullName, otp).catch((err) =>
-    console.error('❌ Email Login OTP send failed:', err)
-  );
+  const token = generateToken(pic.id, 'PIC');
 
   return {
-    message: `OTP sent to your Email and WhatsApp (${pic.phone.slice(0, 4)}XXXXXX${pic.phone.slice(-2)}). Please verify to login.`,
-    phone: pic.phone,
-    email: pic.email,
+    bypass: true,
+    token,
+    user: {
+      id: pic.id,
+      name: pic.fullName,
+      email: pic.email,
+      role: 'PIC',
+      status: pic.status,
+    }
   };
 };
 
