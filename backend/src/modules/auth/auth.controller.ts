@@ -151,6 +151,21 @@ export const resetPasswordWithOTP = async (req: Request, res: Response, next: Ne
 };
 
 /**
+ * POST /auth/reset-password-with-temp
+ * Reset password using temporary password directly
+ */
+export const resetPasswordWithTemp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, tempPassword, newPassword } = req.body;
+    if (!email || !tempPassword || !newPassword) return next(new Error('Email, temporary password, and new password are required'));
+    const result = await authService.resetPasswordWithTemp(email, tempPassword, newPassword);
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * POST /auth/request-password-reset
  * PIC submits a password reset request for admin approval (public — no auth needed)
  */

@@ -46,6 +46,9 @@ router.get('/me', protect, authController.getMe);
 // Forgot Password — sends OTP via WhatsApp + email reset link
 router.post('/forgot-password', authLimiter, validate(forgotPasswordSchema), authController.forgotPassword);
 
+// Reset Password with Temporary Password (replaces OTP flow for now)
+router.post('/reset-password-with-temp', authLimiter, authController.resetPasswordWithTemp);
+
 // Reset Password via OTP (WhatsApp) — preferred method
 router.post('/reset-password-otp', authLimiter, authController.resetPasswordWithOTP);
 

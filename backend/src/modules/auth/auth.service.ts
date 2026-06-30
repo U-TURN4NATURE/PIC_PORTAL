@@ -174,6 +174,27 @@ export const verifyLoginOTP = async (email: string, otp: string) => {
 };
 
 /**
+ * Reset password using temporary password (No OTP/Email required)
+ */
+export const resetPasswordWithTemp = async (email: string, tempPassword: string, newPassword: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+  if (!pic) throw createError('Invalid email or temporary password', 400);
+
+  if (!pic.password) throw createError('This account uses Google Sign-In. Cannot reset password.', 400);
+
+  const isPasswordValid = await bcrypt.compare(tempPassword, pic.password);
+  if (!isPasswordValid) throw createError('Invalid email or temporary password', 400);
+
+  const hashedNewPassword = await bcrypt.hash(newPassword, 10);
+  await prisma.pICPartner.update({
+    where: { id: pic.id },
+    data: { password: hashedNewPassword, mustChangePassword: false },
+  });
+
+  return { message: 'Password reset successfully. You can now login with your new password.' };
+};
+
+/**
  * Direct login (kept for admin / backward compat). PIC login now uses 2FA.
  */
 export const loginPIC = async (email: string, password: string) => {
