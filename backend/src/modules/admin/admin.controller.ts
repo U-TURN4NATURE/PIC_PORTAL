@@ -369,8 +369,9 @@ export const getPasswordResetRequests = async (req: Request, res: Response, next
 
 export const approvePasswordResetRequest = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { adminNote } = req.body;
-    const result = await adminService.approvePasswordResetRequest(req.params.id, req.user!.id, adminNote);
+    const { tempPassword, adminNote } = req.body;
+    if (!tempPassword) return next(new Error('Temporary password is required'));
+    const result = await adminService.approvePasswordResetRequest(req.params.id, req.user!.id, tempPassword, adminNote);
     res.status(200).json(successResponse(result, result.message));
   } catch (error) {
     next(error);

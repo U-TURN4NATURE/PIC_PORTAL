@@ -30,22 +30,31 @@ function ActionModal({
   onSuccess: () => void;
 }) {
   const [adminNote, setAdminNote] = useState('');
+  const [tempPassword, setTempPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const isApprove = action === 'approve';
 
   const handleSubmit = async () => {
+    if (isApprove && (!tempPassword || tempPassword.length < 6)) {
+      toast.error('Please enter a temporary password (min 6 chars)');
+      return;
+    }
+
     setLoading(true);
     try {
       const endpoint = isApprove
         ? `/admin/password-reset-requests/${request.id}/approve`
         : `/admin/password-reset-requests/${request.id}/reject`;
 
-      await api.post(endpoint, { adminNote: adminNote || undefined });
+      await api.post(endpoint, { 
+        adminNote: adminNote || undefined,
+        ...(isApprove ? { tempPassword } : {})
+      });
 
       toast.success(
         isApprove
-          ? `Reset link sent to ${request.pic?.email}`
+          ? `Temporary password set for ${request.pic?.email}`
           : 'Request rejected successfully'
       );
       onSuccess();
@@ -97,7 +106,7 @@ function ActionModal({
           {/* Action Info */}
           {isApprove && (
             <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-xs text-green-800">
-              ✅ Approving will send a <strong>password reset link</strong> to {request.pic?.email} and a <strong>WhatsApp OTP</strong> to {request.pic?.phone}. The link expires in 1 hour.
+              ✅ Approving this will set a <strong>Temporary Password</strong> for the user. They will use this to reset their password. No email or WhatsApp link will be sent.
             </div>
           )}
           {!isApprove && (
@@ -106,16 +115,31 @@ function ActionModal({
             </div>
           )}
 
+          {isApprove && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Set Temporary Password <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={tempPassword}
+                onChange={(e) => setTempPassword(e.target.value)}
+                placeholder="E.g. Temp@1234"
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent text-sm"
+              />
+            </div>
+          )}
+
           {/* Admin Note */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Note for PIC <span className="text-gray-400 font-normal">(optional)</span>
             </label>
             <textarea
               value={adminNote}
               onChange={e => setAdminNote(e.target.value)}
               rows={3}
-              placeholder={isApprove ? 'E.g. Approved. Reset link sent to your email.' : 'E.g. Could not verify identity. Please contact support.'}
+              placeholder={isApprove ? 'E.g. Use the temporary password I shared with you.' : 'E.g. Could not verify identity. Please contact support.'}
               className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/30 resize-none"
             />
           </div>
@@ -140,7 +164,7 @@ function ActionModal({
               {loading ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
               ) : isApprove ? (
-                <><ShieldCheck className="w-4 h-4" /> Approve & Send Link</>
+                <><ShieldCheck className="w-4 h-4" /> Approve & Set Password</>
               ) : (
                 <><XCircle className="w-4 h-4" /> Reject Request</>
               )}

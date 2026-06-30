@@ -1026,10 +1026,9 @@ export const getPasswordResetRequests = async (status?: string) => {
 };
 
 /**
- * Admin approves a password reset request
- * Generates a reset token and sends it to PIC via email + WhatsApp OTP
+ * Admin approves a password reset request and sets a temporary password manually
  */
-export const approvePasswordResetRequest = async (requestId: string, adminId: string, adminNote?: string) => {
+export const approvePasswordResetRequest = async (requestId: string, adminId: string, tempPassword: string, adminNote?: string) => {
   const request = await prisma.passwordResetRequest.findUnique({
     where: { id: requestId },
     include: { pic: true },
@@ -1038,12 +1037,7 @@ export const approvePasswordResetRequest = async (requestId: string, adminId: st
   if (!request) throw createError('Request not found', 404);
   if (request.status !== 'PENDING') throw createError('This request has already been processed', 400);
 
-  const resetToken = generateResetToken();
-  const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-
-  // Generate OTP for WhatsApp
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
   // Update the request status
   await prisma.passwordResetRequest.update({
@@ -1051,30 +1045,17 @@ export const approvePasswordResetRequest = async (requestId: string, adminId: st
     data: {
       status: 'APPROVED',
       adminNote: adminNote || null,
-      resetToken,
-      resetTokenExpiry: resetExpiry,
     },
   });
 
-  // Also update the PIC's resetToken for the standard reset flow
+  // Update the PIC's password to the temporary password
   await prisma.pICPartner.update({
     where: { id: request.picId },
     data: {
-      resetToken,
-      resetTokenExpiry: resetExpiry,
-      otpCode: otp,
-      otpExpiresAt: otpExpiry,
+      password: hashedPassword,
+      mustChangePassword: true,
     },
   });
-
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
-
-  // Send email reset link
-  sendPasswordResetEmail(request.pic.email, request.pic.fullName, resetUrl, otp).catch(console.error);
-
-  // Send WhatsApp OTP as backup
-  sendWhatsAppOTP(request.pic.phone, otp).catch(console.error);
 
   // Audit log
   await prisma.auditLog.create({
@@ -1084,11 +1065,11 @@ export const approvePasswordResetRequest = async (requestId: string, adminId: st
       action: 'APPROVE_PASSWORD_RESET_REQUEST',
       targetId: request.picId,
       targetType: 'PICPartner',
-      metadata: { requestId, details: `Admin approved password reset for ${request.pic.email}` },
+      metadata: { requestId, details: `Admin approved password reset and set temp password for ${request.pic.email}` },
     },
   });
 
-  return { message: `Password reset link sent to ${request.pic.email}` };
+  return { message: `Temporary password set for ${request.pic.email}. Please share it securely with them.` };
 };
 
 /**
