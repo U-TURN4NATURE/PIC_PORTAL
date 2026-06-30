@@ -541,6 +541,7 @@ export const getMe = async (userId: string, role: string) => {
       ifscCode: true,
       branchName: true,
       pendingBankDetails: true,
+      mustChangePassword: true,
     },
   });
 
