@@ -237,7 +237,7 @@ export const exportPICsToExcel = async () => {
     orderBy: { createdAt: 'desc' },
     include: {
       wallet: true,
-      _count: { select: { orders: true } },
+      _count: { select: { orders: true, referrals: true } },
     }
   });
 
@@ -272,9 +272,17 @@ export const exportPICsToExcel = async () => {
     { header: 'Preferred Working Area', key: 'preferredWorkingArea', width: 25 },
     { header: 'Preferred District', key: 'preferredDistrict', width: 20 },
     { header: 'Availability', key: 'availability', width: 15 },
+    { header: 'Why Join', key: 'whyJoin', width: 40 },
+    { header: 'Instagram', key: 'instagramProfile', width: 25 },
+    { header: 'Facebook', key: 'facebookProfile', width: 25 },
+    { header: 'LinkedIn', key: 'linkedinProfile', width: 25 },
+    { header: 'Email Verified', key: 'isEmailVerified', width: 15 },
+    { header: 'Policy Accepted', key: 'isPolicyAccepted', width: 15 },
+    { header: 'Profile Completed', key: 'profileCompleted', width: 15 },
     { header: 'Referral Code', key: 'referralCode', width: 15 },
     { header: 'Total Earnings', key: 'totalEarnings', width: 15 },
     { header: 'Total Orders', key: 'totalOrders', width: 15 },
+    { header: 'Total Referrals', key: 'totalReferrals', width: 15 },
     { header: 'Joined At', key: 'createdAt', width: 20 },
   ];
 
@@ -312,9 +320,17 @@ export const exportPICsToExcel = async () => {
       preferredWorkingArea: pic.preferredWorkingArea || 'N/A',
       preferredDistrict: pic.preferredDistrict || 'N/A',
       availability: pic.availability || 'N/A',
+      whyJoin: pic.whyJoin || 'N/A',
+      instagramProfile: pic.instagramProfile || 'N/A',
+      facebookProfile: pic.facebookProfile || 'N/A',
+      linkedinProfile: pic.linkedinProfile || 'N/A',
+      isEmailVerified: pic.isEmailVerified ? 'Yes' : 'No',
+      isPolicyAccepted: pic.isPolicyAccepted ? 'Yes' : 'No',
+      profileCompleted: pic.profileCompleted ? 'Yes' : 'No',
       referralCode: pic.referralCode || 'N/A',
       totalEarnings: pic.wallet?.totalEarnings || 0,
       totalOrders: pic._count?.orders || 0,
+      totalReferrals: pic._count?.referrals || 0,
       createdAt: new Date(pic.createdAt).toLocaleDateString('en-IN')
     });
   });
