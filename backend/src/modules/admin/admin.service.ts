@@ -2,14 +2,18 @@ import prisma from '../../config/database';
 import bcrypt from 'bcryptjs';
 import { createError } from '../../middleware/error.middleware';
 import { PICStatus, PayoutStatus, Prisma } from '@prisma/client';
-import { generateReferralCode } from '../../utils/crypto.utils';
+import { generateReferralCode, generateResetToken } from '../../utils/crypto.utils';
 import { encrypt, decrypt } from '../../utils/crypto.utils';
 import {
   sendApprovalEmail,
   sendRejectionEmail,
   sendPayoutEmail,
+  sendPasswordResetEmail,
 } from '../../services/email.service';
+import { sendWhatsAppOTP } from '../../services/whatsapp.service';
+import { generateOTP } from '../../utils/crypto.utils';
 import { parsePagination } from '../../utils/pagination.utils';
+import ExcelJS from 'exceljs';
 
 // ─────────────────────────────────────────────────
 // Admin Service — Business Logic
@@ -223,6 +227,99 @@ export const getPICById = async (picId: string) => {
   // Remove sensitive fields
   const { password, otpCode, resetToken, otpExpiresAt, resetTokenExpiry, ...safePIC } = pic;
   return safePIC;
+};
+
+/**
+ * Export all PICs to an Excel file with personal details
+ */
+export const exportPICsToExcel = async () => {
+  const pics = await prisma.pICPartner.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      wallet: true,
+      _count: { select: { orders: true } },
+    }
+  });
+
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'U-Turn4Nature Admin';
+  workbook.created = new Date();
+
+  const worksheet = workbook.addWorksheet('PIC Partners');
+
+  worksheet.columns = [
+    { header: 'ID', key: 'id', width: 25 },
+    { header: 'Full Name', key: 'fullName', width: 25 },
+    { header: 'Email', key: 'email', width: 30 },
+    { header: 'Phone', key: 'phone', width: 15 },
+    { header: 'Status', key: 'status', width: 15 },
+    { header: 'Address', key: 'address', width: 40 },
+    { header: 'City', key: 'city', width: 20 },
+    { header: 'State', key: 'state', width: 20 },
+    { header: 'Pincode', key: 'pincode', width: 15 },
+    { header: 'Aadhaar Number', key: 'aadhaarNumber', width: 20 },
+    { header: 'PAN Card', key: 'panCard', width: 15 },
+    { header: 'Bank Account Name', key: 'bankAccountName', width: 25 },
+    { header: 'Bank Name', key: 'bankName', width: 25 },
+    { header: 'Account Number', key: 'bankAccountNumber', width: 25 },
+    { header: 'IFSC Code', key: 'ifscCode', width: 15 },
+    { header: 'Branch Name', key: 'branchName', width: 20 },
+    { header: 'UPI ID', key: 'upiId', width: 25 },
+    { header: 'Occupation', key: 'occupation', width: 20 },
+    { header: 'Years of Experience', key: 'yearsOfExperience', width: 20 },
+    { header: 'Skills', key: 'skills', width: 30 },
+    { header: 'Education', key: 'education', width: 25 },
+    { header: 'Preferred Working Area', key: 'preferredWorkingArea', width: 25 },
+    { header: 'Preferred District', key: 'preferredDistrict', width: 20 },
+    { header: 'Availability', key: 'availability', width: 15 },
+    { header: 'Referral Code', key: 'referralCode', width: 15 },
+    { header: 'Total Earnings', key: 'totalEarnings', width: 15 },
+    { header: 'Total Orders', key: 'totalOrders', width: 15 },
+    { header: 'Joined At', key: 'createdAt', width: 20 },
+  ];
+
+  // Style the header row
+  worksheet.getRow(1).font = { bold: true };
+  worksheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE0E0E0' }
+  };
+
+  pics.forEach(pic => {
+    worksheet.addRow({
+      id: pic.id,
+      fullName: pic.fullName,
+      email: pic.email,
+      phone: pic.phone,
+      status: pic.status,
+      address: pic.address,
+      city: pic.city,
+      state: pic.state,
+      pincode: pic.pincode,
+      aadhaarNumber: pic.aadhaarNumber || 'N/A',
+      panCard: pic.panCard || 'N/A',
+      bankAccountName: pic.bankAccountName || 'N/A',
+      bankName: pic.bankName || 'N/A',
+      bankAccountNumber: pic.bankAccountNumber || 'N/A',
+      ifscCode: pic.ifscCode || 'N/A',
+      branchName: pic.branchName || 'N/A',
+      upiId: pic.upiId || 'N/A',
+      occupation: pic.occupation || 'N/A',
+      yearsOfExperience: pic.yearsOfExperience || 'N/A',
+      skills: pic.skills || 'N/A',
+      education: pic.education || 'N/A',
+      preferredWorkingArea: pic.preferredWorkingArea || 'N/A',
+      preferredDistrict: pic.preferredDistrict || 'N/A',
+      availability: pic.availability || 'N/A',
+      referralCode: pic.referralCode || 'N/A',
+      totalEarnings: pic.wallet?.totalEarnings || 0,
+      totalOrders: pic._count?.orders || 0,
+      createdAt: new Date(pic.createdAt).toLocaleDateString('en-IN')
+    });
+  });
+
+  return workbook;
 };
 
 // ─────────────────────────────────────────────────
@@ -875,9 +972,10 @@ export const resetPICPassword = async (picId: string, newPassword: string, admin
 
   const hashedPassword = await bcrypt.hash(newPassword, 12);
 
+  // Set mustChangePassword = true so PIC is forced to change on next login
   await prisma.pICPartner.update({
     where: { id: picId },
-    data: { password: hashedPassword }
+    data: { password: hashedPassword, mustChangePassword: true }
   });
 
   // Log the action
@@ -888,9 +986,139 @@ export const resetPICPassword = async (picId: string, newPassword: string, admin
       action: 'RESET_PIC_PASSWORD',
       targetId: picId,
       targetType: 'PICPartner',
-      metadata: { details: `Admin reset password for PIC: ${pic.email}` }
+      metadata: { details: `Admin set temporary password for PIC: ${pic.email}` }
     }
   });
 
-  return { message: 'Password reset successfully' };
+  return { message: 'Temporary password set successfully. PIC will be prompted to change it on next login.' };
+};
+
+// ─────────────────────────────────────────────────
+// Password Reset Request Management
+// ─────────────────────────────────────────────────
+
+/**
+ * Get all password reset requests for admin
+ */
+export const getPasswordResetRequests = async (status?: string) => {
+  const where = status && status !== 'all' ? { status: status as any } : {};
+
+  const requests = await prisma.passwordResetRequest.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    include: {
+      pic: {
+        select: {
+          id: true,
+          fullName: true,
+          email: true,
+          phone: true,
+          status: true,
+          profileImage: true,
+        },
+      },
+    },
+  });
+
+  const pendingCount = await prisma.passwordResetRequest.count({ where: { status: 'PENDING' } });
+
+  return { requests, pendingCount };
+};
+
+/**
+ * Admin approves a password reset request
+ * Generates a reset token and sends it to PIC via email + WhatsApp OTP
+ */
+export const approvePasswordResetRequest = async (requestId: string, adminId: string, adminNote?: string) => {
+  const request = await prisma.passwordResetRequest.findUnique({
+    where: { id: requestId },
+    include: { pic: true },
+  });
+
+  if (!request) throw createError('Request not found', 404);
+  if (request.status !== 'PENDING') throw createError('This request has already been processed', 400);
+
+  const resetToken = generateResetToken();
+  const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  // Generate OTP for WhatsApp
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // Update the request status
+  await prisma.passwordResetRequest.update({
+    where: { id: requestId },
+    data: {
+      status: 'APPROVED',
+      adminNote: adminNote || null,
+      resetToken,
+      resetTokenExpiry: resetExpiry,
+    },
+  });
+
+  // Also update the PIC's resetToken for the standard reset flow
+  await prisma.pICPartner.update({
+    where: { id: request.picId },
+    data: {
+      resetToken,
+      resetTokenExpiry: resetExpiry,
+      otpCode: otp,
+      otpExpiresAt: otpExpiry,
+    },
+  });
+
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  const resetUrl = `${frontendUrl}/reset-password/${resetToken}`;
+
+  // Send email reset link
+  sendPasswordResetEmail(request.pic.email, request.pic.fullName, resetUrl, otp).catch(console.error);
+
+  // Send WhatsApp OTP as backup
+  sendWhatsAppOTP(request.pic.phone, otp).catch(console.error);
+
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: adminId,
+      actorRole: 'ADMIN',
+      action: 'APPROVE_PASSWORD_RESET_REQUEST',
+      targetId: request.picId,
+      targetType: 'PICPartner',
+      metadata: { requestId, details: `Admin approved password reset for ${request.pic.email}` },
+    },
+  });
+
+  return { message: `Password reset link sent to ${request.pic.email}` };
+};
+
+/**
+ * Admin rejects a password reset request
+ */
+export const rejectPasswordResetRequest = async (requestId: string, adminId: string, adminNote?: string) => {
+  const request = await prisma.passwordResetRequest.findUnique({
+    where: { id: requestId },
+    include: { pic: true },
+  });
+
+  if (!request) throw createError('Request not found', 404);
+  if (request.status !== 'PENDING') throw createError('This request has already been processed', 400);
+
+  await prisma.passwordResetRequest.update({
+    where: { id: requestId },
+    data: { status: 'REJECTED', adminNote: adminNote || null },
+  });
+
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: adminId,
+      actorRole: 'ADMIN',
+      action: 'REJECT_PASSWORD_RESET_REQUEST',
+      targetId: request.picId,
+      targetType: 'PICPartner',
+      metadata: { requestId, details: `Admin rejected password reset for ${request.pic.email}` },
+    },
+  });
+
+  return { message: 'Password reset request rejected.' };
 };

@@ -81,6 +81,13 @@ enum ActorRole {
   SYSTEM
 }
 
+enum PasswordResetRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
 // ─────────────────────────────────────────────────
 // ADMIN MODEL
 // ─────────────────────────────────────────────────
@@ -176,6 +183,7 @@ model PICPartner {
   otpExpiresAt      DateTime?
   resetToken        String?
   resetTokenExpiry  DateTime?
+  mustChangePassword Boolean   @default(false)
 
   createdAt         DateTime   @default(now())
   updatedAt         DateTime   @updatedAt
@@ -189,6 +197,7 @@ model PICPartner {
   followUpRequests  FollowUpRequest[]
   sales             SaleEntry[]
   policyAcceptances PolicyAcceptanceLog[]
+  passwordResetRequests PasswordResetRequest[]
 
   @@index([email])
   @@index([referralCode])
@@ -199,6 +208,30 @@ model PICPartner {
 // ─────────────────────────────────────────────────
 // WALLET MODEL
 // ─────────────────────────────────────────────────
+
+// ─────────────────────────────────────────────────
+// PASSWORD RESET REQUEST MODEL
+// ─────────────────────────────────────────────────
+
+model PasswordResetRequest {
+  id               String                       @id @default(cuid())
+  picId            String
+  status           PasswordResetRequestStatus   @default(PENDING)
+  requestNote      String?                      @db.Text  // PIC ki reason
+  adminNote        String?                      @db.Text  // Admin ka response
+  resetToken       String?                      // One-time token sent to PIC after approval
+  resetTokenExpiry DateTime?
+  createdAt        DateTime                     @default(now())
+  updatedAt        DateTime                     @updatedAt
+
+  pic              PICPartner                   @relation(fields: [picId], references: [id], onDelete: Cascade)
+
+  @@index([picId])
+  @@index([status])
+  @@map("password_reset_requests")
+}
+
+
 
 model Wallet {
   id               String     @id @default(cuid())

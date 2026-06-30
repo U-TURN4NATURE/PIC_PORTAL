@@ -16,6 +16,7 @@ interface User {
   isPolicyAccepted?: boolean;
   panCard?: string;
   aadhaarNumber?: string;
+  mustChangePassword?: boolean;
 }
 
 interface AuthState {

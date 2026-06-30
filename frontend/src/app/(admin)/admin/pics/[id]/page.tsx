@@ -406,37 +406,77 @@ export default function PICDetailPage() {
       )}
 
       {resetPasswordModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white border border-brand-sage/20 shadow-xl rounded-2xl w-full max-w-md p-6">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-brand-forest font-semibold text-lg">Reset Password</h3>
-              <button onClick={() => setResetPasswordModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><XCircle className="w-5 h-5 text-gray-400" /></button>
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-gradient-to-r from-brand-forest to-brand-olive p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <Key className="w-5 h-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg">Set Temporary Password</h3>
+                    <p className="text-white/70 text-sm">{pic.fullName}</p>
+                  </div>
+                </div>
+                <button onClick={() => setResetPasswordModal(false)} className="p-1.5 hover:bg-white/20 rounded-lg transition-colors">
+                  <XCircle className="w-5 h-5 text-white/70" />
+                </button>
+              </div>
             </div>
-            <div className="space-y-4">
+
+            <div className="p-6 space-y-4">
+              {/* How it works note */}
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800 space-y-1">
+                <p className="font-semibold">🔐 How Temporary Password Works:</p>
+                <ul className="space-y-0.5 list-disc list-inside text-amber-700">
+                  <li>You set a temporary password for this PIC</li>
+                  <li>PIC logs in with this temporary password</li>
+                  <li>System automatically asks them to set a new password</li>
+                  <li>The new password is only known to the PIC — not to you</li>
+                </ul>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Temporary Password</label>
                 <input
                   type="text"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min. 6 characters)"
+                  placeholder="Enter temporary password (min. 6 characters)"
                   className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  Share this password securely with the PIC. They will be required to change it after logging in.
+                </p>
               </div>
-              <div className="flex gap-3 pt-2">
-                <button onClick={() => setResetPasswordModal(false)} className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">Cancel</button>
-                <button 
-                  onClick={handleResetPassword} 
-                  disabled={actionLoading === 'resetPassword' || newPassword.length < 6} 
-                  className="flex-1 py-2.5 bg-brand-gold text-gray-900 rounded-xl text-sm font-semibold hover:bg-yellow-400 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={() => setResetPasswordModal(false)}
+                  className="flex-1 py-2.5 border border-gray-300 bg-white rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
                 >
-                  {actionLoading === 'resetPassword' ? <RefreshCw className="w-4 h-4 animate-spin" /> : 'Reset Password'}
+                  Cancel
+                </button>
+                <button
+                  onClick={handleResetPassword}
+                  disabled={actionLoading === 'resetPassword' || newPassword.length < 6}
+                  className="flex-1 py-2.5 bg-brand-forest text-white rounded-xl text-sm font-semibold hover:bg-brand-forest/90 disabled:opacity-60 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-brand-forest/20"
+                >
+                  {actionLoading === 'resetPassword' ? (
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <><Key className="w-4 h-4" /> Set Temp Password</>
+                  )}
                 </button>
               </div>
             </div>
           </div>
         </div>
       )}
+
+
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

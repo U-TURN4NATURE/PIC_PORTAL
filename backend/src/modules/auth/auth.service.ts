@@ -127,12 +127,14 @@ export const sendLoginOTP = async (email: string, password: string) => {
   return {
     bypass: true,
     token,
+    mustChangePassword: pic.mustChangePassword,
     user: {
       id: pic.id,
       name: pic.fullName,
       email: pic.email,
       role: 'PIC',
       status: pic.status,
+      mustChangePassword: pic.mustChangePassword,
     }
   };
 };
@@ -572,4 +574,81 @@ export const resendOTP = async (email: string) => {
   }
 
   return { message: 'A new OTP has been sent to your WhatsApp number.' };
+};
+
+// ─────────────────────────────────────────────────
+// Password Reset Request (Admin Approval Flow)
+// ─────────────────────────────────────────────────
+
+/**
+ * Submit a password reset request to admin (when user is logged out / forgets password)
+ * Public endpoint — identified by email only
+ */
+export const submitPasswordResetRequestPublic = async (email: string, requestNote?: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+  // Don't reveal if account exists
+  if (!pic) return { message: 'If an account with this email exists, your request has been submitted for admin review.' };
+
+  // Check if there's already a pending request
+  const existing = await prisma.passwordResetRequest.findFirst({
+    where: { picId: pic.id, status: 'PENDING' },
+  });
+  if (existing) {
+    throw createError('You already have a pending password reset request. Please wait for admin to review it.', 409);
+  }
+
+  await prisma.passwordResetRequest.create({
+    data: {
+      picId: pic.id,
+      status: 'PENDING',
+      requestNote: requestNote || null,
+    },
+  });
+
+  return { message: 'Your password reset request has been submitted. Admin will review it and you will be notified shortly.' };
+};
+
+/**
+ * Submit a password reset request (authenticated — PIC is logged in)
+ */
+export const submitPasswordResetRequest = async (picId: string, requestNote?: string) => {
+  // Check if there's already a pending request
+  const existing = await prisma.passwordResetRequest.findFirst({
+    where: { picId, status: 'PENDING' },
+  });
+  if (existing) {
+    throw createError('You already have a pending password reset request. Please wait for admin to review it.', 409);
+  }
+
+  await prisma.passwordResetRequest.create({
+    data: {
+      picId,
+      status: 'PENDING',
+      requestNote: requestNote || null,
+    },
+  });
+
+  return { message: 'Your password reset request has been submitted. Admin will review it and you will be notified shortly.' };
+};
+
+/**
+ * Change password when mustChangePassword is true (force-change flow)
+ */
+export const forceChangePassword = async (picId: string, newPassword: string) => {
+  const pic = await prisma.pICPartner.findUnique({ where: { id: picId } });
+  if (!pic) throw createError('Account not found', 404);
+
+  const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+  await prisma.pICPartner.update({
+    where: { id: picId },
+    data: {
+      password: hashedPassword,
+      mustChangePassword: false,
+      resetToken: null,
+      resetTokenExpiry: null,
+    },
+  });
+
+  return { message: 'Password changed successfully. Welcome!' };
 };

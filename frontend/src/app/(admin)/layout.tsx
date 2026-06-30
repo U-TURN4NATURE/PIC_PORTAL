@@ -19,6 +19,7 @@ import {
   Flag,
   Megaphone,
   Building2,
+  KeyRound,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -28,10 +29,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [pendingResetCount, setPendingResetCount] = useState(0);
 
   useEffect(() => {
     initAuth();
   }, []);
+
+  // Fetch pending password reset requests count
+  useEffect(() => {
+    if (!isAuthenticated || user?.role !== 'ADMIN') return;
+    api.get('/admin/password-reset-requests').then(res => {
+      setPendingResetCount(res.data.data?.pendingCount || 0);
+    }).catch(() => {});
+  }, [isAuthenticated, user, pathname]);
 
   useEffect(() => {
     // Only redirect when loading is fully done and user is definitely not admin
@@ -69,6 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Customers', href: '/admin/customers', icon: Users },
     { name: 'Follow-up Requests', href: '/admin/followups', icon: Flag },
     { name: 'Bank Approvals', href: '/admin/bank-approvals', icon: Building2 },
+    { name: 'Password Resets', href: '/admin/password-reset-requests', icon: KeyRound, badge: pendingResetCount },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
     { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
@@ -107,6 +118,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname.startsWith(item.href);
+            const badge = (item as any).badge;
             return (
               <Link 
                 key={item.name} 
@@ -114,7 +126,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-colors ${isActive ? 'bg-brand-forest/10 text-brand-forest border border-brand-forest/20 shadow-sm' : 'text-gray-600 hover:text-brand-forest hover:bg-brand-sage/10'}`}
               >
                 <Icon className={`w-5 h-5 ${isActive ? 'text-brand-forest' : 'text-gray-500'}`} />
-                <span className="font-medium">{item.name}</span>
+                <span className="font-medium flex-1">{item.name}</span>
+                {badge > 0 && (
+                  <span className="w-5 h-5 bg-red-500 text-white rounded-full text-[10px] font-bold flex items-center justify-center">
+                    {badge > 9 ? '9+' : badge}
+                  </span>
+                )}
               </Link>
             );
           })}

@@ -150,6 +150,52 @@ export const resetPasswordWithOTP = async (req: Request, res: Response, next: Ne
   }
 };
 
+/**
+ * POST /auth/request-password-reset
+ * PIC submits a password reset request for admin approval (public — no auth needed)
+ */
+export const submitPasswordResetRequestPublic = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { email, requestNote } = req.body;
+    if (!email) return next(new Error('Email is required'));
+    const result = await authService.submitPasswordResetRequestPublic(email, requestNote);
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/submit-reset-request
+ * PIC submits a password reset request (authenticated)
+ */
+export const submitPasswordResetRequest = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const picId = req.user!.id;
+    const { requestNote } = req.body;
+    const result = await authService.submitPasswordResetRequest(picId, requestNote);
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /auth/force-change-password
+ * PIC must change password after admin set a temp password
+ */
+export const forceChangePassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const picId = req.user!.id;
+    const { password } = req.body;
+    if (!password) return next(new Error('New password is required'));
+    const result = await authService.forceChangePassword(picId, password);
+    res.status(200).json(successResponse(null, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getMe = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const user = await authService.getMe(req.user!.id, req.user!.role);

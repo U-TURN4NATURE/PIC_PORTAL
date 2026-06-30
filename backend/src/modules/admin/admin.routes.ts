@@ -11,6 +11,7 @@ router.use(protect, restrictToAdmin);
 router.get('/dashboard', adminController.getDashboardStats);
 
 // PIC Management
+router.get('/export-pics', adminController.exportPICs);
 router.get('/pics', adminController.getPICs);
 router.get('/pics/:id', adminController.getPICById);
 router.get('/pics/:id/policy-logs', adminController.getPICPolicyLogs);
@@ -52,5 +53,13 @@ router.get('/policies/logs', adminController.getAllPolicyLogs);
 router.post('/policies/upload', upload.single('document'), adminController.uploadPolicy);
 router.post('/policies/reset-acceptance', adminController.resetPolicyAcceptance);
 
+// ─────────────────────────────────────────────────
+// PASSWORD RESET REQUESTS
+// ─────────────────────────────────────────────────
+router.get('/password-reset-requests', adminController.getPasswordResetRequests);
+router.post('/password-reset-requests/:id/approve', adminController.approvePasswordResetRequest);
+router.post('/password-reset-requests/:id/reject', adminController.rejectPasswordResetRequest);
+
 export default router;
+
 

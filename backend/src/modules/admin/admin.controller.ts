@@ -109,6 +109,26 @@ export const deletePIC = async (req: Request, res: Response, next: NextFunction)
   }
 };
 
+export const exportPICs = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const workbook = await adminService.exportPICsToExcel();
+    
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename=PIC_Partners_Export_${new Date().toISOString().split('T')[0]}.xlsx`
+    );
+
+    await workbook.xlsx.write(res);
+    res.end();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getOrders = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { picId, status, startDate, endDate, page, limit } = req.query;
@@ -332,3 +352,38 @@ export const resetPICPassword = async (req: Request, res: Response, next: NextFu
     next(error);
   }
 };
+
+// ─────────────────────────────────────────────────
+// PASSWORD RESET REQUEST CONTROLLERS
+// ─────────────────────────────────────────────────
+
+export const getPasswordResetRequests = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { status } = req.query;
+    const result = await adminService.getPasswordResetRequests(status as string);
+    res.status(200).json(successResponse(result));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const approvePasswordResetRequest = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { adminNote } = req.body;
+    const result = await adminService.approvePasswordResetRequest(req.params.id, req.user!.id, adminNote);
+    res.status(200).json(successResponse(result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const rejectPasswordResetRequest = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { adminNote } = req.body;
+    const result = await adminService.rejectPasswordResetRequest(req.params.id, req.user!.id, adminNote);
+    res.status(200).json(successResponse(result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+

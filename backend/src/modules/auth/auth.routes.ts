@@ -53,6 +53,20 @@ router.post('/reset-password-otp', authLimiter, authController.resetPasswordWith
 router.post('/reset-password/:token', authLimiter, validate(resetPasswordSchema), authController.resetPassword);
 
 // ─────────────────────────────────────────────────
+// Admin Approval Password Reset Routes
+// ─────────────────────────────────────────────────
+
+// Submit password reset request to admin (public — no login needed)
+router.post('/request-password-reset', authLimiter, authController.submitPasswordResetRequestPublic);
+
+// Submit password reset request (authenticated PIC)
+router.post('/submit-reset-request', protect, authController.submitPasswordResetRequest);
+
+// Force change password (when mustChangePassword === true after admin set temp password)
+router.post('/force-change-password', protect, authController.forceChangePassword);
+
+
+// ─────────────────────────────────────────────────
 // Google OAuth Routes
 // ─────────────────────────────────────────────────
 

@@ -29,6 +29,7 @@ import { toast } from 'sonner';
 import { useState, useEffect, useCallback } from 'react';
 import PolicyModal from '@/components/PolicyModal';
 import KycModal from '@/components/KycModal';
+import ForceChangePasswordModal from '@/components/ForceChangePasswordModal';
 import NotificationBell from '@/components/NotificationBell';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
@@ -243,6 +244,9 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
   // Wait until isSyncing is false to prevent flashing the modal for users who have data but local storage is outdated
   const showKycModal = !isSyncing && !showPolicyModal && user.status === 'ACTIVE' && (!user.panCard || !user.aadhaarNumber);
 
+  // Force change password: Admin set a temp password — user must change before continuing
+  const showForceChangePassword = !!(user as any).mustChangePassword;
+
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Referrals', href: '/dashboard/referral', icon: User },
@@ -261,6 +265,15 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7] text-gray-900 flex">
+      {/* Force Change Password — highest priority, blocks everything */}
+      {showForceChangePassword && (
+        <ForceChangePasswordModal
+          onSuccess={() => {
+            initAuth(); // Refetch user data — mustChangePassword will be false after change
+          }}
+        />
+      )}
+
       {showPolicyModal && (
         <PolicyModal
           onAccept={() => {

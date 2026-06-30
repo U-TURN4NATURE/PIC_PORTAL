@@ -14,6 +14,7 @@ export default function AdminPICsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
+  const [isExporting, setIsExporting] = useState(false);
 
   // Debounce search term to avoid spamming the API
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -57,30 +58,31 @@ export default function AdminPICsPage() {
     }
   };
 
-  const handleExportCSV = () => {
-    if (pics.length === 0) { toast.error('No data to export'); return; }
-    const headers = ['Name', 'Email', 'Phone', 'City', 'State', 'Status', 'Referral Code', 'Total Earnings', 'Orders', 'Joined'];
-    const rows = pics.map((p: any) => [
-      p.fullName,
-      p.email,
-      p.phone,
-      p.city,
-      p.state,
-      p.status,
-      p.referralCode || '',
-      p.wallet?.totalEarnings || 0,
-      p._count?.orders || 0,
-      new Date(p.createdAt).toLocaleDateString('en-IN'),
-    ]);
-    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `pic-partners-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Exported ${pics.length} records`);
+  const handleExportExcel = async () => {
+    try {
+      setIsExporting(true);
+      const response = await api.get('/admin/export-pics', {
+        responseType: 'blob',
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `PIC_Partners_Export_${new Date().toISOString().split('T')[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      
+      // cleanup
+      link.parentNode?.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      toast.success('Excel file downloaded successfully');
+    } catch (error) {
+      toast.error('Failed to export Excel file');
+      console.error(error);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   return (
@@ -91,13 +93,13 @@ export default function AdminPICsPage() {
           <p className="text-gray-500">View and manage Partners in Change applications and accounts.</p>
         </div>
         <button
-          id="export-pics-csv-btn"
-          onClick={handleExportCSV}
-          disabled={pics.length === 0}
+          id="export-pics-excel-btn"
+          onClick={handleExportExcel}
+          disabled={isExporting}
           className="flex items-center gap-2 px-4 py-2 bg-brand-forest text-white text-sm font-semibold rounded-xl hover:bg-brand-forest/90 transition-colors disabled:opacity-50 shadow-sm shadow-brand-forest/20"
         >
-          <Download className="w-4 h-4" />
-          Export CSV
+          <Download className={`w-4 h-4 ${isExporting ? 'animate-bounce' : ''}`} />
+          {isExporting ? 'Exporting...' : 'Export Excel'}
         </button>
       </div>
 
