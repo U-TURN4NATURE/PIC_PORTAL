@@ -75,7 +75,21 @@ export default function PICPolicyPage() {
     const loadPdf = async () => {
       setIsPdfLoading(true);
       try {
-        // All our policy URLs are protected API routes (/pic/...) so always use api client
+        const isExternal = activePolicy.fileUrl.startsWith('http');
+        
+        if (isExternal) {
+          // If it's an external PDF (e.g. Cloudinary), use Google Docs viewer to avoid Chrome native viewer issues
+          if (activePolicy.fileUrl.toLowerCase().endsWith('.pdf')) {
+            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(activePolicy.fileUrl)}&embedded=true`;
+            setPdfBlobUrl(viewerUrl);
+          } else {
+            setPdfBlobUrl(activePolicy.fileUrl);
+          }
+          setIsPdfLoading(false);
+          return;
+        }
+
+        // For internal protected routes
         const response = await api.get(activePolicy.fileUrl, {
           responseType: 'blob',
         });
