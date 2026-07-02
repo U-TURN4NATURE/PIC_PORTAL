@@ -322,6 +322,16 @@ export const resetPolicyAcceptance = async (req: Request, res: Response, next: N
   }
 };
 
+export const deletePolicy = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const result = await adminService.deletePolicy(id);
+    res.status(200).json(successResponse(result, result.message));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getPICPolicyLogs = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const logs = await adminService.getPICPolicyLogs(req.params.id);

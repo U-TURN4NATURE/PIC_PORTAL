@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, ShieldCheck, AlertCircle, Search, FileText } from 'lucide-react';
+import { Loader2, ShieldCheck, AlertCircle, Search, FileText, Trash2 } from 'lucide-react';
 
 export default function AdminPoliciesPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -14,23 +14,24 @@ export default function AdminPoliciesPage() {
   const [logs, setLogs] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const fetchData = async () => {
+    try {
+      const [policyRes, logsRes] = await Promise.all([
+        api.get('/admin/policies'),
+        api.get('/admin/policies/logs')
+      ]);
+      
+      if (policyRes.data.data) setPolicies(policyRes.data.data);
+      if (logsRes.data.data) setLogs(logsRes.data.data);
+    } catch (error) {
+      console.error('Failed to load policies data', error);
+      toast.error('Failed to load policies data');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [policyRes, logsRes] = await Promise.all([
-          api.get('/admin/policies'),
-          api.get('/admin/policies/logs')
-        ]);
-        
-        if (policyRes.data.data) setPolicies(policyRes.data.data);
-        if (logsRes.data.data) setLogs(logsRes.data.data);
-      } catch (error) {
-        console.error('Failed to load policies data', error);
-        toast.error('Failed to load policies data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchData();
   }, []);
 
@@ -56,6 +57,17 @@ export default function AdminPoliciesPage() {
       toast.error(error.response?.data?.message || 'Failed to upload policy');
     } finally {
       setUploadingPolicy(false);
+    }
+  };
+
+  const handleDeletePolicy = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this policy?')) return;
+    try {
+      await api.delete(`/admin/policies/${id}`);
+      toast.success('Policy deleted successfully');
+      fetchData(); // Refresh list
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to delete policy');
     }
   };
 
@@ -158,7 +170,19 @@ export default function AdminPoliciesPage() {
                       </div>
                       <div className="text-sm text-gray-500 flex items-center justify-between mt-2">
                         <span>Version: {p.version}</span>
-                        <a href={p.fileUrl} target="_blank" rel="noreferrer" className="text-brand-forest hover:underline">View PDF</a>
+                        <div className="flex items-center gap-3">
+                          <a href={p.fileUrl} target="_blank" rel="noreferrer" className="text-brand-forest hover:underline font-medium text-xs flex items-center gap-1">
+                            <FileText className="w-3.5 h-3.5" />
+                            View PDF
+                          </a>
+                          <button
+                            onClick={() => handleDeletePolicy(p.id)}
+                            className="text-red-500 hover:text-red-600 transition-colors"
+                            title="Delete Policy"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
                     </li>
                   ))}

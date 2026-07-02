@@ -958,6 +958,18 @@ export const resetPolicyAcceptance = async () => {
   return { updatedCount: result.count };
 };
 
+export const deletePolicy = async (policyId: string) => {
+  const policy = await prisma.policyDocument.findUnique({
+    where: { id: policyId }
+  });
+  if (!policy) throw createError('Policy not found', 404);
+  
+  await prisma.policyDocument.delete({
+    where: { id: policyId }
+  });
+  return { success: true, message: 'Policy deleted successfully' };
+};
+
 export const getPICPolicyLogs = async (picId: string) => {
   return prisma.policyAcceptanceLog.findMany({
     where: { picId },

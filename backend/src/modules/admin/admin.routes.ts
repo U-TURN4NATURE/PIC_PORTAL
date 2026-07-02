@@ -52,6 +52,7 @@ router.get('/policies', adminController.getPolicies);
 router.get('/policies/logs', adminController.getAllPolicyLogs);
 router.post('/policies/upload', upload.single('document'), adminController.uploadPolicy);
 router.post('/policies/reset-acceptance', adminController.resetPolicyAcceptance);
+router.delete('/policies/:id', adminController.deletePolicy);
 
 // ─────────────────────────────────────────────────
 // PASSWORD RESET REQUESTS
