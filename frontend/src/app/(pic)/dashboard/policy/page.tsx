@@ -78,13 +78,9 @@ export default function PICPolicyPage() {
         const isExternal = activePolicy.fileUrl.startsWith('http');
         
         if (isExternal) {
-          // If it's an external PDF (e.g. Cloudinary), use Google Docs viewer to avoid Chrome native viewer issues
-          if (activePolicy.fileUrl.toLowerCase().endsWith('.pdf')) {
-            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(activePolicy.fileUrl)}&embedded=true`;
-            setPdfBlobUrl(viewerUrl);
-          } else {
-            setPdfBlobUrl(activePolicy.fileUrl);
-          }
+          // For external Cloudinary PDFs, directly use the URL in the iframe
+          // Google Docs viewer sometimes fails with "No preview available" for Cloudinary links
+          setPdfBlobUrl(activePolicy.fileUrl);
           setIsPdfLoading(false);
           return;
         }

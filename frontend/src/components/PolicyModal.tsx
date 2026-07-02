@@ -79,11 +79,7 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
       
       const isProtected = activePolicy.fileUrl.startsWith('/pic') || activePolicy.fileUrl.startsWith('/api');
       if (!isProtected) {
-        if (activePolicy.fileUrl.toLowerCase().endsWith('.pdf')) {
-          setPdfBlobUrl(`https://docs.google.com/viewer?url=${encodeURIComponent(activePolicy.fileUrl)}&embedded=true`);
-        } else {
-          setPdfBlobUrl(activePolicy.fileUrl);
-        }
+        setPdfBlobUrl(activePolicy.fileUrl);
         setLoadState('ready');
         return;
       }
