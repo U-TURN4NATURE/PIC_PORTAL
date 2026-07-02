@@ -400,7 +400,7 @@ export default function ReferralPage() {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-gray-100 rounded-xl p-1 w-fit">
+      <div className="flex flex-wrap gap-1 bg-gray-100 rounded-xl p-1 w-fit">
         {[
           { key: 'add', label: 'Add Referral', icon: <UserPlus className="w-4 h-4" /> },
           { key: 'my-referrals', label: `Follow by Me (${referrals.filter(r => r.handledBy === 'PIC').length})`, icon: <Users className="w-4 h-4" /> },
@@ -419,6 +419,13 @@ export default function ReferralPage() {
             {tab.icon}{tab.label}
           </button>
         ))}
+        {/* Export Button — always visible */}
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all bg-brand-forest text-white hover:bg-brand-olive ml-1"
+        >
+          <Download className="w-4 h-4" /> Export CSV
+        </button>
       </div>
 
       {/* Tab: Add Referral */}
