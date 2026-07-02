@@ -17,15 +17,31 @@ import {
 const step2Schema = z.object({
   aadhaarNumber: z.string().regex(/^\d{12}$/, '12-digit Aadhaar number required').or(z.literal('')),
   panCard: z.string().regex(/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/, 'Invalid PAN format (e.g. ABCDE1234F)').or(z.literal('')),
-  bankAccountName: z.string().min(2, 'Account holder name required'),
-  bankName: z.string().min(2, 'Bank name required'),
-  bankAccountNumber: z.string().min(8, 'Valid account number required'),
-  ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Invalid IFSC (e.g. SBIN0001234)'),
-  branchName: z.string().min(2, 'Branch name required'),
+  bankAccountName: z.string().optional().or(z.literal('')),
+  bankName: z.string().optional().or(z.literal('')),
+  bankAccountNumber: z.string().optional().or(z.literal('')),
+  ifscCode: z.string().regex(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Invalid IFSC (e.g. SBIN0001234)').or(z.literal('')),
+  branchName: z.string().optional().or(z.literal('')),
   upiId: z.string().optional().or(z.literal('')),
   policyAccepted: z.boolean().refine((val) => val === true, {
     message: "You must read and accept the Policy Document",
   }),
+}).superRefine((data, ctx) => {
+  const hasUpi = !!(data.upiId && data.upiId.trim());
+  const hasBankAll = !!(data.bankAccountName?.trim() && data.bankName?.trim() && data.bankAccountNumber?.trim() && data.ifscCode?.trim() && data.branchName?.trim());
+
+  if (!hasUpi && !hasBankAll) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'कम से कम UPI ID या पूरी Bank Details भरना ज़रूरी है।',
+      path: ['upiId'],
+    });
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'कम से कम UPI ID या पूरी Bank Details भरना ज़रूरी है।',
+      path: ['bankAccountName'],
+    });
+  }
 });
 
 // ─── Step 3 Schema ───────────────────────────────
@@ -155,9 +171,21 @@ export default function CompleteProfilePage() {
   const [aadhaarFile, setAadhaarFile] = useState<FileState>({ file: null, preview: null, name: '' });
   const [panFile, setPanFile] = useState<FileState>({ file: null, preview: null, name: '' });
   const [resumeFile, setResumeFile] = useState<FileState>({ file: null, preview: null, name: '' });
+  const [activePolicies, setActivePolicies] = useState<{id: string; title: string; fileUrl: string}[]>([]);
 
   const form2 = useForm<Step2Values>({ resolver: zodResolver(step2Schema), mode: 'onTouched' });
   const form3 = useForm<Step3Values>({ resolver: zodResolver(step3Schema), mode: 'onTouched' });
+
+  // Fetch active policies for the checkbox label
+  useEffect(() => {
+    api.get('/pic/policies').then(res => {
+      const data = res.data.data || [];
+      if (data.length > 0) setActivePolicies(data);
+      else setActivePolicies([{ id: 'static', title: 'PIC Policy Document', fileUrl: '/policy-document.pdf' }]);
+    }).catch(() => {
+      setActivePolicies([{ id: 'static', title: 'PIC Policy Document', fileUrl: '/policy-document.pdf' }]);
+    });
+  }, []);
 
   // Pre-fill PAN and Aadhaar if user already has them
   useEffect(() => {
@@ -315,34 +343,56 @@ export default function CompleteProfilePage() {
 
               {/* Bank Details */}
               <section>
-                <div className="flex items-center gap-2 mb-4">
+                <div className="flex items-center gap-2 mb-2">
                   <Building className="w-4 h-4 text-brand-forest" />
-                  <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Bank Information</h2>
+                  <h2 className="text-sm font-semibold text-brand-forest uppercase tracking-wide">Payment Details</h2>
+                  <span className="ml-1 text-xs font-bold text-red-500">* (कम से कम एक ज़रूरी)</span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Field label="Account Holder Name" required error={form2.formState.errors.bankAccountName?.message}>
-                    <input {...form2.register('bankAccountName')} placeholder="John Doe" className={inputClass} />
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800 flex items-start gap-2">
+                  <span className="text-base">ℹ️</span>
+                  <span><strong>UPI ID या Bank Details</strong> — दोनों में से कम से कम एक भरना अनिवार्य है। चाहें तो दोनों भर सकते हैं।</span>
+                </div>
+
+                {/* UPI Section */}
+                <div className="mb-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                  <p className="text-xs font-bold text-purple-700 mb-3 uppercase tracking-wide">📱 Option 1 — UPI ID</p>
+                  <Field label="UPI ID" error={form2.formState.errors.upiId?.message}>
+                    <input {...form2.register('upiId')} placeholder="yourname@upi या yourphone@bank" className={inputClass} />
                   </Field>
-                  <Field label="Bank Name" required error={form2.formState.errors.bankName?.message}>
-                    <input {...form2.register('bankName')} placeholder="State Bank of India" className={inputClass} />
-                  </Field>
-                  <Field label="Account Number" required error={form2.formState.errors.bankAccountNumber?.message}>
-                    <input {...form2.register('bankAccountNumber')} placeholder="1234567890" className={inputClass} />
-                  </Field>
-                  <Field label="IFSC Code" required error={form2.formState.errors.ifscCode?.message}>
-                    <input {...form2.register('ifscCode')} placeholder="SBIN0001234" className={`${inputClass} uppercase`} />
-                  </Field>
-                  <Field label="Branch Name" required error={form2.formState.errors.branchName?.message}>
-                    <input {...form2.register('branchName')} placeholder="Connaught Place" className={inputClass} />
-                  </Field>
-                  <Field label="UPI ID (Optional)" error={form2.formState.errors.upiId?.message}>
-                    <input {...form2.register('upiId')} placeholder="yourname@upi" className={inputClass} />
-                  </Field>
+                </div>
+
+                {/* OR Divider */}
+                <div className="flex items-center gap-3 my-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <span className="text-xs font-bold text-gray-400 bg-white px-2">OR</span>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+
+                {/* Bank Section */}
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                  <p className="text-xs font-bold text-blue-700 mb-3 uppercase tracking-wide">🏦 Option 2 — Bank Account Details</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Field label="Account Holder Name" error={form2.formState.errors.bankAccountName?.message}>
+                      <input {...form2.register('bankAccountName')} placeholder="John Doe" className={inputClass} />
+                    </Field>
+                    <Field label="Bank Name" error={form2.formState.errors.bankName?.message}>
+                      <input {...form2.register('bankName')} placeholder="State Bank of India" className={inputClass} />
+                    </Field>
+                    <Field label="Account Number" error={form2.formState.errors.bankAccountNumber?.message}>
+                      <input {...form2.register('bankAccountNumber')} placeholder="1234567890" className={inputClass} />
+                    </Field>
+                    <Field label="IFSC Code" error={form2.formState.errors.ifscCode?.message}>
+                      <input {...form2.register('ifscCode')} placeholder="SBIN0001234" className={`${inputClass} uppercase`} />
+                    </Field>
+                    <Field label="Branch Name" error={form2.formState.errors.branchName?.message}>
+                      <input {...form2.register('branchName')} placeholder="Connaught Place" className={inputClass} />
+                    </Field>
+                  </div>
                 </div>
               </section>
 
-              <div className="flex items-start gap-3 py-2">
-                <div className="flex items-center h-5">
+              <div className="flex items-start gap-3 py-2 bg-orange-50 border border-orange-200 rounded-xl p-4">
+                <div className="flex items-center h-5 mt-0.5">
                   <input
                     id="policyAccepted"
                     type="checkbox"
@@ -350,16 +400,35 @@ export default function CompleteProfilePage() {
                     {...form2.register('policyAccepted')}
                   />
                 </div>
-                <div className="text-sm">
-                  <label htmlFor="policyAccepted" className="font-medium text-gray-700">
-                    I have read and agree to the{' '}
-                    <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest hover:underline font-semibold">
-                      Policy Document
-                    </a>
-                    . <span className="text-red-500">*</span>
+                <div className="text-sm flex-1">
+                  <label htmlFor="policyAccepted" className="font-medium text-gray-700 cursor-pointer">
+                    Maine padhkar samajh liya hai aur main sehmat hoon:
+                    <span className="text-red-500"> *</span>
                   </label>
+                  <ul className="mt-2 space-y-1">
+                    {activePolicies.length > 0 ? activePolicies.map((pol, i) => (
+                      <li key={pol.id} className="flex items-center gap-2">
+                        <span className="text-brand-forest font-bold text-xs">{i + 1}.</span>
+                        <a
+                          href={pol.fileUrl.startsWith('/pic') ? '#' : pol.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={pol.fileUrl.startsWith('/pic') ? (e) => { e.preventDefault(); window.open('/policy-document.pdf', '_blank'); } : undefined}
+                          className="text-brand-forest hover:underline font-semibold text-xs"
+                        >
+                          {pol.title}
+                        </a>
+                      </li>
+                    )) : (
+                      <li>
+                        <a href="/policy-document.pdf" target="_blank" rel="noopener noreferrer" className="text-brand-forest hover:underline font-semibold text-xs">
+                          PIC Policy Document
+                        </a>
+                      </li>
+                    )}
+                  </ul>
                   {form2.formState.errors.policyAccepted && (
-                    <p className="text-red-500 text-xs mt-1">{form2.formState.errors.policyAccepted.message}</p>
+                    <p className="text-red-500 text-xs mt-2 font-semibold">{form2.formState.errors.policyAccepted.message}</p>
                   )}
                 </div>
               </div>

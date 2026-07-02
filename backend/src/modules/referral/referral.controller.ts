@@ -112,8 +112,8 @@ export const handleUpdateReferralStatus = async (req: Request, res: Response): P
 
 export const handleUpdateReferralSales = async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { salesAmount, commissionRate } = req.body;
-  const data = await updateReferralSales(id, Number(salesAmount), commissionRate ? Number(commissionRate) : undefined);
+  const { salesAmount, commissionRate, saleDate } = req.body;
+  const data = await updateReferralSales(id, Number(salesAmount), commissionRate ? Number(commissionRate) : undefined, saleDate);
   res.json({ success: true, data });
 };
 
@@ -126,8 +126,8 @@ export const handleGetSaleHistory = async (req: Request, res: Response): Promise
 export const handleUpdateSaleEntry = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { saleId } = req.params;
-    const { saleAmount, commissionRate } = req.body;
-    const result = await updateSaleEntry(saleId, { saleAmount, commissionRate });
+    const { saleAmount, commissionRate, saleDate } = req.body;
+    const result = await updateSaleEntry(saleId, { saleAmount, commissionRate, saleDate });
     res.status(200).json({ status: 'success', data: result });
   } catch (error) {
     next(error);

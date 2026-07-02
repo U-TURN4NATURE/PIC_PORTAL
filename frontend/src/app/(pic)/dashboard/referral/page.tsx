@@ -5,7 +5,7 @@ import api from '@/lib/api';
 import { toast } from 'sonner';
 import {
   UserPlus, Users, Phone, Mail, Flag, CheckCircle2,
-  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X, Search, Pencil, Check
+  Clock, TrendingUp, XCircle, Star, RefreshCw, ChevronDown, X, Search, Pencil, Check, Download
 } from 'lucide-react';
 
 // ─────────────────────────────────────────────────
@@ -341,6 +341,38 @@ export default function ReferralPage() {
       });
   }, [referrals, activeTab, searchQuery, statusFilter]);
 
+  // Export referrals as CSV
+  const handleExportCSV = () => {
+    const toExport = activeTab === 'follow-ups' ? [] : filteredReferrals;
+    if (toExport.length === 0) { toast.error('Koi referral nahi hai export karne ke liye'); return; }
+
+    const headers = ['Name', 'Phone', 'Email', 'Status', 'Total Sales (₹)', 'Commission (₹)', 'Referred On'];
+    const rows = toExport.map(r => [
+      r.personName,
+      r.personPhone,
+      r.personEmail || '',
+      r.status,
+      r.totalSalesAmount.toFixed(0),
+      r.commissionAmount.toFixed(2),
+      new Date(r.createdAt).toLocaleDateString('en-IN'),
+    ]);
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `referrals_${activeTab}_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`${toExport.length} referrals exported successfully!`);
+  };
+
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -583,6 +615,12 @@ export default function ReferralPage() {
               </button>
             )}
             <span className="text-xs text-gray-400 ml-auto">{filteredReferrals.length} result{filteredReferrals.length !== 1 ? 's' : ''}</span>
+            <button
+              onClick={handleExportCSV}
+              className="flex items-center gap-1.5 px-3 py-2 bg-brand-forest text-white rounded-xl text-xs font-semibold hover:bg-brand-olive transition-colors"
+            >
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
           </div>
 
           {loading ? (

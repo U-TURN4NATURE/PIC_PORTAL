@@ -32,6 +32,7 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [salesAmount, setSalesAmount] = useState('');
   const [commissionRate, setCommissionRate] = useState(String(referral.commissionRate || 5));
+  const [saleDate, setSaleDate] = useState(new Date().toISOString().split('T')[0]); // default today
   const [loading, setLoading] = useState(false);
   const [editingSale, setEditingSale] = useState<any | null>(null);
 
@@ -55,12 +56,14 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
         await api.patch(`/admin/referrals/sales/${editingSale.id}`, {
           saleAmount: parseFloat(salesAmount),
           commissionRate: parseFloat(commissionRate),
+          saleDate: saleDate || undefined,
         });
         toast.success('Sale entry updated successfully!');
       } else {
         await api.patch(`/admin/referrals/${referral.id}/sales`, {
           salesAmount: parseFloat(salesAmount),
           commissionRate: parseFloat(commissionRate),
+          saleDate: saleDate || undefined,
         });
         toast.success(`Commission credited to ${referral.pic?.fullName}'s wallet!`);
       }
@@ -90,12 +93,14 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
     setEditingSale(sale);
     setSalesAmount(String(sale.saleAmount));
     setCommissionRate(String(sale.commissionRate));
+    setSaleDate(sale.saleDate ? new Date(sale.saleDate).toISOString().split('T')[0] : new Date(sale.createdAt).toISOString().split('T')[0]);
   };
 
   const cancelEdit = () => {
     setEditingSale(null);
     setSalesAmount('');
     setCommissionRate(String(referral.commissionRate || 5));
+    setSaleDate(new Date().toISOString().split('T')[0]);
   };
 
   const commission = salesAmount ? ((parseFloat(salesAmount) * parseFloat(commissionRate)) / 100).toFixed(2) : '0.00';
@@ -106,7 +111,8 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
         <div className="flex items-center justify-between mb-5 sticky top-0 bg-white pb-2 border-b border-gray-100 z-10">
           <div>
             <h3 className="text-brand-forest font-semibold">Manage Sales</h3>
-            <p className="text-xs text-gray-500 mt-0.5">For: <span className="text-gray-900 font-medium">{referral.personName}</span></p>
+            <p className="text-xs text-gray-500 mt-0.5">Customer: <span className="text-gray-900 font-bold text-sm">{referral.personName}</span></p>
+            <p className="text-xs text-gray-400">PIC: <span className="text-brand-forest font-medium">{referral.pic?.fullName}</span> ({referral.pic?.referralCode})</p>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-400" /></button>
         </div>
@@ -126,7 +132,7 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
                     <div className="flex-1">
                       <p className="text-gray-900 font-bold text-sm">₹{sale.saleAmount.toFixed(0)} <span className="text-xs text-gray-500 font-normal">({sale.commissionRate}% commission)</span></p>
                       <p className="text-xs text-green-600 font-semibold mt-0.5">+₹{sale.commissionEarned.toFixed(2)} credited</p>
-                      <p className="text-xs text-gray-400 mt-0.5">{new Date(sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">📅 {new Date(sale.saleDate || sale.createdAt).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                       <button
@@ -172,6 +178,16 @@ function SaleModal({ referral, onClose, onSuccess }: { referral: any; onClose: (
               type="number" min="0" max="100"
               value={commissionRate}
               onChange={e => setCommissionRate(e.target.value)}
+              className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">📅 Sale Date *</label>
+            <input
+              type="date"
+              value={saleDate}
+              max={new Date().toISOString().split('T')[0]}
+              onChange={e => setSaleDate(e.target.value)}
               className="w-full bg-white border border-gray-300 rounded-xl px-4 py-2.5 text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
             />
           </div>

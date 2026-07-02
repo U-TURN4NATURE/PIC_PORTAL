@@ -393,6 +393,7 @@ model SaleEntry {
   saleAmount        Float
   commissionRate    Float
   commissionEarned  Float
+  saleDate          DateTime?      // Custom date for the sale (optional, defaults to createdAt)
   
   notes             String?        @db.Text
 

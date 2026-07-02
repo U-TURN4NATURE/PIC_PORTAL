@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod';
 import api from '@/lib/api';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -40,6 +40,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const BACKEND_URL = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
     ? 'https://picportal-production-a624.up.railway.app'
@@ -146,7 +147,22 @@ export default function RegisterPage() {
                 <input {...register('phone')} placeholder="9876543210" className={inputClass} />
               </Field>
               <Field label="Password" error={errors.password?.message}>
-                <input {...register('password')} type="password" placeholder="Min 8 chars, 1 uppercase, 1 number" className={inputClass} />
+                <div className="relative">
+                  <input
+                    {...register('password')}
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="Min 8 chars, 1 uppercase, 1 number"
+                    className={inputClass}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-forest transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
               </Field>
             </div>
           </div>

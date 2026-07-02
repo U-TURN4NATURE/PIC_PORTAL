@@ -214,7 +214,8 @@ export const updateReferralStatus = async (
 export const updateReferralSales = async (
   referralId: string,
   salesAmount: number,
-  commissionRate?: number
+  commissionRate?: number,
+  saleDate?: string
 ) => {
   const referral = await prisma.referral.findUnique({
     where: { id: referralId },
@@ -240,7 +241,7 @@ export const updateReferralSales = async (
       },
     });
 
-    // Create the SaleEntry
+    // Create the SaleEntry with optional custom date
     await tx.saleEntry.create({
       data: {
         referralId: referralId,
@@ -248,6 +249,7 @@ export const updateReferralSales = async (
         saleAmount: salesAmount,
         commissionRate: rate,
         commissionEarned: newCommission,
+        saleDate: saleDate ? new Date(saleDate) : null,
       }
     });
 
@@ -295,7 +297,7 @@ export const getSaleHistory = async (referralId: string) => {
 /**
  * Modify a past sale entry safely, recalculating the wallet balances and totals.
  */
-export const updateSaleEntry = async (saleId: string, updates: { saleAmount?: number; commissionRate?: number }) => {
+export const updateSaleEntry = async (saleId: string, updates: { saleAmount?: number; commissionRate?: number; saleDate?: string }) => {
   const sale = await prisma.saleEntry.findUnique({ where: { id: saleId }, include: { referral: true } });
   if (!sale) throw createError('Sale entry not found', 404);
 
@@ -314,6 +316,7 @@ export const updateSaleEntry = async (saleId: string, updates: { saleAmount?: nu
         saleAmount: newAmount,
         commissionRate: newRate,
         commissionEarned: newCommission,
+        saleDate: updates.saleDate !== undefined ? (updates.saleDate ? new Date(updates.saleDate) : null) : undefined,
       }
     });
 
