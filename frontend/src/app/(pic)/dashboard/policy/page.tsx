@@ -75,17 +75,8 @@ export default function PICPolicyPage() {
     const loadPdf = async () => {
       setIsPdfLoading(true);
       try {
-        const isExternal = activePolicy.fileUrl.startsWith('http');
-        
-        if (isExternal) {
-          // For external Cloudinary PDFs, directly use the URL in the iframe
-          // Google Docs viewer sometimes fails with "No preview available" for Cloudinary links
-          setPdfBlobUrl(activePolicy.fileUrl);
-          setIsPdfLoading(false);
-          return;
-        }
-
-        // For internal protected routes
+        // Fetch the PDF as a blob to ensure consistent inline rendering across browsers
+        // and to prevent iframe src caching bugs when switching tabs.
         const response = await api.get(activePolicy.fileUrl, {
           responseType: 'blob',
         });

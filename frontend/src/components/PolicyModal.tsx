@@ -77,13 +77,6 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
     const loadPdfBlob = async () => {
       if (!activePolicy) return;
       
-      const isProtected = activePolicy.fileUrl.startsWith('/pic') || activePolicy.fileUrl.startsWith('/api');
-      if (!isProtected) {
-        setPdfBlobUrl(activePolicy.fileUrl);
-        setLoadState('ready');
-        return;
-      }
-      
       setLoadState('loading');
       try {
         const response = await api.get(activePolicy.fileUrl, { responseType: 'blob' });
