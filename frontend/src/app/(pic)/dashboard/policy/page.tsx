@@ -75,13 +75,21 @@ export default function PICPolicyPage() {
     const loadPdf = async () => {
       setIsPdfLoading(true);
       try {
-        // Fetch the PDF as a blob to ensure consistent inline rendering across browsers
-        // and to prevent iframe src caching bugs when switching tabs.
-        const response = await api.get(activePolicy.fileUrl, {
-          responseType: 'blob',
-        });
-
-        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const isExternal = activePolicy.fileUrl.startsWith('http');
+        let blob: Blob;
+        
+        if (isExternal) {
+          // Fetch directly to avoid sending JWT token which causes Cloudinary to return 401
+          const response = await fetch(activePolicy.fileUrl);
+          if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+          blob = await response.blob();
+        } else {
+          // Internal protected routes need the JWT token via api instance
+          const response = await api.get(activePolicy.fileUrl, {
+            responseType: 'blob',
+          });
+          blob = new Blob([response.data], { type: 'application/pdf' });
+        }
         const url = URL.createObjectURL(blob);
         prevBlobUrl.current = url;
         setPdfBlobUrl(url);

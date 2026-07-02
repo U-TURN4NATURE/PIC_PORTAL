@@ -79,8 +79,17 @@ export default function PolicyModal({ onAccept }: PolicyModalProps) {
       
       setLoadState('loading');
       try {
-        const response = await api.get(activePolicy.fileUrl, { responseType: 'blob' });
-        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const isExternal = activePolicy.fileUrl.startsWith('http');
+        let blob: Blob;
+        
+        if (isExternal) {
+          const response = await fetch(activePolicy.fileUrl);
+          if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+          blob = await response.blob();
+        } else {
+          const response = await api.get(activePolicy.fileUrl, { responseType: 'blob' });
+          blob = new Blob([response.data], { type: 'application/pdf' });
+        }
         const url = URL.createObjectURL(blob);
         setPdfBlobUrl(url);
         setLoadState('ready');
