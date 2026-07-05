@@ -10,7 +10,6 @@ import {
   sendPayoutEmail,
   sendPasswordResetEmail,
 } from '../../services/email.service';
-import { sendWhatsAppOTP } from '../../services/whatsapp.service';
 import { generateOTP } from '../../utils/crypto.utils';
 import { parsePagination } from '../../utils/pagination.utils';
 import ExcelJS from 'exceljs';

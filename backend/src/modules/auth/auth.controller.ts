@@ -31,20 +31,20 @@ export const verifyOTP = async (req: Request, res: Response, next: NextFunction)
 
 export const picLogin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { identifier, password } = req.body;
 
-    console.log(`🔐 PIC Login Step 1 - sending WhatsApp OTP for: ${email}`);
+    console.log(`🔐 PIC Login Step 1 - sending OTP for: ${identifier}`);
 
-    if (!email || !password) {
-      return next(new Error('Email and password are required'));
+    if (!identifier) {
+      return next(new Error('Email or Phone is required'));
     }
 
-    // Step 1: validate credentials and send WhatsApp OTP (or bypass)
-    const result = await authService.sendLoginOTP(email, password) as any;
+    // Step 1: validate credentials and send OTP (or bypass)
+    const result = await authService.sendLoginOTP(identifier, password) as any;
 
     if (result.bypass) {
       res.cookie('token', result.token, getCookieOptions());
-      console.log(`✅ PIC Login bypassed OTP for: ${email}`);
+      console.log(`✅ PIC Login bypassed OTP for: ${identifier}`);
       void res.status(200).json(successResponse({ user: result.user, token: result.token }, 'Login successful'));
       return;
     }
@@ -63,15 +63,15 @@ export const picLogin = async (req: Request, res: Response, next: NextFunction):
  */
 export const verifyLoginOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp) {
-      return next(new Error('Email and OTP are required'));
+    const { identifier, otp } = req.body;
+    if (!identifier || !otp) {
+      return next(new Error('Identifier and OTP are required'));
     }
 
-    const { token, user } = await authService.verifyLoginOTP(email, otp);
+    const { token, user } = await authService.verifyLoginOTP(identifier, otp);
 
     res.cookie('token', token, getCookieOptions());
-    console.log(`✅ PIC Login 2FA verified for: ${email}`);
+    console.log(`✅ PIC Login 2FA verified for: ${identifier}`);
     res.status(200).json(successResponse({ user, token }, 'Login successful'));
   } catch (error) {
     next(error);
@@ -117,7 +117,7 @@ export const logout = (_req: Request, res: Response): void => {
 
 export const forgotPassword = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const result = await authService.forgotPassword(req.body.email);
+    const result = await authService.forgotPassword(req.body.identifier);
     res.status(200).json(successResponse(null, result.message));
   } catch (error) {
     next(error);
@@ -139,11 +139,11 @@ export const resetPassword = async (req: Request, res: Response, next: NextFunct
  */
 export const resetPasswordWithOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, otp, password } = req.body;
-    if (!email || !otp || !password) {
-      return next(new Error('Email, OTP and new password are required'));
+    const { identifier, otp, password } = req.body;
+    if (!identifier || !otp || !password) {
+      return next(new Error('Identifier, OTP and new password are required'));
     }
-    const result = await authService.resetPasswordWithOTP(email, otp, password);
+    const result = await authService.resetPasswordWithOTP(identifier, otp, password);
     res.status(200).json(successResponse(null, result.message));
   } catch (error) {
     next(error);

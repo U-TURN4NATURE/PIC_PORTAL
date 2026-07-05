@@ -3,7 +3,7 @@ import prisma from '../../config/database';
 import { generateToken } from '../../utils/jwt.utils';
 import { generateOTP, generateResetToken } from '../../utils/crypto.utils';
 import { sendOTPEmail, sendPasswordResetEmail } from '../../services/email.service';
-import { sendWhatsAppOTP } from '../../services/whatsapp.service';
+import { sendSMSOTP } from '../../services/sms.service';
 import { createError } from '../../middleware/error.middleware';
 import { PICStatus } from '@prisma/client';
 
@@ -70,9 +70,9 @@ export const registerPIC = async (data: RegisterInput) => {
     },
   });
 
-  // Send OTP via WhatsApp (fire-and-forget, don't block registration)
-  sendWhatsAppOTP(data.phone, otp).catch((err) =>
-    console.error('❌ WhatsApp OTP send failed during registration:', err)
+  // Send OTP via SMS (WishBySMS)
+  sendSMSOTP(data.phone, otp).catch((err) =>
+    console.error('❌ SMS OTP send failed during registration:', err)
   );
 
   // Send OTP via Email (fire-and-forget)
@@ -94,16 +94,24 @@ export const registerPIC = async (data: RegisterInput) => {
  * Step 1 of Login — validate credentials, send WhatsApp OTP for 2FA
  * Returns a temporary sessionToken so frontend can call verifyLoginOTP next.
  */
-export const sendLoginOTP = async (email: string, password: string) => {
-  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+export const sendLoginOTP = async (identifier: string, password?: string) => {
+  const pic = await prisma.pICPartner.findFirst({
+    where: {
+      OR: [
+        { email: identifier },
+        { phone: identifier }
+      ]
+    }
+  });
 
-  if (!pic) throw createError('Invalid email or password', 401);
+  if (!pic) throw createError('Account not found', 404);
 
-  // Google-only accounts have no password
-  if (!pic.password) throw createError('This account uses Google Sign-In. Please use the "Continue with Google" button.', 400);
-
-  const isPasswordValid = await bcrypt.compare(password, pic.password);
-  if (!isPasswordValid) throw createError('Invalid email or password', 401);
+  // If a password was provided, verify it
+  if (password) {
+    if (!pic.password) throw createError('This account uses Google Sign-In. Please use the "Continue with Google" button.', 400);
+    const isPasswordValid = await bcrypt.compare(password, pic.password);
+    if (!isPasswordValid) throw createError('Invalid email/phone or password', 401);
+  }
 
   if (pic.status === PICStatus.REJECTED) {
     throw createError(
@@ -115,35 +123,42 @@ export const sendLoginOTP = async (email: string, password: string) => {
     throw createError('Your account has been suspended. Please contact admin.', 403);
   }
 
-  // ── OTP BYPASSED: Direct Login ──
-  // Clear any existing OTP
+  // ── GENERATE AND SEND OTP (No Bypass) ──
+  const otp = generateOTP();
+  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
   await prisma.pICPartner.update({
-    where: { email },
-    data: { otpCode: null, otpExpiresAt: null },
+    where: { id: pic.id },
+    data: { otpCode: otp, otpExpiresAt: otpExpiry },
   });
 
-  const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
+
+
+  // Send SMS OTP
+  sendSMSOTP(pic.phone, otp).catch(console.error);
+
+  // Also send email as backup
+  sendOTPEmail(pic.email, pic.fullName, otp).catch(console.error);
 
   return {
-    bypass: true,
-    token,
-    mustChangePassword: pic.mustChangePassword,
-    user: {
-      id: pic.id,
-      name: pic.fullName,
-      email: pic.email,
-      role: 'PIC',
-      status: pic.status,
-      mustChangePassword: pic.mustChangePassword,
-    }
+    bypass: false,
+    phone: pic.phone,
+    message: 'OTP sent successfully to your phone and email.',
   };
 };
 
 /**
  * Step 2 of Login — verify the WhatsApp OTP and issue JWT token
  */
-export const verifyLoginOTP = async (email: string, otp: string) => {
-  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+export const verifyLoginOTP = async (identifier: string, otp: string) => {
+  const pic = await prisma.pICPartner.findFirst({
+    where: {
+      OR: [
+        { email: identifier },
+        { phone: identifier }
+      ]
+    }
+  });
   if (!pic) throw createError('Account not found', 404);
   if (!pic.otpCode || !pic.otpExpiresAt) throw createError('No OTP found. Please request a new one.', 400);
   if (new Date() > pic.otpExpiresAt) throw createError('OTP has expired. Please request a new one.', 400);
@@ -151,7 +166,7 @@ export const verifyLoginOTP = async (email: string, otp: string) => {
 
   // Clear OTP after successful verification
   await prisma.pICPartner.update({
-    where: { email },
+    where: { id: pic.id },
     data: { otpCode: null, otpExpiresAt: null, isEmailVerified: true },
   });
 
@@ -408,36 +423,40 @@ export const loginAdmin = async (email: string, password: string) => {
 /**
  * Initiate password reset
  */
-export const forgotPassword = async (email: string) => {
-  const pic = await prisma.pICPartner.findUnique({ where: { email } });
-  if (!pic) return { message: 'If an account exists, a reset OTP has been sent to your WhatsApp.' };
+export const forgotPassword = async (identifier: string) => {
+  const pic = await prisma.pICPartner.findFirst({
+    where: {
+      OR: [{ email: identifier }, { phone: identifier }],
+    },
+  });
+  if (!pic) return { message: 'If an account exists, a reset OTP has been sent.' };
 
-  // Generate OTP for password reset via WhatsApp
+  // Generate OTP for password reset
   const otp = generateOTP();
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
   await prisma.pICPartner.update({
-    where: { email },
+    where: { id: pic.id },
     data: { otpCode: otp, otpExpiresAt: otpExpiry },
   });
 
-  // Send via WhatsApp
-  sendWhatsAppOTP(pic.phone, otp).catch(console.error);
+  // Send SMS OTP
+  sendSMSOTP(pic.phone, otp).catch(console.error);
 
   // Also send email reset link as backup
   const resetToken = generateResetToken();
   const resetExpiry = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
   await prisma.pICPartner.update({
-    where: { email },
+    where: { id: pic.id },
     data: { resetToken, resetTokenExpiry: resetExpiry },
   });
   const resetUrl = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
   
   // Send email in the background without awaiting so it doesn't block the API response
-  sendPasswordResetEmail(email, pic.fullName, resetUrl, otp).catch(console.error);
+  sendPasswordResetEmail(pic.email, pic.fullName, resetUrl, otp).catch(console.error);
 
   return {
-    message: 'OTP sent to your WhatsApp number. Enter the OTP to reset your password.',
+    message: 'OTP sent to your Phone and Email. Enter the OTP to reset your password.',
     phone: pic.phone,
   };
 };
@@ -445,8 +464,12 @@ export const forgotPassword = async (email: string) => {
 /**
  * Verify WhatsApp OTP for password reset and set new password in one step
  */
-export const resetPasswordWithOTP = async (email: string, otp: string, newPassword: string) => {
-  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+export const resetPasswordWithOTP = async (identifier: string, otp: string, newPassword: string) => {
+  const pic = await prisma.pICPartner.findFirst({
+    where: {
+      OR: [{ email: identifier }, { phone: identifier }],
+    },
+  });
   if (!pic) throw createError('Account not found', 404);
   if (!pic.otpCode || !pic.otpExpiresAt) throw createError('No OTP found. Please request a new one.', 400);
   if (new Date() > pic.otpExpiresAt) throw createError('OTP has expired. Please request a new one.', 400);
@@ -455,7 +478,7 @@ export const resetPasswordWithOTP = async (email: string, otp: string, newPasswo
   const hashedPassword = await bcrypt.hash(newPassword, 12);
 
   await prisma.pICPartner.update({
-    where: { email },
+    where: { id: pic.id },
     data: {
       password: hashedPassword,
       otpCode: null,
@@ -587,8 +610,10 @@ export const resendOTP = async (email: string) => {
     data: { otpCode: otp, otpExpiresAt: otpExpiry },
   });
 
-  // Send WhatsApp OTP (primary)
-  sendWhatsAppOTP(pic.phone, otp).catch(console.error);
+
+
+  // Send SMS OTP
+  sendSMSOTP(pic.phone, otp).catch(console.error);
 
   // Also send email as backup for registration OTPs only
   if (!pic.isEmailVerified) {
