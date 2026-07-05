@@ -12,6 +12,15 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 // ─── Schemas ───
+const otpRequestSchema = z.object({
+  identifier: z.string().min(1, 'Email or Phone is required'),
+});
+
+const otpResetSchema = z.object({
+  otp: z.string().length(6, 'OTP must be 6 digits'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
+});
+
 const tempPasswordSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   tempPassword: z.string().min(6, 'Password must be at least 6 characters'),
@@ -25,12 +34,19 @@ const requestSchema = z.object({
 
 type TempPasswordForm = z.infer<typeof tempPasswordSchema>;
 type RequestForm = z.infer<typeof requestSchema>;
+type OTPRequestForm = z.infer<typeof otpRequestSchema>;
+type OTPResetForm = z.infer<typeof otpResetSchema>;
 
-type Tab = 'temp' | 'admin';
+type Tab = 'otp' | 'temp' | 'admin';
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<Tab>('temp');
+  const [activeTab, setActiveTab] = useState<Tab>('otp');
+
+  // ── OTP Tab State ──
+  const [isOtpLoading, setIsOtpLoading] = useState(false);
+  const [otpStep, setOtpStep] = useState<'request' | 'verify'>('request');
+  const [userIdentifier, setUserIdentifier] = useState('');
 
   // ── Temp Password Tab State ──
   const [isTempLoading, setIsTempLoading] = useState(false);
@@ -41,6 +57,40 @@ export default function ForgotPasswordPage() {
 
   const tempForm = useForm<TempPasswordForm>({ resolver: zodResolver(tempPasswordSchema) });
   const requestForm = useForm<RequestForm>({ resolver: zodResolver(requestSchema) });
+  const otpRequestForm = useForm<OTPRequestForm>({ resolver: zodResolver(otpRequestSchema) });
+  const otpResetForm = useForm<OTPResetForm>({ resolver: zodResolver(otpResetSchema) });
+
+  // ── OTP Tab: Submit ──
+  const onOtpRequestSubmit = async (data: OTPRequestForm) => {
+    try {
+      setIsOtpLoading(true);
+      const res = await api.post('/auth/forgot-password', { identifier: data.identifier });
+      setUserIdentifier(data.identifier);
+      toast.success(res.data.message || 'OTP sent successfully!');
+      setOtpStep('verify');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Failed to send OTP.');
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
+
+  const onOtpResetSubmit = async (data: OTPResetForm) => {
+    try {
+      setIsOtpLoading(true);
+      const res = await api.post('/auth/reset-password-otp', {
+        identifier: userIdentifier,
+        otp: data.otp,
+        password: data.password,
+      });
+      toast.success(res.data.message || 'Password reset successfully!');
+      router.push('/login');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Invalid OTP or password.');
+    } finally {
+      setIsOtpLoading(false);
+    }
+  };
 
   // ── Temp Password Tab: Submit ──
   const onTempSubmit = async (data: TempPasswordForm) => {
@@ -123,6 +173,17 @@ export default function ForgotPasswordPage() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6 bg-gray-100 p-1 rounded-xl">
           <button
+            onClick={() => setActiveTab('otp')}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === 'otp'
+                ? 'bg-white text-brand-forest shadow-sm'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <MessageSquare className="w-4 h-4" />
+            OTP
+          </button>
+          <button
             id="tab-temp"
             onClick={() => setActiveTab('temp')}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
@@ -147,6 +208,89 @@ export default function ForgotPasswordPage() {
             Request Admin
           </button>
         </div>
+
+        {/* OTP Tab Content */}
+        {activeTab === 'otp' && (
+          <div className="space-y-5">
+            {otpStep === 'request' ? (
+              <>
+                <div className="bg-brand-sage/10 rounded-xl p-3 text-xs text-gray-600 flex gap-2">
+                  <MessageSquare className="w-4 h-4 text-brand-forest shrink-0 mt-0.5" />
+                  <span>Receive an OTP via WhatsApp and Email to securely reset your password.</span>
+                </div>
+                <form onSubmit={otpRequestForm.handleSubmit(onOtpRequestSubmit)} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-brand-forest mb-1">Email or Phone</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        {...otpRequestForm.register('identifier')}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all text-sm"
+                        placeholder="hello@example.com or 9876543210"
+                      />
+                    </div>
+                    {otpRequestForm.formState.errors.identifier && (
+                      <p className="text-red-500 text-xs mt-1">{otpRequestForm.formState.errors.identifier.message}</p>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isOtpLoading}
+                    className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-brand-forest/20 mt-2"
+                  >
+                    {isOtpLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Send OTP'}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <>
+                <div className="bg-green-50 rounded-xl p-3 text-xs text-green-700 flex gap-2 border border-green-200">
+                  <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
+                  <span>OTP sent! Please check your WhatsApp and Email.</span>
+                </div>
+                <form onSubmit={otpResetForm.handleSubmit(onOtpResetSubmit)} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-brand-forest mb-1">Enter OTP</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      {...otpResetForm.register('otp')}
+                      className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 text-center text-2xl font-bold tracking-[0.5em] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
+                      placeholder="------"
+                    />
+                    {otpResetForm.formState.errors.otp && (
+                      <p className="text-red-500 text-xs mt-1 text-center">{otpResetForm.formState.errors.otp.message}</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-brand-forest mb-1">New Password</label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="password"
+                        {...otpResetForm.register('password')}
+                        className="w-full pl-10 pr-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all text-sm"
+                        placeholder="Enter new password"
+                      />
+                    </div>
+                    {otpResetForm.formState.errors.password && (
+                      <p className="text-red-500 text-xs mt-1">{otpResetForm.formState.errors.password.message}</p>
+                    )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={isOtpLoading}
+                    className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-medium py-3 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-brand-forest/20 mt-2"
+                  >
+                    {isOtpLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><CheckCircle2 className="w-4 h-4" /> Reset Password</>}
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Temp Password Tab Content */}
         {activeTab === 'temp' && (

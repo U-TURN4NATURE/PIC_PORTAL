@@ -14,7 +14,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
+  identifier: z.string().min(1, 'Email or Phone is required'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -35,7 +35,7 @@ function LoginInner() {
 
   // Step: 'credentials' | 'otp'
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
-  const [userEmail, setUserEmail] = useState('');
+  const [userIdentifier, setUserIdentifier] = useState('');
   const [maskedPhone, setMaskedPhone] = useState('');
   const [otpTimer, setOtpTimer] = useState(0);
 
@@ -80,7 +80,7 @@ function LoginInner() {
           return;
         }
 
-        setUserEmail(data.email);
+        setUserIdentifier(data.identifier);
         // Backend returns masked phone like "7701XXXXXX05"
         setMaskedPhone(res.data.data?.phone || '');
         setStep('otp');
@@ -99,7 +99,7 @@ function LoginInner() {
     try {
       setIsLoading(true);
       const res = await api.post('/auth/verify-login-otp', {
-        email: userEmail,
+        identifier: userIdentifier,
         otp: data.otp,
       });
 
@@ -120,7 +120,7 @@ function LoginInner() {
   const handleResendOTP = async () => {
     try {
       setIsResending(true);
-      await api.post('/auth/resend-otp', { email: userEmail });
+      await api.post('/auth/resend-otp', { identifier: userIdentifier });
       toast.success('New OTP sent to your WhatsApp! 📱');
       setOtpTimer(30);
       resetOTP();
@@ -151,14 +151,14 @@ function LoginInner() {
         {step === 'credentials' && (
           <form onSubmit={handleSubmit(onSubmitCredentials)} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-brand-forest mb-1">Email Address</label>
+              <label className="block text-sm font-medium text-brand-forest mb-1">Email or Phone Number</label>
               <input
-                type="email"
-                {...register('email')}
+                type="text"
+                {...register('identifier')}
                 className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
-                placeholder="hello@example.com"
+                placeholder="hello@example.com or 9876543210"
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
+              {errors.identifier && <p className="text-red-500 text-xs mt-1">{errors.identifier.message}</p>}
             </div>
 
             <div>

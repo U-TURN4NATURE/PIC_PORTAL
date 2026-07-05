@@ -598,15 +598,22 @@ export const verifyOTP = async (email: string, otp: string) => {
 /**
  * Resend WhatsApp OTP (registration phone verification or login)
  */
-export const resendOTP = async (email: string) => {
-  const pic = await prisma.pICPartner.findUnique({ where: { email } });
+export const resendOTP = async (identifier: string) => {
+  const pic = await prisma.pICPartner.findFirst({
+    where: {
+      OR: [
+        { email: identifier },
+        { phone: identifier }
+      ]
+    }
+  });
   if (!pic) throw createError('Account not found', 404);
 
   const otp = generateOTP();
   const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
 
   await prisma.pICPartner.update({
-    where: { email },
+    where: { id: pic.id },
     data: { otpCode: otp, otpExpiresAt: otpExpiry },
   });
 

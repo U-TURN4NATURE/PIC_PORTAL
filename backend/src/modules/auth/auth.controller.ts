@@ -102,8 +102,9 @@ export const adminLogin = async (req: Request, res: Response, next: NextFunction
 
 export const resendOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email } = req.body;
-    const result = await authService.resendOTP(email);
+    const { identifier, email } = req.body;
+    const target = identifier || email;
+    const result = await authService.resendOTP(target);
     res.status(200).json(successResponse(null, result.message));
   } catch (error) {
     next(error);
