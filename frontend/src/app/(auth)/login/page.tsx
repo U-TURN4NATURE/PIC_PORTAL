@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 const loginSchema = z.object({
   identifier: z.string().min(1, 'Email or Phone is required'),
-  password: z.string().min(1, 'Password is required'),
+  password: z.string().optional(),
 });
 
 const otpSchema = z.object({
