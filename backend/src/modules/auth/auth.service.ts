@@ -624,7 +624,7 @@ export const resendOTP = async (identifier: string) => {
 
   // Also send email as backup for registration OTPs only
   if (!pic.isEmailVerified) {
-    sendOTPEmail(email, pic.fullName, otp).catch(console.error);
+    sendOTPEmail(pic.email, pic.fullName, otp).catch(console.error);
   }
 
   return { message: 'A new OTP has been sent to your WhatsApp number.' };
