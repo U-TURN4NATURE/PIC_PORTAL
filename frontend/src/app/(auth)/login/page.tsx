@@ -32,6 +32,7 @@ function LoginInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordField, setShowPasswordField] = useState(false);
 
   // Step: 'credentials' | 'otp'
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
@@ -85,7 +86,7 @@ function LoginInner() {
         setMaskedPhone(res.data.data?.phone || '');
         setStep('otp');
         setOtpTimer(30); // 30s before resend allowed
-        toast.success('OTP sent to your WhatsApp! 📱');
+        toast.success('OTP sent via SMS & Email! 📱');
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please try again.');
@@ -121,7 +122,7 @@ function LoginInner() {
     try {
       setIsResending(true);
       await api.post('/auth/resend-otp', { identifier: userIdentifier });
-      toast.success('New OTP sent to your WhatsApp! 📱');
+      toast.success('New OTP sent via SMS & Email! 📱');
       setOtpTimer(30);
       resetOTP();
     } catch (error: any) {
@@ -161,31 +162,43 @@ function LoginInner() {
               {errors.identifier && <p className="text-red-500 text-xs mt-1">{errors.identifier.message}</p>}
             </div>
 
-            <div>
-              <div className="flex justify-between items-center mb-1">
-                <label className="block text-sm font-medium text-brand-forest">Password</label>
-                <Link href="/forgot-password" className="text-xs text-brand-gold hover:text-brand-forest transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password')}
-                  className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
-                  placeholder="••••••••"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(p => !p)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-forest transition-colors"
-                  tabIndex={-1}
+            {!showPasswordField ? (
+              <div className="text-right mt-2">
+                <button 
+                  type="button" 
+                  onClick={() => setShowPasswordField(true)} 
+                  className="text-xs text-brand-forest hover:text-brand-gold font-medium transition-colors"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  Login with password instead?
                 </button>
               </div>
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-            </div>
+            ) : (
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="block text-sm font-medium text-brand-forest">Password</label>
+                  <Link href="/forgot-password" className="text-xs text-brand-gold hover:text-brand-forest transition-colors">
+                    Forgot password?
+                  </Link>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    {...register('password')}
+                    className="w-full px-4 py-3 rounded-xl border border-brand-sage/50 bg-white/50 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 focus:border-transparent transition-all"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(p => !p)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-brand-forest transition-colors"
+                    tabIndex={-1}
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+              </div>
+            )}
 
             <button
               type="submit"
@@ -204,16 +217,16 @@ function LoginInner() {
           </form>
         )}
 
-        {/* ── STEP 2: WhatsApp OTP ── */}
+        {/* ── STEP 2: SMS OTP ── */}
         {step === 'otp' && (
           <div className="space-y-5">
-            {/* WhatsApp icon + info */}
+            {/* SMS icon + info */}
             <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex gap-3 items-start">
               <MessageCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-green-800">OTP sent via WhatsApp 📱</p>
+                <p className="text-sm font-medium text-green-800">OTP sent via SMS & Email 📱</p>
                 <p className="text-xs text-green-700 mt-1">
-                  A 6-digit OTP has been sent to <strong>{maskedPhone ? `+91 ${maskedPhone}` : 'your registered WhatsApp number'}</strong>.
+                  A 6-digit OTP has been sent to <strong>{maskedPhone ? `+91 ${maskedPhone}` : 'your registered phone number'}</strong> and your email.
                   Valid for <strong>10 minutes</strong>.
                 </p>
               </div>

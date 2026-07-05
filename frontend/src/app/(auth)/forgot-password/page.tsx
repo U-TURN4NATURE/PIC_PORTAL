@@ -216,7 +216,7 @@ export default function ForgotPasswordPage() {
               <>
                 <div className="bg-brand-sage/10 rounded-xl p-3 text-xs text-gray-600 flex gap-2">
                   <MessageSquare className="w-4 h-4 text-brand-forest shrink-0 mt-0.5" />
-                  <span>Receive an OTP via WhatsApp and Email to securely reset your password.</span>
+                  <span>Receive an OTP via SMS and Email to securely reset your password.</span>
                 </div>
                 <form onSubmit={otpRequestForm.handleSubmit(onOtpRequestSubmit)} className="space-y-4">
                   <div>
@@ -247,7 +247,7 @@ export default function ForgotPasswordPage() {
               <>
                 <div className="bg-green-50 rounded-xl p-3 text-xs text-green-700 flex gap-2 border border-green-200">
                   <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />
-                  <span>OTP sent! Please check your WhatsApp and Email.</span>
+                  <span>OTP sent! Please check your SMS and Email.</span>
                 </div>
                 <form onSubmit={otpResetForm.handleSubmit(onOtpResetSubmit)} className="space-y-4">
                   <div>
