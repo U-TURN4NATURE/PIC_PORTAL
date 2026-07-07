@@ -231,8 +231,8 @@ export default function ReferralPage() {
 
   const handleAddReferral = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.personName.trim() || !form.personPhone.trim() || !form.address.trim() || !form.city.trim() || !form.pincode.trim()) {
-      toast.error('Name, phone number, address, city, and pincode are required');
+    if (!form.personName.trim() || !form.personPhone.trim() || !form.city.trim() || !form.pincode.trim()) {
+      toast.error('Name, phone number, city, and pincode are required');
       return;
     }
     setSubmitting(true);
@@ -475,14 +475,13 @@ export default function ReferralPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-red-500">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Address <span className="text-gray-400 font-normal">(optional)</span></label>
                 <input
                   type="text"
                   value={form.address}
                   onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
                   placeholder="e.g. 123 Main St, Apartment 4B"
                   className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
-                  required
                 />
               </div>
 

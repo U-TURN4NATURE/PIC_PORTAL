@@ -17,9 +17,7 @@ const registerSchema = z.object({
   phone: z.string().regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian phone number'),
   password: z
     .string()
-    .min(8, 'At least 8 characters')
-    .regex(/[A-Z]/, 'Must contain one uppercase letter')
-    .regex(/[0-9]/, 'Must contain one number'),
+    .min(6, 'At least 6 characters'),
   address: z.string().min(5, 'Full address is required'),
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
@@ -151,7 +149,7 @@ export default function RegisterPage() {
                   <input
                     {...register('password')}
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Min 8 chars, 1 uppercase, 1 number"
+                    placeholder="Min 6 characters"
                     className={inputClass}
                   />
                   <button

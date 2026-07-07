@@ -12,9 +12,7 @@ export const registerSchema = z.object({
     phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian phone number'),
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[0-9]/, 'Password must contain at least one number'),
+      .min(6, 'Password must be at least 6 characters'),
     address: z.string().min(5, 'Address is required'),
     state: z.string().min(2, 'State is required'),
     city: z.string().min(2, 'City is required'),
@@ -46,9 +44,7 @@ export const resetPasswordSchema = z.object({
   body: z.object({
     password: z
       .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Must contain uppercase letter')
-      .regex(/[0-9]/, 'Must contain a number'),
+      .min(6, 'Password must be at least 6 characters'),
     confirmPassword: z.string(),
   }).refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',

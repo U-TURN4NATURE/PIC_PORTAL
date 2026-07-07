@@ -24,9 +24,7 @@ export const addReferral = async (
     throw createError('You have already added a referral with this phone number', 400);
   }
 
-  if (!data.address || !data.address.trim()) {
-    throw createError('Address is required', 400);
-  }
+
   if (!data.pincode || !data.pincode.trim()) {
     throw createError('Pincode is required', 400);
   }

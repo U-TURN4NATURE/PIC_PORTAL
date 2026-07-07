@@ -32,7 +32,7 @@ function LoginInner() {
   const [isLoading, setIsLoading] = useState(false);
   const [isResending, setIsResending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordField, setShowPasswordField] = useState(false);
+  const [showPasswordField, setShowPasswordField] = useState(true);
 
   // Step: 'credentials' | 'otp'
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
@@ -197,6 +197,15 @@ function LoginInner() {
                   </button>
                 </div>
                 {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
+                <div className="text-right mt-2">
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPasswordField(false)} 
+                    className="text-xs text-brand-forest hover:text-brand-gold font-medium transition-colors"
+                  >
+                    Login with OTP instead?
+                  </button>
+                </div>
               </div>
             )}
 

@@ -106,13 +106,6 @@ export const sendLoginOTP = async (identifier: string, password?: string) => {
 
   if (!pic) throw createError('Account not found', 404);
 
-  // If a password was provided, verify it
-  if (password) {
-    if (!pic.password) throw createError('This account uses Google Sign-In. Please use the "Continue with Google" button.', 400);
-    const isPasswordValid = await bcrypt.compare(password, pic.password);
-    if (!isPasswordValid) throw createError('Invalid email/phone or password', 401);
-  }
-
   if (pic.status === PICStatus.REJECTED) {
     throw createError(
       `Your application has been rejected. ${pic.rejectionReason ? 'Reason: ' + pic.rejectionReason : 'Please contact support.'}`,
@@ -121,6 +114,31 @@ export const sendLoginOTP = async (identifier: string, password?: string) => {
   }
   if (pic.status === PICStatus.SUSPENDED) {
     throw createError('Your account has been suspended. Please contact admin.', 403);
+  }
+
+  // If a password was provided, verify it
+  if (password) {
+    if (!pic.password) throw createError('This account uses Google Sign-In. Please use the "Continue with Google" button.', 400);
+    const isPasswordValid = await bcrypt.compare(password, pic.password);
+    if (!isPasswordValid) throw createError('Invalid email/phone or password', 401);
+
+    // Bypass OTP because valid password was provided
+    const token = generateToken({ id: pic.id, email: pic.email, role: 'PIC' });
+    return {
+      bypass: true,
+      token,
+      user: {
+        id: pic.id,
+        fullName: pic.fullName,
+        email: pic.email,
+        phone: pic.phone,
+        referralCode: pic.referralCode,
+        status: pic.status,
+        profileCompleted: pic.profileCompleted,
+        profileImage: pic.profileImage,
+        role: 'PIC' as const,
+      },
+    };
   }
 
   // ── GENERATE AND SEND OTP (No Bypass) ──
