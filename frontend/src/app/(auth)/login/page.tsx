@@ -69,7 +69,13 @@ function LoginInner() {
   const onSubmitCredentials = async (data: LoginFormValues) => {
     try {
       setIsLoading(true);
-      const res = await api.post('/auth/login', data);
+      
+      const payload = {
+        identifier: data.identifier,
+        ...(showPasswordField && data.password ? { password: data.password } : {})
+      };
+      
+      const res = await api.post('/auth/login', payload);
 
       if (res.data.success) {
         // If backend bypassed OTP and returned token directly
