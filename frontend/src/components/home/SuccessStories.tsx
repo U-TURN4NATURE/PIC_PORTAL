@@ -84,7 +84,6 @@ function StoryCard({ story, index }: { story: typeof SUCCESS_STORIES[0]; index: 
             fill
             className="object-cover group-hover:scale-105 transition-transform duration-700"
             style={{ objectPosition: (story as any).objectPosition ?? 'center' }}
-            loading="lazy"
             sizes="(max-width: 768px) 100vw, 33vw"
             onError={() => setImgError(true)}
           />
@@ -254,7 +253,12 @@ export default function SuccessStories() {
           onTouchStart={() => setPaused(true)}
           onTouchEnd={() => setPaused(false)}
         >
-          <StoryCard story={SUCCESS_STORIES[start]} index={start} />
+          <div
+            key={start}
+            style={{ animation: 'fadeInCard 0.4s ease' }}
+          >
+            <StoryCard story={SUCCESS_STORIES[start]} index={start} />
+          </div>
 
           <div className="flex justify-center items-center gap-4 mt-5">
             <button
