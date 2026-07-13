@@ -85,6 +85,7 @@ function StoryCard({ story, index }: { story: typeof SUCCESS_STORIES[0]; index: 
             className="object-cover group-hover:scale-105 transition-transform duration-700"
             style={{ objectPosition: (story as any).objectPosition ?? 'center' }}
             sizes="(max-width: 768px) 100vw, 33vw"
+            unoptimized={true}
             onError={() => setImgError(true)}
           />
         ) : (
