@@ -218,7 +218,7 @@ export default function AdminPICsPage() {
                           </>
                         )}
                         
-                        {pic.status === 'APPROVED' && (
+                        {(pic.status === 'APPROVED' || pic.status === 'ACTIVE') && (
                           <button onClick={() => handleStatusAction(pic.id, 'suspend')} className="p-2 text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" title="Suspend">
                             <Ban className="w-4 h-4" />
                           </button>

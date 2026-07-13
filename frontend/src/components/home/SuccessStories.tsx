@@ -27,7 +27,7 @@ const SUCCESS_STORIES = [
   },
   {
     name: 'Nisha Nagar',
-    location: 'Noida',
+    location: 'Ghaziabad',
     img: '/nisha_nagar.jpg.png',
     quote: 'As a Partner in Change, I support UTurn4Nature by bringing authentic homemade products to every home while empowering rural women across India.',
     role: 'Partner in Change',
@@ -44,11 +44,13 @@ const SUCCESS_STORIES = [
     imgHeight: 'h-80',
   },
   {
-    name: 'Rekha Verma',
-    location: 'India',
-    img: '/women_6.webp',
+    name: 'Supriya',
+    location: 'Greater Noida',
+    img: '/supriya.jpg.png',
     quote: "I started by sharing U-Turn4Nature with a few people I knew. As they experienced the taste and quality of our homemade, chemical-free products, they began recommending them to others. That's how our community continues to grow—through trust.",
     role: 'Partner in Change',
+    objectPosition: '50% 20%',
+    imgHeight: 'h-80',
   },
 ];
 
