@@ -37,7 +37,7 @@ const SUCCESS_STORIES = [
   {
     name: 'Sumiti',
     location: 'Noida',
-    img: '/sumiti.jpg',
+    img: '/sumiti.png',
     quote: 'I believe food should nourish families and communities. As a Partner in Change, I promote authentic homemade products while empowering rural women entrepreneurs.',
     role: 'Partner in Change',
     objectPosition: '50% 20%',
