@@ -130,6 +130,8 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
     });
   }, [speakerOff]);
 
+  const silenceTimerRef = useRef<any>(null);
+
   const listen = useCallback(() => {
     if (!alive.current || muted) {
       setPhaseSync('listening');
@@ -140,15 +142,17 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
 
     // Abort any previous instance
     try { recRef.current?.abort(); } catch {}
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     const rec = new SR();
     recRef.current = rec;
 
     rec.lang = langRef.current;
-    rec.continuous = false;       // simple one-shot mode is most reliable
+    rec.continuous = true;        // stay open so user can speak full sentences
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
     let finalSent = false;
+    let fullTranscript = '';
 
     rec.onstart = () => {
       if (!alive.current) return;
@@ -157,23 +161,42 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
     };
 
     rec.onresult = (e: any) => {
-      if (!alive.current || phaseRef.current !== 'listening') return;
+      if (!alive.current || phaseRef.current !== 'listening' || finalSent) return;
       const all = Array.from(e.results as SpeechRecognitionResultList);
       const transcript = all.map((r: any) => r[0].transcript).join(' ').trim();
       setUserText(transcript);
+      fullTranscript = transcript;
+
+      // Clear any existing silence timer — user is still speaking
+      if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
+
       const last = all[all.length - 1] as any;
-      if (last.isFinal && transcript.length > 1 && !finalSent) {
-        finalSent = true;
-        rec.stop();
-        sendToAI(transcript);
+      if (last.isFinal && transcript.length > 1) {
+        // User paused — start a 2-second silence timer
+        // If they speak again within 2s, timer resets (above clearTimeout)
+        // If 2s passes with no new speech → send to AI
+        silenceTimerRef.current = setTimeout(() => {
+          if (!alive.current || finalSent || phaseRef.current !== 'listening') return;
+          finalSent = true;
+          try { rec.stop(); } catch {}
+          sendToAI(fullTranscript);
+        }, 2000);
       }
     };
 
-    // If no speech detected after silence, restart
+    // If recognition ends naturally (e.g. long silence), handle it
     rec.onend = () => {
       if (!alive.current) return;
       if (phaseRef.current === 'listening' && !finalSent) {
-        setTimeout(() => { if (alive.current && phaseRef.current === 'listening') listen(); }, 300);
+        // If we have accumulated text and recognition ended, send it
+        if (fullTranscript.length > 1) {
+          if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+          finalSent = true;
+          sendToAI(fullTranscript);
+        } else {
+          // No speech detected, restart listening
+          setTimeout(() => { if (alive.current && phaseRef.current === 'listening') listen(); }, 300);
+        }
       }
     };
 
@@ -261,6 +284,7 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
 
   const endCall = () => {
     alive.current = false;
+    if (silenceTimerRef.current) { clearTimeout(silenceTimerRef.current); silenceTimerRef.current = null; }
     try { recRef.current?.abort(); } catch {}
     synth.current?.cancel();
     setPhaseSync('ended');
