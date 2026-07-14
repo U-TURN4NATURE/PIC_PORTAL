@@ -76,7 +76,7 @@ function deleteSession(sessionId: string) {
 export { loadHistory, saveSession, deleteSession };
 
 // ── Hook ──────────────────────────────────────────────────
-export function useAIChat(initialMessages?: ChatMessage[]) {
+export function useAIChat(initialMessages?: ChatMessage[], isLoggedIn?: boolean) {
   const [messages, setMessages] = useState<ChatMessage[]>(
     initialMessages ?? [WELCOME_MESSAGE]
   );
@@ -109,7 +109,7 @@ export function useAIChat(initialMessages?: ChatMessage[]) {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: geminiContents }),
+        body: JSON.stringify({ messages: geminiContents, isLoggedIn: !!isLoggedIn }),
         signal: abortRef.current.signal,
       });
 
@@ -126,7 +126,6 @@ export function useAIChat(initialMessages?: ChatMessage[]) {
 
       setMessages(prev => {
         const updated = [...prev, botMsg];
-        // Auto-save to history
         saveSession(updated.filter(m => m.id !== 'welcome'));
         return updated;
       });
@@ -141,10 +140,9 @@ export function useAIChat(initialMessages?: ChatMessage[]) {
     } finally {
       setIsLoading(false);
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isLoggedIn]);
 
   const clearChat = useCallback(() => {
-    // Save current before clearing
     const userMsgs = messages.filter(m => m.role === 'user');
     if (userMsgs.length > 0) saveSession(messages.filter(m => m.id !== 'welcome'));
     setMessages([WELCOME_MESSAGE]);

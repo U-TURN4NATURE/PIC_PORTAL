@@ -10,6 +10,7 @@ import {
 import { useAIChat, QUICK_REPLIES, ChatMessage, ChatSession } from './useAIChat';
 import VoiceCallMode from './VoiceCallMode';
 import ChatHistoryPanel from './ChatHistoryPanel';
+import { useAuthStore } from '@/store/authStore';
 
 const G = '#1B4332';
 const PINK = '#E91E8C';
@@ -110,6 +111,7 @@ function MessageBubble({
 
 // ── Main Widget ────────────────────────────────────────────
 export default function AIChatWidget() {
+  const { isAuthenticated } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
   const [inputText, setInputText] = useState('');
   const [showQuickReplies, setShowQuickReplies] = useState(true);
@@ -126,7 +128,7 @@ export default function AIChatWidget() {
 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
-  const { messages, isLoading, error, sendMessage, clearChat } = useAIChat();
+  const { messages, isLoading, error, sendMessage, clearChat } = useAIChat(undefined, isAuthenticated);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -256,6 +258,7 @@ export default function AIChatWidget() {
         <VoiceCallMode
           onClose={() => setShowCallMode(false)}
           onMessageSent={handleCallMessage}
+          isLoggedIn={isAuthenticated}
         />
       )}
 

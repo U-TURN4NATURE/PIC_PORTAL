@@ -60,9 +60,10 @@ function Waveform({ active, color }: { active: boolean; color: string }) {
 interface Props {
   onClose: () => void;
   onMessageSent: (user: string, ai: string) => void;
+  isLoggedIn?: boolean;
 }
 
-export default function VoiceCallMode({ onClose, onMessageSent }: Props) {
+export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Props) {
   const [phase, setPhase] = useState<'connecting' | 'speaking' | 'listening' | 'processing' | 'ended'>('connecting');
   const [userText, setUserText] = useState('');
   const [aiText, setAiText]   = useState('');
@@ -210,7 +211,7 @@ export default function VoiceCallMode({ onClose, onMessageSent }: Props) {
     ];
 
     try {
-      const res  = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs }) });
+      const res  = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs, isLoggedIn: !!isLoggedIn }) });
       const data = await res.json();
       const reply = data.reply || 'Kuch samajh nahi aaya, dobara boliye please.';
 
