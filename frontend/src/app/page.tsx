@@ -13,6 +13,7 @@ import FAQSection from '@/components/home/FAQSection';
 import SuccessStories from '@/components/home/SuccessStories';
 import { FloatingButtons, MobileStickyBar } from '@/components/home/FloatingButtons';
 import { G, G2, GOLD, PINK, CREAM, CHARCOAL, WA } from '@/components/home/constants';
+import AIChatWidget from '@/components/AIChat/AIChatWidget';
 
 // ──────────────────────────────────────────────────────────────
 // Brand tokens (also available via CSS vars in globals.css)
@@ -669,6 +670,7 @@ export default function Home() {
       <Footer />
       <FloatingButtons />
       <MobileStickyBar />
+      <AIChatWidget />
     </div>
   );
 }

@@ -31,6 +31,7 @@ import PolicyModal from '@/components/PolicyModal';
 import KycModal from '@/components/KycModal';
 import ForceChangePasswordModal from '@/components/ForceChangePasswordModal';
 import NotificationBell from '@/components/NotificationBell';
+import AIChatWidget from '@/components/AIChat/AIChatWidget';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
@@ -404,6 +405,8 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </main>
+      {/* AI Saathi — available inside PIC dashboard */}
+      <AIChatWidget />
     </div>
   );
 }
