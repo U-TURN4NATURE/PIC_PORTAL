@@ -249,8 +249,31 @@ export default function AIChatWidget() {
           70%{box-shadow:0 0 0 16px rgba(233,30,140,0)}
           100%{box-shadow:0 0 0 0 rgba(233,30,140,0)}
         }
-        @keyframes greenDot{0%,100%{opacity:1}50%{opacity:.3}}
+       @keyframes greenDot{0%,100%{opacity:1}50%{opacity:.3}}
         @keyframes listeningWave{0%,100%{transform:scaleY(1)}50%{transform:scaleY(1.8)}}
+
+        /* Mobile full-screen chat */
+        @media (max-width: 640px) {
+          .saathi-chat-window {
+            bottom: 0 !important;
+            right: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            border-radius: 0 !important;
+            border: none !important;
+          }
+          .saathi-fab {
+            bottom: 20px !important;
+            right: 16px !important;
+            width: 54px !important;
+            height: 54px !important;
+          }
+          .saathi-label {
+            bottom: 78px !important;
+            right: 10px !important;
+          }
+        }
       `}</style>
 
       {/* ── Voice Call fullscreen overlay ── */}
@@ -274,7 +297,7 @@ export default function AIChatWidget() {
       <button
         onClick={() => { setIsOpen(p => !p); setShowHistory(false); }}
         aria-label="Saathi AI chat"
-        className="fixed z-50 flex items-center justify-center rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
+        className="saathi-fab fixed z-50 flex items-center justify-center rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
         style={{
           bottom: '100px', right: '24px', width: '60px', height: '60px',
           background: isOpen ? 'rgba(27,67,50,0.95)' : `linear-gradient(135deg,${G} 0%,#2d6a4f 50%,${PINK} 100%)`,
@@ -294,7 +317,7 @@ export default function AIChatWidget() {
 
       {/* ── Label ── */}
       {!isOpen && !showCallMode && (
-        <div className="fixed z-50 text-xs font-bold text-white px-2 py-1 rounded-full pointer-events-none"
+        <div className="saathi-label fixed z-50 text-xs font-bold text-white px-2 py-1 rounded-full pointer-events-none"
           style={{ bottom: '164px', right: '18px', background: `${G}cc`, border: `1px solid ${G2}44`, backdropFilter: 'blur(8px)' }}>
           🎙️ Saathi AI
         </div>
@@ -302,7 +325,7 @@ export default function AIChatWidget() {
 
       {/* ── Chat Window ── */}
       {isOpen && !showCallMode && !showHistory && (
-        <div className="fixed z-50 flex flex-col overflow-hidden shadow-2xl"
+        <div className="saathi-chat-window fixed z-50 flex flex-col overflow-hidden shadow-2xl"
           style={{
             bottom: '172px', right: '16px',
             width: 'min(390px, calc(100vw - 32px))',
