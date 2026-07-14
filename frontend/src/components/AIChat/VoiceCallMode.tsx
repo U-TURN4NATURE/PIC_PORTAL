@@ -3,25 +3,18 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { PhoneOff, Mic, MicOff, Volume2, VolumeX } from 'lucide-react';
 
-const G = '#1B4332';
 const G2 = '#2ECC71';
 const PINK = '#E91E8C';
 
-type CallState = 'connecting' | 'listening' | 'processing' | 'speaking' | 'ended';
-
-// ── Prepare text for natural TTS ──────────────────────────
-function prepareForSpeech(text: string): string {
+// ── Strip text for clean TTS ──────────────────────────────
+function cleanForSpeech(text: string): string {
   return text
-    // Strip markdown
     .replace(/\*\*(.*?)\*\*/g, '$1')
     .replace(/\*(.*?)\*/g, '$1')
     .replace(/#{1,6}\s/g, '')
     .replace(/\[.*?\]\(.*?\)/g, '')
-    .replace(/•\s*/g, ', ')
-    .replace(/[-–—]\s/g, ', ')
-    // Strip all emojis using Unicode property escapes
+    .replace(/[•\-–—]\s*/g, ', ')
     .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
-    // Clean up punctuation
     .replace(/\n{2,}/g, '. ')
     .replace(/\n/g, ', ')
     .replace(/,\s*,/g, ',')
@@ -31,579 +24,427 @@ function prepareForSpeech(text: string): string {
     .trim();
 }
 
-// ── Pick the most natural available voice ─────────────────
-function getBestVoice(synth: SpeechSynthesis, isHindi: boolean): SpeechSynthesisVoice | null {
+// ── Best available TTS voice ──────────────────────────────
+function pickVoice(synth: SpeechSynthesis, lang: string): SpeechSynthesisVoice | null {
   const voices = synth.getVoices();
-  if (!voices.length) return null;
-
-  if (isHindi) {
-    // Priority order for Hindi
-    const hindiPriority = [
-      'Google हिन्दी',
-      'Google Hindi',
-      'Microsoft Swara Online (Natural)',
-      'Microsoft Hemant Online',
-      'hi-IN',
-    ];
-    for (const name of hindiPriority) {
-      const v = voices.find(v =>
-        v.name.toLowerCase().includes(name.toLowerCase()) ||
-        v.lang === name
-      );
-      if (v) return v;
-    }
-    return voices.find(v => v.lang.startsWith('hi')) || null;
-  } else {
-    // Priority order for English
-    const engPriority = [
-      'Google UK English Female',
-      'Google US English',
-      'Microsoft Zira Online (Natural)',
-      'Microsoft Jenny Online (Natural)',
-      'Google UK English Male',
-      'Samantha',
-      'Karen',
-    ];
-    for (const name of engPriority) {
-      const v = voices.find(v =>
-        v.name.toLowerCase().includes(name.toLowerCase())
-      );
-      if (v) return v;
-    }
-    return voices.find(v => v.lang.startsWith('en')) || null;
+  const preferred = lang.startsWith('hi')
+    ? ['Google हिन्दी', 'Google Hindi', 'Microsoft Swara', 'hi-IN']
+    : ['Google UK English Female', 'Google US English', 'Microsoft Jenny', 'Microsoft Zira', 'Samantha'];
+  for (const name of preferred) {
+    const v = voices.find(v => v.name.includes(name) || v.lang === name);
+    if (v) return v;
   }
+  return voices.find(v => v.lang.startsWith(lang.slice(0, 2))) ?? null;
 }
 
-// ── Animated waveform ─────────────────────────────────────
-function SoundWave({ active, color }: { active: boolean; color: string }) {
+// ── Simple waveform ───────────────────────────────────────
+function Waveform({ active, color }: { active: boolean; color: string }) {
+  const bars = [0.4, 0.9, 1, 0.6, 1.2, 0.7, 1.1, 0.5, 1, 0.4, 0.8, 0.6];
   return (
-    <div className="flex items-center justify-center gap-[3px] h-12">
-      {[0.3, 0.7, 1, 0.5, 1.2, 0.8, 1.1, 0.4, 0.9, 0.6, 1, 0.5, 0.8, 0.3].map((h, i) => (
-        <span
-          key={i}
-          className="rounded-full"
-          style={{
-            width: '3px',
-            height: active ? `${h * 36}px` : '3px',
-            background: color,
-            opacity: active ? 0.75 + h * 0.2 : 0.2,
-            borderRadius: '9999px',
-            transition: 'height 0.12s ease, opacity 0.12s ease',
-            animation: active
-              ? `voiceWave ${0.6 + h * 0.3}s ease-in-out ${i * 0.06}s infinite alternate`
-              : undefined,
-          }}
-        />
+    <div className="flex items-center justify-center gap-1 h-10">
+      {bars.map((h, i) => (
+        <span key={i} style={{
+          display: 'block',
+          width: 3, borderRadius: 9999,
+          background: color,
+          height: active ? `${h * 32}px` : '3px',
+          opacity: active ? 0.6 + h * 0.3 : 0.15,
+          transition: 'height 0.12s ease, opacity 0.15s ease',
+          animation: active ? `wv ${0.55 + h * 0.25}s ease-in-out ${i * 0.05}s infinite alternate` : undefined,
+        }} />
       ))}
     </div>
   );
 }
 
-// ── Central Avatar ────────────────────────────────────────
-function CallAvatar({ callState }: { callState: CallState }) {
-  const speaking = callState === 'speaking';
-  const listening = callState === 'listening';
-  const processing = callState === 'processing';
-
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: 200, height: 200 }}>
-      {/* Outer glow rings */}
-      {(speaking || listening) && (
-        <>
-          <div className="absolute rounded-full"
-            style={{
-              width: 200, height: 200,
-              background: speaking ? `radial-gradient(circle, ${G2}18, transparent)` : `radial-gradient(circle, ${PINK}18, transparent)`,
-              animation: 'ringExpand 2s ease-in-out infinite',
-            }} />
-          <div className="absolute rounded-full"
-            style={{
-              width: 175, height: 175,
-              border: `2px solid ${speaking ? G2 : PINK}33`,
-              animation: 'ringExpand 2s ease-in-out 0.5s infinite',
-            }} />
-          <div className="absolute rounded-full"
-            style={{
-              width: 150, height: 150,
-              border: `1.5px solid ${speaking ? G2 : PINK}55`,
-              animation: 'ringExpand 2s ease-in-out 1s infinite',
-            }} />
-        </>
-      )}
-
-      {/* Main avatar circle */}
-      <div
-        className="w-28 h-28 rounded-full flex flex-col items-center justify-center relative z-10"
-        style={{
-          background: speaking
-            ? `radial-gradient(circle at 40% 35%, #1a4a30, #0a1f12)`
-            : listening
-              ? `radial-gradient(circle at 40% 35%, #2a0a35, #0f051a)`
-              : `radial-gradient(circle at 40% 35%, #152010, #080e08)`,
-          border: `2.5px solid ${speaking ? G2 : listening ? PINK : 'rgba(255,255,255,0.12)'}`,
-          boxShadow: speaking
-            ? `0 0 40px ${G2}44, 0 0 80px ${G2}18, inset 0 1px 0 rgba(255,255,255,0.1)`
-            : listening
-              ? `0 0 40px ${PINK}44, 0 0 80px ${PINK}18, inset 0 1px 0 rgba(255,255,255,0.1)`
-              : '0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
-          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-      >
-        <span className="text-4xl" style={{ filter: speaking || listening ? 'drop-shadow(0 0 8px currentColor)' : undefined }}>🌿</span>
-        <span className="text-white/70 text-[11px] font-bold mt-1 tracking-wide">SAATHI AI</span>
-      </div>
-
-      {/* Processing spinner */}
-      {processing && (
-        <div className="absolute w-36 h-36 rounded-full"
-          style={{ border: `2px solid transparent`, borderTopColor: G2, animation: 'spin 1s linear infinite' }} />
-      )}
-    </div>
-  );
-}
-
-interface VoiceCallModeProps {
+interface Props {
   onClose: () => void;
-  onMessageSent: (userText: string, aiReply: string) => void;
+  onMessageSent: (user: string, ai: string) => void;
 }
 
-export default function VoiceCallMode({ onClose, onMessageSent }: VoiceCallModeProps) {
-  const [callState, setCallState] = useState<CallState>('connecting');
-  const [userTranscript, setUserTranscript] = useState('');
-  const [aiText, setAiText] = useState('');
-  const [isMuted, setIsMuted] = useState(false);
-  const [isSpeakerOff, setIsSpeakerOff] = useState(false);
-  const [callDuration, setCallDuration] = useState(0);
-  const [listenLang, setListenLang] = useState<'hi-IN' | 'en-IN'>('hi-IN');
-  const [voicesReady, setVoicesReady] = useState(false);
-  const [callHistory, setCallHistory] = useState<{ role: string; parts: { text: string }[] }[]>([]);
+export default function VoiceCallMode({ onClose, onMessageSent }: Props) {
+  const [phase, setPhase] = useState<'connecting' | 'speaking' | 'listening' | 'processing' | 'ended'>('connecting');
+  const [userText, setUserText] = useState('');
+  const [aiText, setAiText]   = useState('');
+  const [muted, setMuted]     = useState(false);
+  const [speakerOff, setSpeakerOff] = useState(false);
+  const [lang, setLang]       = useState<'hi-IN' | 'en-IN'>('hi-IN');
+  const [elapsed, setElapsed] = useState(0);
+  const [voicesLoaded, setVoicesLoaded] = useState(false);
 
-  const synthRef = useRef<SpeechSynthesis | null>(null);
-  const recognitionRef = useRef<any>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const activeRef = useRef(true);
-  const stateRef = useRef<CallState>('connecting');
-  const aiTextRef = useRef('');
+  const alive   = useRef(true);
+  const synth   = useRef<SpeechSynthesis | null>(null);
+  const recRef  = useRef<any>(null);
+  const phaseRef = useRef<string>('connecting');
+  const historyRef = useRef<{ role: string; parts: { text: string }[] }[]>([]);
+  const langRef = useRef(lang);
+  langRef.current = lang;
 
-  const updateState = (newState: CallState) => {
-    stateRef.current = newState;
-    setCallState(newState);
-  };
+  const setPhaseSync = (p: typeof phase) => { phaseRef.current = p; setPhase(p); };
+  const fmt = (s: number) => `${String(Math.floor(s / 60)).padStart(2,'0')}:${String(s % 60).padStart(2,'0')}`;
 
-  const updateAiText = (text: string) => {
-    aiTextRef.current = text;
-    setAiText(text);
-  };
-
-  const formatDuration = (s: number) =>
-    `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-
-  // ── Load voices ──────────────────────────────────────────
+  // Timer
   useEffect(() => {
-    synthRef.current = window.speechSynthesis;
-    const synth = synthRef.current;
-
-    const tryLoadVoices = () => {
-      if (synth.getVoices().length > 0) setVoicesReady(true);
-    };
-    tryLoadVoices();
-    synth.onvoiceschanged = tryLoadVoices;
-    return () => { synth.onvoiceschanged = null; };
+    const t = setInterval(() => { if (alive.current) setElapsed(e => e + 1); }, 1000);
+    return () => clearInterval(t);
   }, []);
 
-  // ── Speak with best voice ────────────────────────────────
+  // Load voices
+  useEffect(() => {
+    synth.current = window.speechSynthesis;
+    const s = synth.current;
+    const load = () => { if (s.getVoices().length > 0) setVoicesLoaded(true); };
+    load();
+    s.onvoiceschanged = load;
+    return () => { synth.current = null; };
+  }, []);
+
+  // ── Core: speak, then listen ──────────────────────────────
   const speak = useCallback((text: string): Promise<void> => {
     return new Promise(resolve => {
-      const synth = synthRef.current;
-      if (!synth || isSpeakerOff) { resolve(); return; }
+      const s = synth.current;
+      if (!s || speakerOff || !alive.current) { resolve(); return; }
 
-      synth.cancel();
+      s.cancel();
 
-      const clean = prepareForSpeech(text);
-      // Detect language
-      const hindiChars = (clean.match(/[\u0900-\u097F]/g) || []).length;
-      const hindiWords = (clean.match(/\bhai\b|\bkya\b|\bnahi\b|\bkaisa\b|\bkarein\b|\bboliye\b|\bpehle\b/gi) || []).length;
-      const isHindi = hindiChars > 5 || hindiWords > 2;
+      const clean = cleanForSpeech(text);
+      if (!clean) { resolve(); return; }
+
+      const isHindi = /[\u0900-\u097F]/.test(clean) || /\b(hai|hoon|mein|kya|nahin|karein|boliye)\b/i.test(clean);
+      const voiceLang = isHindi ? 'hi-IN' : 'en-IN';
 
       const utter = new SpeechSynthesisUtterance(clean);
-
-      // Best voice selection
-      const bestVoice = getBestVoice(synth, isHindi);
+      const bestVoice = pickVoice(s, voiceLang);
       if (bestVoice) utter.voice = bestVoice;
-
-      utter.lang = isHindi ? 'hi-IN' : 'en-IN';
-      utter.rate = 0.88;       // slightly slower = more natural
-      utter.pitch = 1.0;       // neutral pitch (no robotic high pitch)
+      utter.lang   = voiceLang;
+      utter.rate   = 0.9;
+      utter.pitch  = 1.0;
       utter.volume = 1.0;
 
-      utter.onstart = () => updateState('speaking');
-      utter.onend = () => resolve();
+      utter.onstart = () => { if (alive.current) setPhaseSync('speaking'); };
+      utter.onend   = () => resolve();
       utter.onerror = () => resolve();
 
-      // IMPORTANT: Strictly stop listening BEFORE speaking to prevent the infinite echo loop!
-      recognitionRef.current?.abort();
-
-      synth.speak(utter);
+      s.speak(utter);
     });
-  }, [isSpeakerOff]);
+  }, [speakerOff]);
 
-  // ── Send to AI ───────────────────────────────────────────
-  const sendToAI = useCallback(async (text: string) => {
-    if (!activeRef.current) return;
-    
-    // Stop mic explicitly so we don't catch anything while processing
-    recognitionRef.current?.abort();
-    
-    updateState('processing');
-    setUserTranscript(text);
-    updateAiText('');
-
-    // Append context note to keep responses short and match language
-    const userPayloadMsg = { 
-      role: 'user', 
-      parts: [{ text: text + '\n\n[SYSTEM: This is a VOICE CALL. CRITICAL RULES:\n1. Detect user language (Hindi/English) and match it EXACTLY.\n2. Do NOT use emojis, asterisks, or markdown formatting.\n3. Be extremely smart, brief, and conversational (like a real human on the phone). Do not give long lists.]' }] 
-    };
-
-    const payloadMessages = [...callHistory, userPayloadMsg];
-
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: payloadMessages,
-        }),
-      });
-      const data = await res.json();
-      const reply = data.reply || 'Kuch samajh nahi aaya. Phir se boliye?';
-
-      if (!activeRef.current) return;
-      updateAiText(reply);
-      onMessageSent(text, reply);
-
-      // Save to history (save original text without system note)
-      setCallHistory(prev => [
-        ...prev,
-        { role: 'user', parts: [{ text }] },
-        { role: 'model', parts: [{ text: reply }] }
-      ]);
-
-      await speak(reply);
-      
-      // Delay before listening to avoid picking up the tail end of the AI's speech
-      if (activeRef.current) {
-        updateState('listening');
-        setTimeout(() => startListening(), 400);
-      }
-    } catch {
-      if (!activeRef.current) return;
-      updateAiText('Network error. Dobara boliye please.');
-      
-      await speak('Network error aayi. Dobara boliye please.');
-      if (activeRef.current) {
-        updateState('listening');
-        setTimeout(() => startListening(), 400);
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [speak, onMessageSent, callHistory]);
-
-  // ── Speech recognition ───────────────────────────────────
-  const startListening = useCallback(() => {
-    // Strictly do not listen while speaking or processing
-    if (!activeRef.current || isMuted || stateRef.current === 'speaking' || stateRef.current === 'processing') {
-      if (stateRef.current !== 'speaking' && stateRef.current !== 'processing') updateState('listening');
+  const listen = useCallback(() => {
+    if (!alive.current || muted) {
+      setPhaseSync('listening');
       return;
     }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { updateState('listening'); return; }
+    const SR = (window as any).SpeechRecognition ?? (window as any).webkitSpeechRecognition;
+    if (!SR) { setPhaseSync('listening'); return; }
 
-    recognitionRef.current?.abort();
+    // Abort any previous instance
+    try { recRef.current?.abort(); } catch {}
     const rec = new SR();
-    recognitionRef.current = rec;
+    recRef.current = rec;
 
-    rec.lang = listenLang;
-    rec.continuous = true; // IMPORTANT: Keep mic open continuously instead of closing on every pause
+    rec.lang = langRef.current;
+    rec.continuous = false;       // simple one-shot mode is most reliable
     rec.interimResults = true;
     rec.maxAlternatives = 1;
 
-    rec.onstart = () => { 
-      if (activeRef.current && stateRef.current !== 'speaking') { 
-        updateState('listening'); 
-        setUserTranscript(''); 
-      } 
+    let finalSent = false;
+
+    rec.onstart = () => {
+      if (!alive.current) return;
+      setPhaseSync('listening');
+      setUserText('');
     };
 
-    rec.onresult = (event: any) => {
-      // Do not process results if we are supposed to be speaking
-      if (stateRef.current === 'speaking') return;
-
-      const results = Array.from(event.results as any[]);
-      const transcript = results.map((r: any) => r[0].transcript).join(' ');
-      
-      const last = results[results.length - 1] as any;
-      const finalTranscript = transcript.trim();
-
-      setUserTranscript(finalTranscript);
-      if (last.isFinal && finalTranscript.length > 1) {
+    rec.onresult = (e: any) => {
+      if (!alive.current || phaseRef.current !== 'listening') return;
+      const all = Array.from(e.results as SpeechRecognitionResultList);
+      const transcript = all.map((r: any) => r[0].transcript).join(' ').trim();
+      setUserText(transcript);
+      const last = all[all.length - 1] as any;
+      if (last.isFinal && transcript.length > 1 && !finalSent) {
+        finalSent = true;
         rec.stop();
-        sendToAI(finalTranscript);
+        sendToAI(transcript);
       }
     };
 
-    rec.onspeechend = () => rec.stop();
+    // If no speech detected after silence, restart
+    rec.onend = () => {
+      if (!alive.current) return;
+      if (phaseRef.current === 'listening' && !finalSent) {
+        setTimeout(() => { if (alive.current && phaseRef.current === 'listening') listen(); }, 300);
+      }
+    };
 
     rec.onerror = (e: any) => {
-      if (!activeRef.current) return;
-      if (e.error !== 'aborted') {
-        setTimeout(() => { if (activeRef.current) startListening(); }, 1200);
+      if (!alive.current) return;
+      if (e.error === 'aborted' || e.error === 'no-speech') {
+        if (phaseRef.current === 'listening') {
+          setTimeout(() => { if (alive.current && phaseRef.current === 'listening') listen(); }, 500);
+        }
+        return;
       }
+      console.error('SpeechRecognition error:', e.error);
+      setTimeout(() => { if (alive.current && phaseRef.current === 'listening') listen(); }, 1000);
     };
 
-    rec.onend = () => {
-      if (activeRef.current && stateRef.current === 'listening') {
-        setTimeout(() => { if (activeRef.current) startListening(); }, 700);
-      }
-    };
-
-    try { rec.start(); } catch { /* already started */ }
+    try { rec.start(); } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listenLang, isMuted, sendToAI]);
+  }, [muted]);
 
-  // ── Boot ─────────────────────────────────────────────────
+  const sendToAI = useCallback(async (text: string) => {
+    if (!alive.current) return;
+
+    // Stop mic before processing
+    try { recRef.current?.abort(); } catch {}
+    setPhaseSync('processing');
+    setUserText(text);
+    setAiText('');
+
+    const msgs = [
+      ...historyRef.current,
+      {
+        role: 'user',
+        parts: [{ text: `${text}\n\n[SYSTEM: Voice call. Respond ONLY in the same language as the user (Hindi or English). Be very short, natural, conversational. No markdown, no lists, no emojis.]` }]
+      }
+    ];
+
+    try {
+      const res  = await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ messages: msgs }) });
+      const data = await res.json();
+      const reply = data.reply || 'Kuch samajh nahi aaya, dobara boliye please.';
+
+      if (!alive.current) return;
+      setAiText(reply);
+      onMessageSent(text, reply);
+
+      historyRef.current = [
+        ...historyRef.current,
+        { role: 'user',  parts: [{ text }] },
+        { role: 'model', parts: [{ text: reply }] },
+      ];
+
+      await speak(reply);
+    } catch {
+      if (!alive.current) return;
+      setAiText('Network error. Dobara try karein.');
+      await speak('Network error aayi. Dobara try karein.');
+    }
+
+    // Back to listening after speaking
+    if (alive.current) {
+      setPhaseSync('listening');
+      setTimeout(() => { if (alive.current) listen(); }, 400);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [speak, onMessageSent]);
+
+  // Boot: greet → listen
   useEffect(() => {
-    activeRef.current = true;
-    timerRef.current = setInterval(() => setCallDuration(d => d + 1), 1000);
+    if (!voicesLoaded) return;
+    alive.current = true;
 
-    const greet = async () => {
-      updateState('speaking');
-      // Natural bilingual greeting (English first, then Hindi)
-      const greeting = 'Hello, I am Saathi! Namaste! Main Saathi hoon. Boliye, how can I help you today?';
-      updateAiText(greeting);
-      
+    const boot = async () => {
+      const greeting = 'Hello! I am Saathi. Namaste! Aap registration, earning, ya PIC program ke baare mein kuch bhi pooch sakte hain.';
+      setAiText(greeting);
       await speak(greeting);
-      
-      if (activeRef.current) {
-        updateState('listening');
-        setTimeout(() => startListening(), 400);
+      if (alive.current) {
+        setPhaseSync('listening');
+        setTimeout(() => { if (alive.current) listen(); }, 400);
       }
     };
-
-    // Wait for voices to load
-    const t = setTimeout(greet, voicesReady ? 600 : 1500);
+    const t = setTimeout(boot, 500);
     return () => clearTimeout(t);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [voicesReady]);
+  }, [voicesLoaded]);
 
-  // ── End call ─────────────────────────────────────────────
-  const endCall = useCallback(() => {
-    activeRef.current = false;
-    recognitionRef.current?.abort();
-    synthRef.current?.cancel();
-    if (timerRef.current) clearInterval(timerRef.current);
-    updateState('ended');
-    setTimeout(onClose, 600);
-  }, [onClose]);
+  const endCall = () => {
+    alive.current = false;
+    try { recRef.current?.abort(); } catch {}
+    synth.current?.cancel();
+    setPhaseSync('ended');
+    setTimeout(onClose, 500);
+  };
 
-  const toggleMute = useCallback(() => {
-    setIsMuted(m => {
-      if (!m) { recognitionRef.current?.abort(); updateState('listening'); }
-      else if (stateRef.current === 'listening') startListening();
+  const toggleMute = () => {
+    setMuted(m => {
+      if (!m) { try { recRef.current?.abort(); } catch {} setPhaseSync('listening'); }
+      else if (phaseRef.current === 'listening') setTimeout(listen, 200);
       return !m;
     });
-  }, [startListening]);
-
-  const toggleLang = useCallback(() => {
-    const next = listenLang === 'hi-IN' ? 'en-IN' : 'hi-IN';
-    setListenLang(next);
-    if (stateRef.current === 'listening') {
-      recognitionRef.current?.abort();
-      setTimeout(() => { if (activeRef.current) startListening(); }, 400);
-    }
-  }, [listenLang, startListening]);
-
-  // State labels
-  const stateConfig: Record<CallState, { label: string; color: string; sub: string }> = {
-    connecting: { label: 'Connecting...', color: 'rgba(255,255,255,0.5)', sub: 'Saathi se jud raha hai' },
-    listening:  { label: isMuted ? '🔇 Muted' : '🎙️ Sun raha hoon...', color: PINK, sub: isMuted ? 'Unmute karein bolne ke liye' : 'Apna sawaal boliye' },
-    processing: { label: '💭 Soch raha hoon...', color: G2, sub: 'Jawab dhundh raha hoon' },
-    speaking:   { label: '🔊 Bol raha hoon...', color: G2, sub: 'Suniye...' },
-    ended:      { label: 'Call khatam', color: 'rgba(255,255,255,0.4)', sub: '' },
   };
-  const sc = stateConfig[callState];
+
+  const toggleLang = () => {
+    const next = lang === 'hi-IN' ? 'en-IN' : 'hi-IN';
+    setLang(next);
+    langRef.current = next;
+    if (phaseRef.current === 'listening') {
+      try { recRef.current?.abort(); } catch {}
+      setTimeout(() => { if (alive.current) listen(); }, 300);
+    }
+  };
+
+  const phaseLabel: Record<string, { text: string; color: string; sub: string }> = {
+    connecting: { text: 'Connecting...', color: 'rgba(255,255,255,0.5)', sub: 'Please wait' },
+    speaking:   { text: '🔊 Speaking...', color: G2,   sub: 'Suniye...' },
+    listening:  { text: muted ? '🔇 Muted' : '🎙️ Listening...', color: PINK, sub: muted ? 'Unmute to speak' : 'Boliye, main sun raha hoon' },
+    processing: { text: '💭 Thinking...', color: G2,   sub: 'Jawab dhoondh raha hoon' },
+    ended:      { text: 'Call ended',    color: 'rgba(255,255,255,0.4)', sub: '' },
+  };
+  const info = phaseLabel[phase] ?? phaseLabel.connecting;
 
   return (
     <>
       <style>{`
-        @keyframes voiceWave {
-          0% { height: 3px; } 100% { height: 36px; }
-        }
-        @keyframes ringExpand {
-          0% { transform: scale(0.85); opacity: 0.8; }
-          100% { transform: scale(1.05); opacity: 0; }
-        }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        @keyframes callFadeIn {
-          from { opacity: 0; transform: scale(0.97); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes subtlePulse {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 1; }
-        }
+        @keyframes wv { from { height: 3px; } to { height: 100%; } }
+        @keyframes ring { 0%{transform:scale(.85);opacity:.7} 100%{transform:scale(1.06);opacity:0} }
+        @keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
+        @keyframes fadeIn { from{opacity:0;transform:scale(.97)} to{opacity:1;transform:scale(1)} }
+        @keyframes pulse { 0%,100%{opacity:.5} 50%{opacity:1} }
       `}</style>
 
-      {/* Full-screen backdrop */}
-      <div className="fixed inset-0 z-[100] flex flex-col"
-        style={{
-          background: 'radial-gradient(ellipse at 30% 20%, #0f2e1a 0%, #060d07 50%, #0a0514 100%)',
-          animation: 'callFadeIn 0.4s ease-out forwards',
-        }}>
-
-        {/* Subtle ambient glow */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute rounded-full" style={{ width: 400, height: 400, top: -100, left: -100, background: `radial-gradient(circle, ${G}30, transparent)`, filter: 'blur(60px)' }} />
-          <div className="absolute rounded-full" style={{ width: 300, height: 300, bottom: -50, right: -50, background: `radial-gradient(circle, ${PINK}20, transparent)`, filter: 'blur(60px)' }} />
+      <div className="fixed inset-0 z-[100] flex flex-col" style={{
+        background: 'radial-gradient(ellipse at 30% 20%, #0f2e1a 0%, #060d07 50%, #0a0514 100%)',
+        animation: 'fadeIn .35s ease-out forwards',
+      }}>
+        {/* Ambient blobs */}
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div style={{ position:'absolute', width:400, height:400, top:-120, left:-80, borderRadius:'50%', background:`radial-gradient(circle,#1B433230,transparent)`, filter:'blur(60px)' }} />
+          <div style={{ position:'absolute', width:300, height:300, bottom:-60, right:-60, borderRadius:'50%', background:`radial-gradient(circle,${PINK}20,transparent)`, filter:'blur(60px)' }} />
         </div>
 
-        {/* Top bar */}
+        {/* Header */}
         <div className="relative z-10 flex items-center justify-between px-6 pt-10 pb-4">
           <div>
-            <p className="text-white/30 text-xs font-medium tracking-wider uppercase">Voice Guidance</p>
-            <p className="text-white font-bold text-lg mt-0.5">Saathi AI 🌿</p>
+            <p style={{ color:'rgba(255,255,255,.3)', fontSize:11, fontWeight:600, letterSpacing:2, textTransform:'uppercase' }}>Voice Guidance</p>
+            <p style={{ color:'#fff', fontWeight:700, fontSize:18, marginTop:2 }}>Saathi AI 🌿</p>
           </div>
-          <div className="flex items-center gap-3">
-            {/* Language toggle */}
-            <button onClick={toggleLang}
-              className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-semibold transition-all hover:scale-105"
-              style={{ background: `${PINK}18`, border: `1px solid ${PINK}40`, color: PINK }}>
-              {listenLang === 'hi-IN' ? '🇮🇳 हिंदी' : '🇬🇧 English'}
+          <div className="flex gap-3">
+            <button onClick={toggleLang} style={{ background:`${PINK}18`, border:`1px solid ${PINK}40`, color:PINK, borderRadius:999, padding:'6px 12px', fontSize:12, fontWeight:700, cursor:'pointer' }}>
+              {lang === 'hi-IN' ? '🇮🇳 हिंदी' : '🇬🇧 English'}
             </button>
-            {/* Timer */}
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <span className="w-2 h-2 rounded-full" style={{ background: G2, animation: 'subtlePulse 2s ease-in-out infinite' }} />
-              <span className="text-sm font-mono font-bold" style={{ color: G2 }}>{formatDuration(callDuration)}</span>
+            <div style={{ display:'flex', alignItems:'center', gap:6, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.1)', borderRadius:999, padding:'6px 12px' }}>
+              <span style={{ width:8, height:8, borderRadius:'50%', background:G2, animation:'pulse 2s ease-in-out infinite', display:'inline-block' }} />
+              <span style={{ color:G2, fontFamily:'monospace', fontWeight:700, fontSize:13 }}>{fmt(elapsed)}</span>
             </div>
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-6 px-8">
-
+        {/* Centre */}
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-6 px-6">
           {/* Avatar */}
-          <CallAvatar callState={callState} />
+          <div style={{ position:'relative', width:200, height:200, display:'flex', alignItems:'center', justifyContent:'center' }}>
+            {(phase === 'speaking' || phase === 'listening') && [0,1,2].map(i => (
+              <div key={i} style={{
+                position:'absolute', borderRadius:'50%',
+                width: 180 - i*30, height: 180 - i*30,
+                border:`1.5px solid ${phase==='speaking' ? G2 : PINK}${['33','44','66'][i]}`,
+                animation:`ring ${1.8 + i*.3}s ease-out ${i*.4}s infinite`,
+              }} />
+            ))}
+            <div style={{
+              width:110, height:110, borderRadius:'50%', position:'relative', zIndex:2,
+              display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+              background: phase === 'speaking' ? 'radial-gradient(circle at 40% 35%,#1a4a30,#0a1f12)'
+                        : phase === 'listening' ? 'radial-gradient(circle at 40% 35%,#2a0a35,#0f051a)'
+                        : 'radial-gradient(circle at 40% 35%,#152010,#080e08)',
+              border: `2.5px solid ${phase === 'speaking' ? G2 : phase === 'listening' ? PINK : 'rgba(255,255,255,.12)'}`,
+              boxShadow: phase === 'speaking' ? `0 0 40px ${G2}44,0 0 80px ${G2}18`
+                       : phase === 'listening' ? `0 0 40px ${PINK}44,0 0 80px ${PINK}18`
+                       : '0 8px 32px rgba(0,0,0,.5)',
+              transition: 'all .5s cubic-bezier(.4,0,.2,1)',
+            }}>
+              <span style={{ fontSize:36 }}>🌿</span>
+              <span style={{ color:'rgba(255,255,255,.7)', fontSize:10, fontWeight:700, marginTop:3, letterSpacing:1 }}>SAATHI AI</span>
+            </div>
+            {phase === 'processing' && (
+              <div style={{ position:'absolute', width:136, height:136, borderRadius:'50%', border:`2px solid transparent`, borderTopColor:G2, animation:'spin 1s linear infinite' }} />
+            )}
+          </div>
 
           {/* Status */}
-          <div className="text-center">
-            <p className="text-base font-bold transition-all duration-300" style={{ color: sc.color }}>
-              {sc.label}
-            </p>
-            <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{sc.sub}</p>
+          <div style={{ textAlign:'center' }}>
+            <p style={{ color: info.color, fontWeight:700, fontSize:15, transition:'color .3s' }}>{info.text}</p>
+            <p style={{ color:'rgba(255,255,255,.3)', fontSize:12, marginTop:4 }}>{info.sub}</p>
           </div>
 
           {/* Waveform */}
-          <SoundWave
-            active={callState === 'speaking' || callState === 'listening'}
-            color={callState === 'speaking' ? G2 : PINK}
-          />
+          <Waveform active={phase === 'speaking' || phase === 'listening'} color={phase === 'speaking' ? G2 : PINK} />
 
-          {/* Live transcript card */}
-          <div className="w-full max-w-sm rounded-2xl px-5 py-4 min-h-[88px] flex items-center justify-center text-center transition-all duration-300"
-            style={{
-              background: callState === 'listening'
-                ? `linear-gradient(135deg, ${PINK}10, transparent)`
-                : callState === 'speaking'
-                  ? `linear-gradient(135deg, ${G}30, transparent)`
-                  : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${callState === 'listening' ? PINK + '30' : callState === 'speaking' ? G2 + '25' : 'rgba(255,255,255,0.07)'}`,
-            }}>
-            {callState === 'listening' && userTranscript && (
-              <p className="text-sm font-medium leading-relaxed" style={{ color: PINK + 'cc' }}>
-                🎙️ "{userTranscript}"
+          {/* Transcript card */}
+          <div style={{
+            width:'100%', maxWidth:360, borderRadius:18, padding:'16px 20px', minHeight:80,
+            display:'flex', alignItems:'center', justifyContent:'center', textAlign:'center',
+            transition:'all .3s',
+            background: phase === 'listening' ? `linear-gradient(135deg,${PINK}10,transparent)`
+                       : phase === 'speaking'  ? `linear-gradient(135deg,#1B433228,transparent)`
+                       : 'rgba(255,255,255,.04)',
+            border: `1px solid ${phase === 'listening' ? PINK+'30' : phase === 'speaking' ? G2+'25' : 'rgba(255,255,255,.07)'}`,
+          }}>
+            {phase === 'listening' && userText && (
+              <p style={{ color:`${PINK}cc`, fontSize:14, lineHeight:1.5 }}>🎙️ "{userText}"</p>
+            )}
+            {phase === 'listening' && !userText && (
+              <p style={{ color:'rgba(255,255,255,.25)', fontSize:14, animation:'pulse 2s ease-in-out infinite' }}>
+                {muted ? 'Mic muted — unmute to speak' : 'Boliye... main sun raha hoon 👂'}
               </p>
             )}
-            {callState === 'listening' && !userTranscript && (
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.25)', animation: 'subtlePulse 2s ease-in-out infinite' }}>
-                {isMuted ? 'Mic muted hai — unmute karein' : 'Boliye... main sun raha hoon 👂'}
+            {phase === 'speaking' && aiText && (
+              <p style={{ color:'rgba(255,255,255,.82)', fontSize:13, lineHeight:1.6 }}>
+                {aiText.slice(0, 180)}{aiText.length > 180 ? '...' : ''}
               </p>
             )}
-            {callState === 'speaking' && aiText && (
-              <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>
-                {aiText.replace(/\*\*(.*?)\*\*/g, '$1').slice(0, 180)}{aiText.length > 180 ? '...' : ''}
-              </p>
-            )}
-            {callState === 'processing' && (
-              <div className="flex items-center gap-3">
-                {[0, 1, 2].map(i => (
-                  <span key={i} className="w-2.5 h-2.5 rounded-full"
-                    style={{ background: G2, animation: `subtlePulse 1.2s ease-in-out ${i * 0.2}s infinite` }} />
-                ))}
-                <span className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>Jawab dhoondh raha hoon...</span>
+            {phase === 'processing' && (
+              <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                {[0,1,2].map(i => <span key={i} style={{ width:10, height:10, borderRadius:'50%', background:G2, animation:`pulse 1.2s ease-in-out ${i*.2}s infinite`, display:'inline-block' }} />)}
+                <span style={{ color:'rgba(255,255,255,.4)', fontSize:13 }}>Soch raha hoon...</span>
               </div>
             )}
-            {callState === 'connecting' && (
-              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Saathi se connect ho raha hai...</p>
-            )}
+            {phase === 'connecting' && <p style={{ color:'rgba(255,255,255,.3)', fontSize:13 }}>Saathi se connect ho raha hai...</p>}
           </div>
-
-          {/* Speaker off indicator */}
-          {isSpeakerOff && (
-            <p className="text-xs px-3 py-1 rounded-full"
-              style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)' }}>
-              🔇 Speaker off — AI reply sunai nahi dega
-            </p>
-          )}
         </div>
 
-        {/* Bottom controls */}
-        <div className="relative z-10 flex items-center justify-center gap-6 px-8 pb-14">
-
+        {/* Controls */}
+        <div style={{ position:'relative', zIndex:10, display:'flex', alignItems:'center', justifyContent:'center', gap:28, paddingBottom:56, paddingLeft:32, paddingRight:32 }}>
           {/* Mute */}
-          <div className="flex flex-col items-center gap-2">
-            <button onClick={toggleMute}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-              style={{
-                background: isMuted ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.07)',
-                border: `1.5px solid ${isMuted ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)'}`,
-              }}>
-              {isMuted ? <MicOff className="w-6 h-6 text-white/80" /> : <Mic className="w-6 h-6 text-white/60" />}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+            <button onClick={toggleMute} style={{
+              width:56, height:56, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', transition:'transform .15s',
+              background: muted ? 'rgba(255,255,255,.18)' : 'rgba(255,255,255,.07)',
+              border: `1.5px solid ${muted ? 'rgba(255,255,255,.4)' : 'rgba(255,255,255,.12)'}`,
+            }}>
+              {muted ? <MicOff size={22} color="rgba(255,255,255,.8)" /> : <Mic size={22} color="rgba(255,255,255,.55)" />}
             </button>
-            <span className="text-[10px] text-white/30">{isMuted ? 'Unmute' : 'Mute'}</span>
+            <span style={{ color:'rgba(255,255,255,.3)', fontSize:10 }}>{muted ? 'Unmute' : 'Mute'}</span>
           </div>
 
-          {/* End Call */}
-          <div className="flex flex-col items-center gap-2">
-            <button onClick={endCall}
-              className="w-20 h-20 rounded-full flex items-center justify-center transition-all hover:scale-105 active:scale-95"
-              style={{
-                background: 'linear-gradient(135deg, #f53a3a, #c42828)',
-                boxShadow: '0 8px 40px rgba(245,58,58,0.45), 0 2px 8px rgba(0,0,0,0.3)',
-              }}>
-              <PhoneOff className="w-8 h-8 text-white" />
+          {/* End call */}
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+            <button onClick={endCall} style={{
+              width:80, height:80, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer',
+              background:'linear-gradient(135deg,#f53a3a,#c42828)',
+              boxShadow:'0 8px 40px rgba(245,58,58,.45),0 2px 8px rgba(0,0,0,.3)',
+              border:'none', transition:'transform .15s',
+            }}>
+              <PhoneOff size={32} color="#fff" />
             </button>
-            <span className="text-[10px] text-white/30">Call band karo</span>
+            <span style={{ color:'rgba(255,255,255,.3)', fontSize:10 }}>End Call</span>
           </div>
 
           {/* Speaker */}
-          <div className="flex flex-col items-center gap-2">
-            <button onClick={() => setIsSpeakerOff(s => !s)}
-              className="w-14 h-14 rounded-full flex items-center justify-center transition-all hover:scale-110 active:scale-95"
-              style={{
-                background: isSpeakerOff ? 'rgba(255,80,80,0.15)' : callState === 'speaking' ? `${G2}22` : 'rgba(255,255,255,0.07)',
-                border: `1.5px solid ${isSpeakerOff ? 'rgba(255,80,80,0.35)' : callState === 'speaking' ? G2 + '50' : 'rgba(255,255,255,0.12)'}`,
-              }}>
-              {isSpeakerOff
-                ? <VolumeX className="w-6 h-6 text-red-400/80" />
-                : <Volume2 className="w-6 h-6" style={{ color: callState === 'speaking' ? G2 : 'rgba(255,255,255,0.4)' }} />
-              }
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 }}>
+            <button onClick={() => setSpeakerOff(s => !s)} style={{
+              width:56, height:56, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer',
+              background: speakerOff ? 'rgba(255,80,80,.15)' : 'rgba(255,255,255,.07)',
+              border: `1.5px solid ${speakerOff ? 'rgba(255,80,80,.35)' : 'rgba(255,255,255,.12)'}`,
+            }}>
+              {speakerOff ? <VolumeX size={22} color="rgba(255,100,100,.8)" /> : <Volume2 size={22} color="rgba(255,255,255,.55)" />}
             </button>
-            <span className="text-[10px] text-white/30">{isSpeakerOff ? 'Speaker off' : 'Speaker'}</span>
+            <span style={{ color:'rgba(255,255,255,.3)', fontSize:10 }}>{speakerOff ? 'Speaker off' : 'Speaker'}</span>
           </div>
         </div>
 
-        {/* Bottom hint */}
-        <p className="relative z-10 text-center text-white/20 text-[11px] pb-5 px-6">
+        <p style={{ position:'relative', zIndex:10, textAlign:'center', color:'rgba(255,255,255,.18)', fontSize:11, paddingBottom:20 }}>
           Hindi ya English — dono mein boliye 🌿
         </p>
       </div>
