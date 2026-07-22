@@ -144,14 +144,14 @@ async function main() {
       const commission = amount * 0.05;
       await prisma.order.create({
         data: {
+          shopifyOrderId: `SEED_ORDER_${i + 1}`,
           picId: activePic.id,
           customerName: `Customer ${i + 1}`,
-          customerPhone: `970000000${i + 1}`,
-          amount,
+          customerEmail: `customer${i + 1}@test.com`,
+          orderAmount: amount,
           commissionAmount: commission,
           commissionRate: 5,
           status: OrderStatus.PAID,
-          paidAt: new Date(),
         },
       });
     }
