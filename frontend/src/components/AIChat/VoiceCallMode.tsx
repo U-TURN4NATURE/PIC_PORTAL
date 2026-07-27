@@ -269,9 +269,8 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
     alive.current = true;
 
     const boot = async () => {
-      const greeting = 'Hello! I am Saathi. Namaste! Aap registration, earning, ya PIC program ke baare mein kuch bhi pooch sakte hain.';
+      const greeting = 'Hello! I am PIC AI. Namaste! Aap registration, earning, ya Partner in Change ke baare mein kuch bhi pooch sakte hain.';
       setAiText(greeting);
-      await speak(greeting);
       if (alive.current) {
         setPhaseSync('listening');
         setTimeout(() => { if (alive.current) listen(); }, 400);
@@ -342,7 +341,7 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
         <div className="relative z-10 flex items-center justify-between px-6 pt-10 pb-4">
           <div>
             <p style={{ color:'rgba(255,255,255,.3)', fontSize:11, fontWeight:600, letterSpacing:2, textTransform:'uppercase' }}>Voice Guidance</p>
-            <p style={{ color:'#fff', fontWeight:700, fontSize:18, marginTop:2 }}>Saathi AI 🌿</p>
+            <p style={{ color:'#fff', fontWeight:700, fontSize:18, marginTop:2 }}>PIC AI 🌿</p>
           </div>
           <div className="flex gap-3">
             <button onClick={toggleLang} style={{ background:`${PINK}18`, border:`1px solid ${PINK}40`, color:PINK, borderRadius:999, padding:'6px 12px', fontSize:12, fontWeight:700, cursor:'pointer' }}>
@@ -380,7 +379,7 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
               transition: 'all .5s cubic-bezier(.4,0,.2,1)',
             }}>
               <span style={{ fontSize:36 }}>🌿</span>
-              <span style={{ color:'rgba(255,255,255,.7)', fontSize:10, fontWeight:700, marginTop:3, letterSpacing:1 }}>SAATHI AI</span>
+              <span style={{ color:'rgba(255,255,255,.7)', fontSize:10, fontWeight:700, marginTop:3, letterSpacing:1 }}>PIC AI</span>
             </div>
             {phase === 'processing' && (
               <div style={{ position:'absolute', width:136, height:136, borderRadius:'50%', border:`2px solid transparent`, borderTopColor:G2, animation:'spin 1s linear infinite' }} />
@@ -425,7 +424,7 @@ export default function VoiceCallMode({ onClose, onMessageSent, isLoggedIn }: Pr
                 <span style={{ color:'rgba(255,255,255,.4)', fontSize:13 }}>Soch raha hoon...</span>
               </div>
             )}
-            {phase === 'connecting' && <p style={{ color:'rgba(255,255,255,.3)', fontSize:13 }}>Saathi se connect ho raha hai...</p>}
+            {phase === 'connecting' && <p style={{ color:'rgba(255,255,255,.3)', fontSize:13 }}>PIC AI se connect ho raha hai...</p>}
           </div>
         </div>
 

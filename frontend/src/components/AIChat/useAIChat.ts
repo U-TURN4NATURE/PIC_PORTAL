@@ -19,7 +19,7 @@ export interface ChatSession {
 const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'model',
-  text: `Namaste! 🌿 Main **Saathi** hoon — U-Turn4Nature PIC Portal ka AI assistant!\n\nHello! I'm **Saathi** 🌿 — your AI guide for the Partner in Change program.\n\nMain aapki madad kar sakta hoon:\n• PIC program join karne mein 📝\n• Earnings & income samajhne mein 💰\n• Products ke baare mein 🏡\n• Registration process mein 🚀\n\nAaj main aapki kya madad kar sakta hoon? 😊\nHow can I help you today?\n\n📞 **Call mode** ke liye phone icon dabao — bilkul phone call ki tarah baat kar sakte ho!`,
+  text: `Namaste! 🌿 Main **PIC AI** hoon — U-Turn4Nature PIC Portal ka AI assistant!\n\nHello! I'm **PIC AI** 🌿 — your AI guide for the Partner in Change program.\n\nMain aapki madad kar sakta hoon:\n• Partner in Change join karne mein 📝\n• Earnings & income samajhne mein 💰\n• Products ke baare mein 🏡\n• Registration process mein 🚀\n\nAaj main aapki kya madad kar sakta hoon? 😊\nHow can I help you today?\n\n📞 **Call mode** ke liye phone icon dabao — bilkul phone call ki tarah baat kar sakte ho!`,
   timestamp: new Date(),
 };
 
