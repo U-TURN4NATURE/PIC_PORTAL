@@ -147,15 +147,8 @@ export default function AIChatWidget() {
     if (isOpen) setTimeout(() => inputRef.current?.focus(), 200);
   }, [isOpen]);
 
-  // Auto-speak latest AI msg
-  useEffect(() => {
-    if (!voiceEnabled || !isOpen) return;
-    const last = messages[messages.length - 1];
-    if (last?.role === 'model' && last.id !== 'welcome' && !isLoading) {
-      speakText(last.text, last.id);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [messages, isLoading]);
+  // Auto-speak latest AI msg (Disabled by user request)
+  // useEffect(() => { ... });
 
   // TTS
   const speakText = useCallback((text: string, msgId?: string) => {
