@@ -30,10 +30,11 @@ const STATS = [
 
 const HOW_STEPS = [
   { step: '01', icon: ShieldCheck, title: 'Register Free', desc: 'Sign up in 2 minutes. No fees, no investment, no inventory required.' },
-  { step: '02', icon: Gift, title: 'Share Awareness', desc: 'Share your referral link/website. Your contacts discover & buy authentic homemade products online.' },
-  { step: '03', icon: TrendingUp, title: 'Earn Monthly', desc: 'Get 5%+ on every purchase made by your referral — lifelong.' },
-  { step: '04', icon: Award, title: 'Rewards & Benefits', desc: 'Vacation with RWEs, company share opportunity, extra bonus, discounts. Connect with our Networks.' },
-  { step: '05', icon: Star, title: 'Build Your Business', desc: 'We support PIC women to start their own business with complete handholding — Impact #100MillionWomen.' },
+  { step: '02', icon: Heart, title: '1-2-1', desc: 'Brief discussion, offer letter, Orientation on Products USP and how to proceed — Offline/Online.' },
+  { step: '03', icon: Gift, title: 'Share Awareness', desc: 'Share your referral link/website. Your contacts discover & buy authentic homemade products online.' },
+  { step: '04', icon: TrendingUp, title: 'Earn Monthly', desc: 'Get 5%+ on every purchase made by your referral — lifelong.' },
+  { step: '05', icon: Award, title: 'Rewards & Benefits', desc: 'Vacation with RWEs, company share opportunity, extra bonus, discounts. Connect with our Networks.' },
+  { step: '06', icon: Star, title: 'Build Your Business', desc: 'We support PIC women to start their own business with complete handholding — Impact #100MillionWomen.' },
 ];
 
 const INCOME_TIERS = [
