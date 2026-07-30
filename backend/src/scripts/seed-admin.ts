@@ -33,6 +33,18 @@ async function main() {
     },
   });
 
+  // Also add secondary admin email
+  await prisma.admin.upsert({
+    where: { email: 'abhinavsharma75990@gmail.com' },
+    update: { password: hashedPassword },
+    create: {
+      name: 'Abhinav Sharma',
+      email: 'abhinavsharma75990@gmail.com',
+      phone: '7983299389',
+      password: hashedPassword,
+    },
+  });
+
   // Also clean up the old default admin if it exists
   try {
     await prisma.admin.delete({

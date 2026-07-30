@@ -367,7 +367,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ error: userMessage }, { status: 503 });
   } catch (err) {
-    console.error('[Saathi AI] Internal error:', err);
+    console.error('[PIC AI] Internal error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

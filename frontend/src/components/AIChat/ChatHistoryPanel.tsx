@@ -119,7 +119,7 @@ export default function ChatHistoryPanel({ onClose, onLoadSession }: ChatHistory
             <div className="flex flex-col items-center justify-center h-full gap-4 text-center px-6">
               <MessageSquare className="w-12 h-12 text-white/10" />
               <p className="text-white/30 text-sm">Abhi tak koi chat nahi hui</p>
-              <p className="text-white/20 text-xs">Saathi se baat karo — history yahan save hogi</p>
+              <p className="text-white/20 text-xs">PIC AI se baat karo — history yahan save hogi</p>
             </div>
           ) : (
             <div className="space-y-2">

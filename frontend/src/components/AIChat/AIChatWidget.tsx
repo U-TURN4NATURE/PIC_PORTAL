@@ -296,7 +296,7 @@ export default function AIChatWidget() {
       {/* ── FAB ── */}
       <button
         onClick={() => { setIsOpen(p => !p); setShowHistory(false); }}
-        aria-label="Saathi AI chat"
+        aria-label="PIC AI chat"
         className="saathi-fab fixed z-50 flex items-center justify-center rounded-full shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95"
         style={{
           bottom: '100px', right: '24px', width: '60px', height: '60px',
@@ -319,7 +319,7 @@ export default function AIChatWidget() {
       {!isOpen && !showCallMode && (
         <div className="saathi-label fixed z-50 text-xs font-bold text-white px-2 py-1 rounded-full pointer-events-none"
           style={{ bottom: '164px', right: '18px', background: `${G}cc`, border: `1px solid ${G2}44`, backdropFilter: 'blur(8px)' }}>
-          🎙️ Saathi AI
+          🎙️ PIC AI
         </div>
       )}
 
@@ -345,7 +345,7 @@ export default function AIChatWidget() {
                 <Sparkles className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-white font-bold text-sm leading-tight">Saathi AI 🌿</p>
+                <p className="text-white font-bold text-sm leading-tight">PIC AI 🌿</p>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full" style={{ background: G2 }} />
                   <p className="text-xs" style={{ color: G2 }}>
@@ -405,7 +405,7 @@ export default function AIChatWidget() {
             <div>
               <p className="text-xs font-bold" style={{ color: G2 }}>📞 Phone call ki tarah baat karo!</p>
               <p className="text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                Sirf bolo — Saathi sunegi aur bol ke jawab degi
+                Sirf bolo — PIC AI sunegi aur bol ke jawab degi
               </p>
             </div>
             <span className="ml-auto text-xs px-2 py-0.5 rounded-full font-bold flex-shrink-0"

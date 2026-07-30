@@ -405,7 +405,7 @@ export default function PICLayout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </main>
-      {/* AI Saathi — available inside PIC dashboard */}
+      {/* PIC AI — available inside PIC dashboard */}
       <AIChatWidget />
     </div>
   );
