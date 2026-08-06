@@ -18,8 +18,8 @@ async function syncAllData() {
     for (const pic of oldPics) {
       await newPrisma.pICPartner.upsert({
         where: { id: pic.id },
-        update: pic,
-        create: pic,
+        update: pic as any,
+        create: pic as any,
       });
       console.log(`✅ Synced PIC: ${pic.fullName} (${pic.email})`);
     }
@@ -36,7 +36,7 @@ async function syncAllData() {
 
     const oldOrders = await oldPrisma.order.findMany();
     for (const o of oldOrders) {
-      await newPrisma.order.upsert({ where: { id: o.id }, update: o, create: o });
+      await newPrisma.order.upsert({ where: { id: o.id }, update: o as any, create: o as any });
     }
 
     console.log('\n🎉 ALL RECENT PIC DATA SYNCED SUCCESSFULLY!');
