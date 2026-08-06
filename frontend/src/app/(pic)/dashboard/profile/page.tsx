@@ -306,14 +306,38 @@ export default function ProfilePage() {
       )}
 
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Personal Info (read-only) */}
+        {/* Personal Info (read-only with editable gender) */}
         <div className="bg-white border border-brand-sage/30 rounded-2xl p-6 shadow-sm">
-          <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <User className="w-4 h-4 text-brand-forest" /> Personal Information
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+              <User className="w-4 h-4 text-brand-forest" /> Personal Information
+            </h3>
+            <span className="text-xs text-gray-400 font-normal ml-1">(Gender is Editable)</span>
+          </div>
           <InfoRow icon={User} label="Full Name" value={profile?.fullName} />
           <InfoRow icon={Mail} label="Email" value={profile?.email} />
           <InfoRow icon={Phone} label="Phone" value={profile?.phone} />
+          
+          {/* Editable Gender Field */}
+          <div className="flex items-center gap-3 py-3 border-b border-brand-sage/10 last:border-0">
+            <div className="p-1.5 bg-brand-forest/5 rounded-lg shrink-0">
+              <User className="w-4 h-4 text-brand-forest" />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+              <select
+                value={form.gender || ''}
+                onChange={e => setForm((f: any) => ({ ...f, gender: e.target.value }))}
+                className="w-full max-w-[200px] px-3 py-2 rounded-xl border border-brand-sage/50 text-gray-900 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm bg-white"
+              >
+                <option value="">Select Gender</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
           <InfoRow icon={CreditCard} label="PAN Card" value={profile?.panCard ? `${profile.panCard.slice(0, 2)}***${profile.panCard.slice(-2)}` : '—'} />
           <InfoRow icon={CreditCard} label="Aadhaar" value={profile?.aadhaarNumber ? `XXXX-XXXX-${profile.aadhaarNumber.slice(-4)}` : '—'} />
         </div>
@@ -355,7 +379,7 @@ export default function ProfilePage() {
               />
             </div>
             
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
                 <select
@@ -383,19 +407,6 @@ export default function ProfilePage() {
                   {cityOptions.map(c => (
                     <option key={c.name} value={c.name}>{c.name}</option>
                   ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
-                <select
-                  value={form.gender || ''}
-                  onChange={e => setForm((f: any) => ({ ...f, gender: e.target.value }))}
-                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
-                >
-                  <option value="">Select Gender</option>
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
                 </select>
               </div>
             </div>
