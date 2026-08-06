@@ -144,6 +144,14 @@ export default function RegisterPage() {
               <Field label="Phone Number" error={errors.phone?.message}>
                 <input {...register('phone')} placeholder="9876543210" className={inputClass} />
               </Field>
+              <Field label="Gender" error={errors.gender?.message}>
+                <select {...register('gender')} className={inputClass}>
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </Field>
               <Field label="Password" error={errors.password?.message}>
                 <div className="relative">
                   <input
@@ -197,14 +205,6 @@ export default function RegisterPage() {
                     {cityOptions.map((c) => (
                       <option key={c.name} value={c.name}>{c.name}</option>
                     ))}
-                  </select>
-                </Field>
-                <Field label="Gender" error={errors.gender?.message}>
-                  <select {...register('gender')} className={inputClass}>
-                    <option value="">Select Gender</option>
-                    <option value="Male">Male</option>
-                    <option value="Female">Female</option>
-                    <option value="Other">Other</option>
                   </select>
                 </Field>
                 <Field label="Pincode" error={errors.pincode?.message}>
