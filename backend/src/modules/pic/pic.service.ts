@@ -136,7 +136,7 @@ export const requestPayout = async (picId: string, data: { amount: number; payme
 };
 
 export const updateProfile = async (picId: string, data: any) => {
-  const allowedFields = ['phone', 'address', 'state', 'city', 'pincode', 'instagramProfile', 'facebookProfile', 'linkedinProfile', 'panCard', 'aadhaarNumber'];
+  const allowedFields = ['phone', 'address', 'state', 'city', 'pincode', 'gender', 'instagramProfile', 'facebookProfile', 'linkedinProfile', 'panCard', 'aadhaarNumber'];
   const bankFields = ['upiId', 'bankAccountNumber', 'ifscCode', 'bankAccountName', 'bankName', 'branchName'];
 
   const updateData: any = {};
@@ -163,7 +163,7 @@ export const updateProfile = async (picId: string, data: any) => {
     data: updateData,
     select: {
       id: true, fullName: true, email: true, phone: true, profileImage: true,
-      address: true, state: true, city: true, pincode: true,
+      address: true, state: true, city: true, pincode: true, gender: true,
       upiId: true, bankAccountNumber: true, ifscCode: true, 
       instagramProfile: true, facebookProfile: true, linkedinProfile: true,
       pendingBankDetails: true, panCard: true, aadhaarNumber: true,

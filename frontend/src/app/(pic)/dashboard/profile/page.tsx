@@ -9,8 +9,10 @@ import {
   Link, Loader2, Save, CheckCircle2, Camera, Upload, X,
 } from 'lucide-react';
 import Image from 'next/image';
+import { State, City } from 'country-state-city';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const indianStates = State.getStatesOfCountry('IN');
 
 export default function ProfilePage() {
   const { user, initAuth } = useAuthStore();
@@ -18,6 +20,9 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState<any>({});
+
+  const selectedStateObj = indianStates.find(s => s.name === form.state);
+  const cityOptions = selectedStateObj ? City.getCitiesOfState('IN', selectedStateObj.isoCode) : [];
 
   // Profile image state
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -45,6 +50,7 @@ export default function ProfilePage() {
         city: data.city || '',
         state: data.state || '',
         pincode: data.pincode || '',
+        gender: data.gender || '',
       }));
     } catch (err) {
       toast.error('Failed to load profile');
@@ -349,24 +355,48 @@ export default function ProfilePage() {
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
-                <input
-                  value={form.city || ''}
-                  onChange={e => setForm((f: any) => ({ ...f, city: e.target.value }))}
-                  placeholder="City"
-                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
-                />
-              </div>
+            <div className="grid grid-cols-3 gap-4">
               <div>
                 <label className="block text-xs font-medium text-gray-700 mb-1">State</label>
-                <input
+                <select
                   value={form.state || ''}
-                  onChange={e => setForm((f: any) => ({ ...f, state: e.target.value }))}
-                  placeholder="State"
+                  onChange={e => {
+                    setForm((f: any) => ({ ...f, state: e.target.value, city: '' }));
+                  }}
+                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm bg-white"
+                >
+                  <option value="">Select State</option>
+                  {indianStates.map(s => (
+                    <option key={s.isoCode} value={s.name}>{s.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">City</label>
+                <select
+                  value={form.city || ''}
+                  onChange={e => setForm((f: any) => ({ ...f, city: e.target.value }))}
+                  disabled={!form.state}
+                  className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm bg-white"
+                >
+                  <option value="">Select City</option>
+                  {cityOptions.map(c => (
+                    <option key={c.name} value={c.name}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                <select
+                  value={form.gender || ''}
+                  onChange={e => setForm((f: any) => ({ ...f, gender: e.target.value }))}
                   className="w-full px-4 py-2.5 rounded-xl border border-brand-sage/50 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-forest/30 focus:outline-none text-sm"
-                />
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
             </div>
 

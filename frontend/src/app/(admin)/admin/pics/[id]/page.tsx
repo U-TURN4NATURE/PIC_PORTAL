@@ -548,6 +548,7 @@ export default function PICDetailPage() {
                 <InfoRow icon={<Mail className="w-4 h-4" />} label="Email" value={pic.email} badge={pic.isEmailVerified ? '✓ Verified' : '✗ Unverified'} badgeClass={pic.isEmailVerified ? 'text-green-400' : 'text-red-400'} onCopy={() => copy(pic.email, 'Email')} />
                 <InfoRow icon={<Phone className="w-4 h-4" />} label="Phone" value={pic.phone} onCopy={() => copy(pic.phone, 'Phone')} />
                 <InfoRow icon={<MapPin className="w-4 h-4" />} label="Location" value={`${pic.city}, ${pic.state} ${pic.pincode}`} />
+                {pic.gender && <InfoRow icon={<User className="w-4 h-4" />} label="Gender" value={pic.gender} />}
                 {pic.address && <InfoRow icon={<MapPin className="w-4 h-4" />} label="Address" value={pic.address} />}
                 {pic.referralCode && <InfoRow icon={<Tag className="w-4 h-4" />} label="Referral Code" value={pic.referralCode} valueClass="text-brand-gold font-mono font-bold" onCopy={() => copy(pic.referralCode, 'Referral code')} />}
                 {pic.upiId && <InfoRow icon={<Wallet className="w-4 h-4" />} label="UPI ID" value={pic.upiId} onCopy={() => copy(pic.upiId, 'UPI ID')} />}

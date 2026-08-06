@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Loader2, ArrowRight, ArrowLeft, CheckCircle2, MapPin, User, Lock, Phone, Mail, Home, Eye, EyeOff } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { State, City } from 'country-state-city';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -22,17 +23,12 @@ const registerSchema = z.object({
   city: z.string().min(2, 'City is required'),
   state: z.string().min(2, 'State is required'),
   pincode: z.string().regex(/^\d{6}$/, 'Enter a valid 6-digit pincode'),
+  gender: z.string().min(1, 'Gender is required'),
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
-const INDIAN_STATES = [
-  'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh','Goa','Gujarat',
-  'Haryana','Himachal Pradesh','Jharkhand','Karnataka','Kerala','Madhya Pradesh',
-  'Maharashtra','Manipur','Meghalaya','Mizoram','Nagaland','Odisha','Punjab',
-  'Rajasthan','Sikkim','Tamil Nadu','Telangana','Tripura','Uttar Pradesh',
-  'Uttarakhand','West Bengal','Delhi','Jammu & Kashmir','Ladakh',
-];
+const indianStates = State.getStatesOfCountry('IN');
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -44,10 +40,14 @@ export default function RegisterPage() {
     ? 'https://picportal-production-a624.up.railway.app'
     : 'http://localhost:5000';
 
-  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
   });
+
+  const selectedStateName = watch('state');
+  const selectedStateObj = indianStates.find(s => s.name === selectedStateName);
+  const cityOptions = selectedStateObj ? City.getCitiesOfState('IN', selectedStateObj.isoCode) : [];
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
@@ -177,16 +177,34 @@ export default function RegisterPage() {
               <Field label="Full Address" error={errors.address?.message}>
                 <input {...register('address')} placeholder="House No, Street, Area" className={inputClass} />
               </Field>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Field label="City" error={errors.city?.message}>
-                  <input {...register('city')} placeholder="Mumbai" className={inputClass} />
-                </Field>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <Field label="State" error={errors.state?.message}>
-                  <select {...register('state')} className={inputClass}>
+                  <select
+                    {...register('state', {
+                      onChange: () => setValue('city', '')
+                    })}
+                    className={inputClass}
+                  >
                     <option value="">Select State</option>
-                    {INDIAN_STATES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
+                    {indianStates.map((s) => (
+                      <option key={s.isoCode} value={s.name}>{s.name}</option>
                     ))}
+                  </select>
+                </Field>
+                <Field label="City" error={errors.city?.message}>
+                  <select {...register('city')} className={inputClass} disabled={!selectedStateName}>
+                    <option value="">Select City</option>
+                    {cityOptions.map((c) => (
+                      <option key={c.name} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Gender" error={errors.gender?.message}>
+                  <select {...register('gender')} className={inputClass}>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
                   </select>
                 </Field>
                 <Field label="Pincode" error={errors.pincode?.message}>

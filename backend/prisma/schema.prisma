@@ -129,6 +129,7 @@ model PICPartner {
   state             String
   city              String
   pincode           String
+  gender            String?
 
   // KYC / Identity (Step 2 — collected after approval)
   aadhaarNumber     String?

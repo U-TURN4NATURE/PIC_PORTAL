@@ -20,6 +20,7 @@ export interface RegisterInput {
   state: string;
   city: string;
   pincode: string;
+  gender: string;
 }
 
 /**
@@ -54,6 +55,7 @@ export const registerPIC = async (data: RegisterInput) => {
       state: data.state,
       city: data.city,
       pincode: data.pincode,
+      gender: data.gender,
       status: PICStatus.PENDING,
       isEmailVerified: false, // Will be verified via WhatsApp OTP
       profileCompleted: false,
@@ -572,6 +574,7 @@ export const getMe = async (userId: string, role: string) => {
       city: true,
       state: true,
       pincode: true,
+      gender: true,
       instagramProfile: true,
       facebookProfile: true,
       linkedinProfile: true,

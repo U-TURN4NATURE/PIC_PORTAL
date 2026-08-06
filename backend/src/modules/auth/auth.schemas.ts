@@ -17,6 +17,7 @@ export const registerSchema = z.object({
     state: z.string().min(2, 'State is required'),
     city: z.string().min(2, 'City is required'),
     pincode: z.string().regex(/^\d{6}$/, 'Invalid pincode (6 digits required)'),
+    gender: z.string().min(1, 'Gender is required'),
   }),
 });
 
