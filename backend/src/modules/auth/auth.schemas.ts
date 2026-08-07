@@ -18,6 +18,17 @@ export const registerSchema = z.object({
     city: z.string().min(2, 'City is required'),
     pincode: z.string().regex(/^\d{6}$/, 'Invalid pincode (6 digits required)'),
     gender: z.string().min(1, 'Gender is required'),
+    otp: z.string().length(6, 'OTP must be 6 digits'),
+    hash: z.string().min(1, 'Hash is required'),
+    expiresAt: z.number().positive(),
+  }),
+});
+
+export const sendRegistrationOTPSchema = z.object({
+  body: z.object({
+    fullName: z.string().min(2, 'Full name must be at least 2 characters').max(100),
+    email: z.string().email('Invalid email address'),
+    phone: z.string().regex(/^[6-9]\d{9}$/, 'Invalid Indian phone number'),
   }),
 });
 

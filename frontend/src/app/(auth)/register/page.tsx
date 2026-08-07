@@ -35,12 +35,16 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [hashData, setHashData] = useState<{ hash: string; expiresAt: number } | null>(null);
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
 
   const BACKEND_URL = typeof window !== 'undefined' && !window.location.hostname.includes('localhost')
     ? 'https://picportal-production-a624.up.railway.app'
     : 'http://localhost:5000';
 
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RegisterFormValues>({
+  const { register, handleSubmit, watch, setValue, formState: { errors }, getValues } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
   });
@@ -52,7 +56,45 @@ export default function RegisterPage() {
   const onSubmit = async (data: RegisterFormValues) => {
     try {
       setIsLoading(true);
-      await api.post('/auth/register', data);
+      if (step === 1) {
+        const response = await api.post('/auth/send-registration-otp', {
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+        });
+        setHashData(response.data.data);
+        setStep(2);
+        toast.success('OTP sent to your phone and email');
+      }
+    } catch (error: any) {
+      const apiError = error.response?.data;
+      if (apiError?.errors?.length) {
+        apiError.errors.forEach((e: { field: string; message: string }) =>
+          toast.error(`${e.field}: ${e.message}`)
+        );
+      } else {
+        toast.error(apiError?.message || 'Request failed. Please try again.');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const verifyAndRegister = async () => {
+    if (!otp || otp.length !== 6) {
+      setOtpError('Please enter a valid 6-digit OTP');
+      return;
+    }
+    setOtpError('');
+    try {
+      setIsLoading(true);
+      const data = getValues();
+      await api.post('/auth/register', {
+        ...data,
+        otp,
+        hash: hashData?.hash,
+        expiresAt: hashData?.expiresAt,
+      });
       setIsSuccess(true);
     } catch (error: any) {
       const apiError = error.response?.data;
@@ -96,6 +138,48 @@ export default function RegisterPage() {
             className="w-full bg-brand-forest text-white py-3 rounded-xl font-medium hover:bg-brand-forest/90 transition-colors flex items-center justify-center gap-2"
           >
             Go to Login <ArrowRight className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 2 && !isSuccess) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-brand-beige via-brand-sage/20 to-white px-4">
+        <div className="max-w-md w-full glass-card rounded-2xl p-8 text-center shadow-xl">
+          <div className="w-20 h-20 bg-brand-olive/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Phone className="w-8 h-8 text-brand-forest" />
+          </div>
+          <h2 className="text-2xl font-dm-serif text-brand-forest mb-3">Verify Your Number</h2>
+          <p className="text-gray-600 mb-6 leading-relaxed text-sm">
+            We've sent a 6-digit OTP to <strong className="text-brand-forest">{getValues('phone')}</strong> and your email.
+          </p>
+          <div className="mb-6">
+            <input
+              type="text"
+              maxLength={6}
+              value={otp}
+              onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+              placeholder="Enter 6-digit OTP"
+              className={`w-full text-center tracking-widest text-2xl px-4 py-3 rounded-xl border ${otpError ? 'border-red-500' : 'border-brand-sage/50'} bg-white/50 text-gray-900 focus:outline-none focus:ring-2 focus:ring-brand-forest/50 transition-all`}
+            />
+            {otpError && <p className="text-red-500 text-xs mt-2 text-left">{otpError}</p>}
+          </div>
+          <button
+            onClick={verifyAndRegister}
+            disabled={isLoading || otp.length !== 6}
+            className="w-full bg-brand-forest text-white py-3.5 rounded-xl font-medium hover:bg-brand-forest/90 transition-all disabled:opacity-70 flex items-center justify-center gap-2 mb-4 shadow-lg shadow-brand-forest/20"
+          >
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
+            {isLoading ? 'Verifying...' : 'Verify & Register'}
+          </button>
+          <button
+            onClick={() => setStep(1)}
+            disabled={isLoading}
+            className="text-sm text-gray-500 hover:text-brand-forest font-medium transition-colors"
+          >
+            Change Phone Number
           </button>
         </div>
       </div>
@@ -219,8 +303,8 @@ export default function RegisterPage() {
             disabled={isLoading}
             className="w-full bg-brand-forest hover:bg-brand-forest/90 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-70 mt-6 shadow-lg shadow-brand-forest/20"
           >
-            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CheckCircle2 className="w-5 h-5" />}
-            {isLoading ? 'Submitting Application...' : 'Submit Application'}
+            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+            {isLoading ? 'Sending OTP...' : 'Next: Verify Phone Number'}
           </button>
         </form>
 

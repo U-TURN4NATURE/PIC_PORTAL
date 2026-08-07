@@ -20,6 +20,15 @@ export const register = async (req: Request, res: Response, next: NextFunction):
   }
 };
 
+export const sendRegistrationOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const result = await authService.sendRegistrationOTP(req.body);
+    res.status(200).json(successResponse(result, 'OTP sent successfully'));
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const verifyOTP = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const result = await authService.verifyOTP(req.body.email, req.body.otp);

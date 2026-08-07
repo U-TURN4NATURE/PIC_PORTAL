@@ -6,6 +6,7 @@ import { authLimiter } from '../../middleware/rate-limit.middleware';
 import { kycUpload } from '../../middleware/upload.middleware';
 import {
   registerSchema,
+  sendRegistrationOTPSchema,
   picLoginSchema,
   adminLoginSchema,
   forgotPasswordSchema,
@@ -21,6 +22,9 @@ const router = Router();
 
 // PIC Registration (Step 1 — basic info only)
 router.post('/register', authLimiter, validate(registerSchema), authController.register);
+
+// Send Registration OTP (Before creating user)
+router.post('/send-registration-otp', authLimiter, validate(sendRegistrationOTPSchema), authController.sendRegistrationOTP);
 
 // OTP Verification (legacy — kept for backward compat)
 router.post('/verify-otp', authLimiter, validate(verifyOTPSchema), authController.verifyOTP);

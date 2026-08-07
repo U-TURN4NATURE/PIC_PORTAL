@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import prisma from '../../config/database';
 import { generateToken } from '../../utils/jwt.utils';
 import { generateOTP, generateResetToken } from '../../utils/crypto.utils';
@@ -21,11 +22,47 @@ export interface RegisterInput {
   city: string;
   pincode: string;
   gender: string;
+  otp: string;
+  hash: string;
+  expiresAt: number;
 }
 
 /**
+ * Send OTP for Registration (Stateless - before user is created)
+ */
+export const sendRegistrationOTP = async (data: { fullName: string; email: string; phone: string }) => {
+  const existingPIC = await prisma.pICPartner.findUnique({ where: { email: data.email } });
+  if (existingPIC) {
+    throw createError('An account with this email already exists', 409);
+  }
+
+  const existingPhone = await prisma.pICPartner.findFirst({ where: { phone: data.phone } });
+  if (existingPhone) {
+    throw createError('An account with this phone number already exists', 409);
+  }
+
+  const otp = generateOTP();
+  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
+  const secret = process.env.JWT_SECRET || 'fallback_secret_for_development';
+  const dataToHash = `${data.phone}.${otp}.${expiresAt}`;
+  const hash = crypto.createHmac('sha256', secret).update(dataToHash).digest('hex');
+
+  // Send SMS OTP (WishBySMS)
+  sendSMSOTP(data.phone, otp).catch((err) =>
+    console.error('❌ SMS OTP send failed during registration:', err)
+  );
+
+  // Send Email OTP
+  sendOTPEmail(data.email, data.fullName, otp).catch((err) =>
+    console.error('❌ Email OTP send failed during registration:', err)
+  );
+
+  return { hash, expiresAt };
+};
+
+/**
  * Register a new PIC Partner — Step 1 only (basic info)
- * Status starts as PENDING. No KYC or experience collected here.
+ * Status starts as PENDING. Verifies stateless HMAC OTP.
  */
 export const registerPIC = async (data: RegisterInput) => {
   const existingPIC = await prisma.pICPartner.findUnique({ where: { email: data.email } });
@@ -33,17 +70,24 @@ export const registerPIC = async (data: RegisterInput) => {
     throw createError('An account with this email already exists', 409);
   }
 
-  // Check if phone already registered
   const existingPhone = await prisma.pICPartner.findFirst({ where: { phone: data.phone } });
   if (existingPhone) {
     throw createError('An account with this phone number already exists', 409);
   }
 
-  const hashedPassword = await bcrypt.hash(data.password, 12);
+  // Verify Stateless OTP
+  if (Date.now() > data.expiresAt) {
+    throw createError('OTP has expired. Please request a new one.', 400);
+  }
+  const secret = process.env.JWT_SECRET || 'fallback_secret_for_development';
+  const dataToHash = `${data.phone}.${data.otp}.${data.expiresAt}`;
+  const computedHash = crypto.createHmac('sha256', secret).update(dataToHash).digest('hex');
+  
+  if (computedHash !== data.hash) {
+    throw createError('Invalid OTP', 400);
+  }
 
-  // Generate OTP for WhatsApp phone verification
-  const otp = generateOTP();
-  const otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+  const hashedPassword = await bcrypt.hash(data.password, 12);
 
   const pic = await prisma.pICPartner.create({
     data: {
@@ -57,10 +101,8 @@ export const registerPIC = async (data: RegisterInput) => {
       pincode: data.pincode,
       gender: data.gender,
       status: PICStatus.PENDING,
-      isEmailVerified: false, // Will be verified via WhatsApp OTP
+      isEmailVerified: true, // Already verified via stateless OTP
       profileCompleted: false,
-      otpCode: otp,
-      otpExpiresAt: otpExpiry,
     },
     select: {
       id: true,
@@ -72,19 +114,9 @@ export const registerPIC = async (data: RegisterInput) => {
     },
   });
 
-  // Send OTP via SMS (WishBySMS)
-  sendSMSOTP(data.phone, otp).catch((err) =>
-    console.error('❌ SMS OTP send failed during registration:', err)
-  );
-
-  // Send OTP via Email (fire-and-forget)
-  sendOTPEmail(data.email, data.fullName, otp).catch((err) =>
-    console.error('❌ Email OTP send failed during registration:', err)
-  );
-
   return {
     ...pic,
-    message: 'Registration successful! Please verify your WhatsApp number with the OTP sent.',
+    message: 'Registration successful! Your application is pending admin approval.',
   };
 };
 
