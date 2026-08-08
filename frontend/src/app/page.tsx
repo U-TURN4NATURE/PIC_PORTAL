@@ -174,10 +174,14 @@ function Hero() {
             </span>
           </h1>
 
-          <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto mb-10 mt-4">
+          <p className="text-white/80 text-lg sm:text-xl max-w-2xl mx-auto mb-6 mt-4">
             This program gives individuals a chance to{' '}
             <strong style={{ color: PINK }}>earn lifelong income</strong> and become{' '}
             <strong style={{ color: G2 }}>co-architects of women empowerment.</strong>
+          </p>
+
+          <p className="text-2xl sm:text-3xl font-extrabold mb-10" style={{ color: GOLD, textShadow: `0 4px 20px ${GOLD}40` }}>
+            No Investment
           </p>
 
           {/* CTAs */}
