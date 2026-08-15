@@ -20,6 +20,7 @@ import {
   Megaphone,
   Building2,
   KeyRound,
+  Globe,
 } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
@@ -83,6 +84,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
     { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+    { name: 'Website Content', href: '/admin/content', icon: Globe },
     { name: 'Legal & Policies', href: '/admin/policies', icon: ShieldCheckIcon },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
