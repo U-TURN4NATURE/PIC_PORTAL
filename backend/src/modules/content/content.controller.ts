@@ -7,7 +7,38 @@ const CONTENT_FILE = path.join(__dirname, 'content.json');
 // ─────────────────────────────────────────────────
 // Helper: Read content file
 // ─────────────────────────────────────────────────
+const DEFAULT_CONTENT = {
+  hero: {
+    badge: "Sustainable Future",
+    title: "Become a PIC Partner",
+    subtitle: "Join thousands of eco-warriors...",
+    ctaText: "Get Started Today",
+    ctaLink: "/register"
+  },
+  testimonials: [],
+  faqs: [],
+  stats: [],
+  contact: {
+    email: "contact@u-turn.in",
+    phone: "+91 9000000000",
+    address: "U-Turn4Nature HQ, India",
+    workingHours: "Mon - Sat, 9:00 AM - 6:00 PM"
+  }
+};
+
 const readContent = (): Record<string, unknown> => {
+  if (!fs.existsSync(CONTENT_FILE)) {
+    try {
+      const srcFile = path.resolve(process.cwd(), 'src/modules/content/content.json');
+      if (fs.existsSync(srcFile)) {
+        const raw = fs.readFileSync(srcFile, 'utf-8');
+        fs.writeFileSync(CONTENT_FILE, raw, 'utf-8');
+        return JSON.parse(raw);
+      }
+    } catch (e) {}
+    fs.writeFileSync(CONTENT_FILE, JSON.stringify(DEFAULT_CONTENT, null, 2), 'utf-8');
+    return DEFAULT_CONTENT;
+  }
   const raw = fs.readFileSync(CONTENT_FILE, 'utf-8');
   return JSON.parse(raw);
 };
