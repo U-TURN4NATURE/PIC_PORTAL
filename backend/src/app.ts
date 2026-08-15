@@ -20,6 +20,7 @@ import picReferralRoutes from './modules/referral/referral.routes';
 import adminReferralRoutes from './modules/referral/referral.admin.routes';
 import picFollowUpRoutes from './modules/followup/followup.routes';
 import adminFollowUpRoutes from './modules/followup/followup.admin.routes';
+import contentRoutes from './modules/content/content.routes';
 
 // Swagger API Docs
 import { setupSwagger } from './config/swagger';
@@ -90,6 +91,7 @@ app.use('/api/pic/referrals', picReferralRoutes);
 app.use('/api/pic/followups', picFollowUpRoutes);
 app.use('/api/admin/referrals', adminReferralRoutes);
 app.use('/api/admin/followups', adminFollowUpRoutes);
+app.use('/api/content', contentRoutes);
 
 // Root Endpoint
 app.get('/', (_req, res) => {

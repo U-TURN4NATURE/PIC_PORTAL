@@ -1,0 +1,84 @@
+{
+  "hero": {
+    "title": "Become a PIC Partner",
+    "subtitle": "Join thousands of eco-warriors making a difference with U-Turn4Nature",
+    "ctaText": "Get Started Today",
+    "ctaLink": "/register",
+    "badgeText": "🌿 Sustainable Future"
+  },
+  "testimonials": [
+    {
+      "id": "t1",
+      "name": "Rajesh Kumar",
+      "role": "PIC Partner, Delhi",
+      "text": "Joining U-Turn4Nature as a PIC partner was the best decision I made. The platform is easy to use and the support team is amazing!",
+      "avatar": "RK",
+      "rating": 5
+    },
+    {
+      "id": "t2",
+      "name": "Priya Sharma",
+      "role": "PIC Partner, Mumbai",
+      "text": "I have been earning great commissions while contributing to a greener planet. Highly recommend the PIC program!",
+      "avatar": "PS",
+      "rating": 5
+    },
+    {
+      "id": "t3",
+      "name": "Amit Verma",
+      "role": "PIC Partner, Bangalore",
+      "text": "The referral system is transparent and payouts are always on time. Great initiative by U-Turn4Nature!",
+      "avatar": "AV",
+      "rating": 5
+    }
+  ],
+  "faqs": [
+    {
+      "id": "f1",
+      "question": "Who can become a PIC Partner?",
+      "answer": "Anyone who is passionate about sustainability and wants to earn while making a positive environmental impact can become a PIC Partner. You just need to register and complete the verification process."
+    },
+    {
+      "id": "f2",
+      "question": "How do I earn as a PIC Partner?",
+      "answer": "You earn commissions by referring customers to our eco-friendly products. Every successful purchase through your referral link earns you a percentage of the sale."
+    },
+    {
+      "id": "f3",
+      "question": "When and how do I get paid?",
+      "answer": "Payouts are processed every month directly to your registered bank account. Minimum payout threshold is ₹500."
+    },
+    {
+      "id": "f4",
+      "question": "Is there any registration fee?",
+      "answer": "No, registration is completely free! There are no hidden charges or fees to become a PIC Partner."
+    },
+    {
+      "id": "f5",
+      "question": "How do I track my referrals and earnings?",
+      "answer": "You get access to a personal dashboard where you can track all your referrals, orders, commissions, and payout history in real-time."
+    }
+  ],
+  "announcements": [
+    {
+      "id": "a1",
+      "title": "🎉 Welcome to PIC Portal!",
+      "message": "We are excited to launch our new PIC Partner portal. Start your journey towards a sustainable future today!",
+      "type": "success",
+      "active": true,
+      "createdAt": "2026-01-01T00:00:00.000Z"
+    }
+  ],
+  "stats": [
+    { "id": "s1", "label": "Active PIC Partners", "value": "5,000+", "icon": "👥" },
+    { "id": "s2", "label": "Orders Fulfilled", "value": "50,000+", "icon": "📦" },
+    { "id": "s3", "label": "Cities Covered", "value": "200+", "icon": "🌍" },
+    { "id": "s4", "label": "Trees Saved", "value": "1,00,000+", "icon": "🌳" }
+  ],
+  "contact": {
+    "email": "support@u-turn.in",
+    "phone": "+91 98765 43210",
+    "address": "U-Turn4Nature, New Delhi, India",
+    "workingHours": "Mon-Sat, 9AM - 6PM IST"
+  }
+}
