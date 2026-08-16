@@ -8,7 +8,7 @@ import FadeSection from './FadeSection';
 const FAQ = [
   {
     q: 'Is this an MLM or pyramid scheme?',
-    a: 'No. This is a pure referral program. You earn 5% only on your referred customers\' purchases — not by recruiting others. There is zero "joining fee chain" and no obligation to recruit anyone.',
+    a: 'No. This is a pure referral program. You earn 3% to 5% plus other benfits on your referred customers\' purchases — not by recruiting others. There is zero "joining fee chain" and no obligation to recruit anyone. No investment required.',
   },
   {
     q: 'How and when do I get paid?',
