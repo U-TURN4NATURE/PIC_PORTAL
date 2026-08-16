@@ -11,6 +11,10 @@ const FAQ = [
     a: 'No. This is a pure referral program. You earn 3% to 5% plus other benfits on your referred customers\' purchases — not by recruiting others. There is zero "joining fee chain" and no obligation to recruit anyone. No investment required.',
   },
   {
+    q: 'What about the 3%–5% referral and other benefits ?',
+    a: 'The first 500 Active PICs will earn 5%, the next 500 Active PICs 4%, and all subsequent Active PICs 3% on purchases made by their directly referred customers. To qualify as an Active PIC, your referred customers must generate a minimum total purchase of ₹9,999 within 6 months of joining. Join early to secure a higher referral benefit. Additional benefits may include exclusive discounts, family village holidays with Didi, PIC Club membership, PIC own venture support, potential equity opportunities, subject to applicable terms etc. There is no joining fee, investment, compulsory purchase or recruitment requirement.',
+  },
+  {
     q: 'How and when do I get paid?',
     a: 'paid directly to your bank account or UPI ID by the 10th of every month for the previous month\'s verified sales.',
   },
