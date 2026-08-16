@@ -7,10 +7,6 @@ import { G, G2, GOLD, CREAM } from './constants';
 import FadeSection from './FadeSection';
 
 const SUCCESS_STORIES = [
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
   {
     name: 'Bandna',
     location: 'Delhi',
